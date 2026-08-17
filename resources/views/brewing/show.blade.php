@@ -80,8 +80,8 @@
         $w1TotalKg = $recipe->malts->where('batch_number', 1)->sum('kg');
         $w2TotalKg = $recipe->malts->where('batch_number', 2)->sum('kg');
 
-		$totalExtractKg = $recipe->malts->where('is_active', true)->where('batch_number', 1)->sum(fn($m) => $m->kg * ($m->extract / 100));
-		$blg = $recipe->volume > 0 ? ($totalExtractKg / ($recipe->volume / 2) * 100 * (($recipe->efficiency) / 100)) : 0;
+		$blg = $recipe->blg;
+  
 		$brix = $blg * 1.04 - 0.04;
 
         $formatDuration = function($start, $end = null) {
@@ -268,6 +268,7 @@
 			</div>
 			
 			<!-- ZASYP SŁODÓW - WARKA 2 -->
+			@if($recipe->batch_count == 2)
 			<div class="bg-white shadow-md sm:rounded-xl overflow-hidden border border-gray-100">
 				<div class="bg-blue-50 border-b border-blue-100 px-6 py-4">
 					<h3 class="font-bold text-blue-800 uppercase tracking-widest text-sm">Zasyp Warka 2 (500L)</h3>
@@ -308,7 +309,7 @@
 					</table>
 				</div>
 			</div>
-			
+			@endif
 			<!-- SEKCJA: CHMIELENIE (PODZIAŁ NA WARKI) -->
 			@foreach($recipe->hops->groupBy('batch_number') as $batch => $hops)
 				<div class="bg-white shadow-md sm:rounded-xl overflow-hidden border border-gray-100 mb-6">
@@ -330,7 +331,7 @@
 							@foreach($hops as $hop)
 								<tr class="{{ $hop->is_active ? '' : 'opacity-50 grayscale' }}">
 									<td class="px-6 py-3 text-left">{{ $hop->name }}</td>
-									<td class="px-6 py-3 font-bold">{{ number_format($hop->amount, 1) }} g</td>
+									<td class="px-6 py-3 font-bold">{{ $hop->amount }} g</td>
 									<td class="px-6 py-3">{{ $hop->alpha_acids }} %</td>
 									<td class="px-6 py-3 text-center">
 										<span class="px-2 py-1 rounded bg-amber-100 text-amber-800 font-bold">{{ $hop->time }} min</span>
@@ -358,7 +359,6 @@
 						$fg = $latestReading ? $latestReading->value : $og;
 
                         $abv = ($og > 0) ? ($og - $fg) / 1.938 : 0;
-					
 					@endphp
 					<span class="text-white text-xs uppercase tracking-widest font-bold">Poziom odfermentowania - {{ number_format($attenuation, 1) }}%</span>
 					<span class="text-white text-xs uppercase tracking-widest font-bold">Alkohol -  {{ number_format($abv, 2) }}%</span>

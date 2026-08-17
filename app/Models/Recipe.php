@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Recipe extends Model
 {
     protected $fillable = [
-        'number', 'name', 'tank_number', 'volume', 'efficiency', 'user_id', 'yeast_pitched_at',
+        'number', 'name', 'tank_number', 'volume', 'batch_count', 'efficiency', 'blg', 'user_id', 'yeast_pitched_at',
         'primary_fermentation_start', 'secondary_fermentation_start', 'finished_at'
     ];
 

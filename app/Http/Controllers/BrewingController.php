@@ -190,7 +190,6 @@ class BrewingController extends Controller
 
     public function edit(Recipe $recipe)
     {
-        // Ładujemy relacje, żeby w formularzu pojawiły się już wpisane słody i chmiele
         $recipe->load(['malts', 'hops']);
         return view('brewing.create', [
             'recipe' => $recipe
@@ -198,7 +197,6 @@ class BrewingController extends Controller
     }
     public function clone(Recipe $recipe)
     {
-        // Ładujemy relacje, żeby w formularzu pojawiły się już wpisane słody i chmiele
         $recipe->load(['malts', 'hops']);
         return view('brewing.create', [
             'recipe' => $recipe,
@@ -208,7 +206,6 @@ class BrewingController extends Controller
 
     public function print(Recipe $recipe)
     {
-        // Jeśli masz te same obliczenia co w show, możesz je przenieść tutaj
         return view('brewing.print', compact('recipe'));
     }
 }
