@@ -77,6 +77,7 @@
 		</table>
 	</div>
 	
+	@if($recipe->malts->where('batch_number', 2)->count() > 0)
 	<div>
 		<h3 class="text-xs font-black uppercase bg-gray-100 p-2 mb-2 border">Zasyp Warka 2</h3>
 		<table>
@@ -97,6 +98,7 @@
 			</tfoot>
 		</table>
 	</div>
+	@endif
 </div>
 
 <!-- Chmiele -->

@@ -34,6 +34,8 @@
 									<th class="text-left font-bold tracking-wider">Numer warki</th>
 									<th class="px-6 py-3 text-left font-bold tracking-wider">Nazwa</th>
 									<th class="px-6 py-3 text-left font-bold tracking-wider">Objętość</th>
+									<th class="px-6 py-3 text-left font-bold tracking-wider">Ilość warek</th>
+									<th class="px-6 py-3 text-left font-bold tracking-wider">BLG</th>
 									<th class="px-6 py-3 text-left font-bold tracking-wider">Wydajność</th>
 									<th class="px-6 py-3 text-left font-bold tracking-wider">Data utworzenia</th>
 									<th class="px-6 py-3 text-right font-bold tracking-wider">Akcje</th>
@@ -53,6 +55,12 @@
 										</td>
 										<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
 											{{ $recipe->volume }} L
+										</td>
+										<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+											{{ $recipe->batch_count }}
+										</td>
+										<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+											{{ $recipe->blg }} °Blg
 										</td>
 										<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
 											{{ $recipe->efficiency }} %
