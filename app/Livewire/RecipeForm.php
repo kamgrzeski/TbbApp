@@ -31,7 +31,8 @@ class RecipeForm extends Component
             $this->recipeId = $isClone ? null : $recipe->id;
             $this->recipe_name = $isClone ? $recipe->name . ' (Kopia)' : $recipe->name;
             $this->tank_number = $recipe->tank_number;
-            $this->batch_count = $recipe->volume <= 500 ? 1 : 2;
+            $this->batch_count = $recipe->batch_count;
+
             $this->efficiency = $recipe->efficiency ?? 75;
 
             // Mapowanie słodów z bazy
