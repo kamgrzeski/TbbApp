@@ -108,7 +108,7 @@
         .info { overflow: hidden; }
         .name { font-size: 4.9vh; font-weight: 800; text-transform: uppercase; white-space: nowrap; }
         .style-line { color: var(--gold); font-size: 2.2vh; font-weight: 600; text-transform: uppercase; }
-        .beer-desc { font-size: 2.2vh; color: var(--text-muted); margin-top: 0.5vh; }
+        .beer-desc { font-size: 2.3vh; color: var(--text-muted); margin-top: 0.5vh; }
 
         .stats {
             display: grid; grid-template-columns: 1fr 1fr;
@@ -180,11 +180,11 @@
 	<section class="snacks-section">
 		<div class="snacks-grid" id="snacks-list">
 			<div class="snack-card">
-				<div class="snack-name">Chipsy</div>
+				<div class="snack-name">Przekąski</div>
 				<div class="snack-price">12 zł</div>
 			</div>
 			<div class="snack-card">
-				<div class="snack-name">Woda 330ml</div>
+				<div class="snack-name">Woda G/NG 330ml</div>
 				<div class="snack-price">10 zł</div>
 			</div>
 			<div class="snack-card">

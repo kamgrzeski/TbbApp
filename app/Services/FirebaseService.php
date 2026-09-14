@@ -13,7 +13,7 @@ class FirebaseService
         $secret = config('services.firebase.secret');
 
         // Pobieramy wszystkie piwa i mapujemy je na format JSON dla Firebase
-        $beers = Beerwall::get()->map(function ($beer) {
+        $beers = Beerwall::orderBy('position')->get()->map(function ($beer) {
             return [
                 'beer_name'         => (string)$beer->beer_name,
                 'beer_style'        => (string)$beer->beer_style,

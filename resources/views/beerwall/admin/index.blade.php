@@ -33,7 +33,7 @@
 								<tr>
 									<th class="px-6 py-3 text-left font-bold tracking-wider">Piwo / Styl</th>
 									<th class="px-6 py-3 text-left font-bold tracking-wider text-center">Ceny (S/M/L)</th>
-									<th class="px-6 py-3 text-left font-bold tracking-wider text-center">Statusy</th>
+									<th class="px-6 py-3 text-left font-bold tracking-wider text-center">Status / pozycja</th>
 									<th class="px-6 py-3 text-right font-bold tracking-wider w-40">Akcje</th>
 								</tr>
 								</thead>
@@ -59,8 +59,12 @@
 													<span class="px-2 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-700 rounded-full uppercase border border-amber-200">Wkrótce</span>
 												@endif
 												@if($beer->is_ended)
-													<span class="px-2 py-0.5 text-[10px] font-bold bg-gray-600 text-white rounded-full uppercase">Wyprzedane</span>
+													<span class="px-2 py-0.5 text-[10px] font-bold bg-gray-600 text-black rounded-full uppercase">Wyprzedane</span>
 												@endif
+												
+												<span class="px-2 py-0.5 text-[10px] font-bold bg-gray-600 text-black rounded-full uppercase">
+													Pozycja: {{ $beer->position }}
+												</span>
 											</div>
 										</td>
 										<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

@@ -37,9 +37,20 @@
                         </div>
                     </div>
                     
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Wydajność (%)</label>
-                        <input type="number" wire:model.live="efficiency" class="form-control border-gray-300 shadow-sm" style="width: 120px">
+                    <div class="row mb-4 g-3">
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">Wydajność (%)</label>
+                            <input type="number" wire:model.live="efficiency" class="form-control border-gray-300 shadow-sm">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Temperatura zadania drożdży</label>
+                            <input
+                                    type="number"
+                                    step="0.1"
+                                    wire:model.live="yeast_pitch_temperature"
+                                    class="form-control border-gray-300 shadow-sm"
+                            >
+                        </div>
                     </div>
                     
                     @foreach([1, 2] as $batchIdx)

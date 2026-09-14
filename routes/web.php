@@ -49,5 +49,3 @@ Route::middleware(['auth'])->group(function () {
 
 
 Route::get('/bw', [BeerWallController::class, 'indexFront'])->name('beerwall.index-front');
-Route::get('/bww', [BeerWallController::class, 'indexFront'])->name('beerwall.index-front');
-Route::get('/bwo', [BeerWallController::class, 'indexFrontOld'])->name('beerwall.index-front-old');

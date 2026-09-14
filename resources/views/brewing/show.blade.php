@@ -184,43 +184,82 @@
 					</div>
 				</div>
 			</div>
-
+			
 			<!-- KLUCZOWE PARAMETRY -->
 			<div class="bg-white overflow-hidden shadow-md sm:rounded-xl border border-gray-100">
 				<div class="bg-gray-50/50 border-b border-gray-100 px-6 py-4">
 					<h3 class="text-lg font-bold text-gray-800 flex items-center">
-						<svg class="w-5 h-5 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+						<svg class="w-5 h-5 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								  d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z">
+							</path>
+						</svg>
 						Kluczowe parametry warki - {{ $recipe->name }} - Numer tanka: {{ $recipe->tank_number }}
 					</h3>
 				</div>
 				
 				<div class="p-4 md:p-6 no-print">
-					<div class="grid grid-cols-3 gap-2 md:gap-6">
+					<div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6">
+						
+						<!-- Objętość -->
 						<div class="relative group p-3 md:p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-100 rounded-xl md:rounded-2xl transition-all shadow-sm">
-							<p class="text-[12px] md:text-xs font-black text-blue-600 uppercase tracking-tighter md:tracking-wider mb-1">Objętość</p>
+							<p class="text-[12px] md:text-xs font-black text-blue-600 uppercase tracking-tighter md:tracking-wider mb-1">
+								Objętość
+							</p>
 							<div class="flex items-baseline">
-								<span class="text-xl md:text-3xl font-black text-gray-900">{{ $recipe->volume }}</span>
+                    <span class="text-xl md:text-3xl font-black text-gray-900">
+                        {{ $recipe->volume }}
+                    </span>
 								<span class="ml-1 text-sm md:text-xl font-bold text-gray-500">L</span>
 							</div>
 						</div>
+						
+						<!-- Wydajność -->
 						<div class="relative group p-3 md:p-5 bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 rounded-xl md:rounded-2xl transition-all shadow-sm">
-							<p class="text-[12px] md:text-xs font-black text-emerald-600 uppercase tracking-tighter md:tracking-wider mb-1">Wydajność</p>
+							<p class="text-[12px] md:text-xs font-black text-emerald-600 uppercase tracking-tighter md:tracking-wider mb-1">
+								Wydajność
+							</p>
 							<div class="flex items-baseline">
-								<span class="text-xl md:text-3xl font-black text-gray-900">{{ $recipe->efficiency }}</span>
+                    <span class="text-xl md:text-3xl font-black text-gray-900">
+                        {{ $recipe->efficiency }}
+                    </span>
 								<span class="ml-1 text-sm md:text-xl font-bold text-gray-500">%</span>
 							</div>
 						</div>
+						
+						<!-- Gęstość -->
 						<div class="relative group p-3 md:p-5 bg-gradient-to-br from-amber-50 to-white border border-amber-100 rounded-xl md:rounded-2xl transition-all shadow-sm">
-							<p class="text-[12px] md:text-xs font-black text-amber-600 uppercase tracking-tighter md:tracking-wider mb-1">Gęstość</p>
+							<p class="text-[12px] md:text-xs font-black text-amber-600 uppercase tracking-tighter md:tracking-wider mb-1">
+								Gęstość
+							</p>
 							<div class="flex flex-col">
-                                <span class="text-lg md:text-2xl font-black text-gray-900 leading-none">
-                                    {{ number_format($blg, 1) }}<small class="text-[12px] md:text-sm font-bold text-gray-400 ml-0.5">°Blg</small>
-                                </span>
+                    <span class="text-lg md:text-2xl font-black text-gray-900 leading-none">
+                        {{ number_format($blg, 1) }}
+                        <small class="text-[12px] md:text-sm font-bold text-gray-400 ml-0.5">°Blg</small>
+                    </span>
 								<span class="text-[9px] md:text-xs font-bold text-amber-500 mt-1">
-                                    {{ number_format($brix, 1) }}°Brix
-                                </span>
+                        {{ number_format($brix, 1) }}°Brix
+                    </span>
 							</div>
 						</div>
+						
+						<!-- Temperatura zadania drożdży -->
+						<div class="relative group p-3 md:p-5 bg-purple-100 border border-purple-300 rounded-xl md:rounded-2xl transition-all shadow-sm">
+							<p class="text-[12px] md:text-xs font-black text-purple-700 uppercase tracking-tighter md:tracking-wider mb-1">
+								Temp. zadania drożdży
+							</p>
+							
+							<div class="flex items-baseline">
+        <span class="text-xl md:text-3xl font-black text-purple-950">
+            {{ round($recipe->yeast_pitch_temperature, 2) ?? '—' }}
+        </span>
+								
+								<span class="ml-1 text-sm md:text-xl font-bold text-purple-600">
+            °C
+        </span>
+							</div>
+						</div>
+					
 					</div>
 				</div>
 			</div>

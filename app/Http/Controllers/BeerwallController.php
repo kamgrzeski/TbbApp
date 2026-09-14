@@ -7,45 +7,24 @@ use Illuminate\Http\Request;
 
 class BeerwallController extends Controller
 {
-    /**
-     * Widok publiczny (dla telewizora)
-     */
     public function indexFront()
     {
         return view('beerwall.index')->with([
-            'beerwall' => Beerwall::all()
-        ]);
-    }
-    /**
-     * Widok publiczny (dla telewizora)
-     */
-    public function indexFrontOld()
-    {
-        return view('beerwall.index-old')->with([
-            'beerwall' => Beerwall::all()
+            'beerwall' => Beerwall::orderBy('position')->get()
         ]);
     }
 
-    /**
-     * Lista piw w panelu admina
-     */
     public function index()
     {
         $beers = Beerwall::orderBy('id', 'asc')->get();
         return view('beerwall.admin.index', compact('beers'));
     }
 
-    /**
-     * Formularz dodawania nowego piwa
-     */
     public function create()
     {
         return view('beerwall.admin.create');
     }
 
-    /**
-     * Zapisywanie nowego piwa
-     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -68,17 +47,11 @@ class BeerwallController extends Controller
         return redirect()->route('beerwall.admin.index')->with('success', 'Piwo zostało dodane do karty!');
     }
 
-    /**
-     * Formularz edycji
-     */
     public function edit(Beerwall $beerwall)
     {
         return view('beerwall.admin.create', compact('beerwall'));
     }
 
-    /**
-     * Aktualizacja piwa
-     */
     public function update(Request $request, Beerwall $beerwall)
     {
         $data = $request->validate([
@@ -90,6 +63,7 @@ class BeerwallController extends Controller
             'beer_price_small' => 'required|numeric',
             'beer_price_medium' => 'required|numeric',
             'beer_price_large' => 'required|numeric',
+            'position' => 'required|numeric'
         ]);
 
         $data['is_ended'] = $request->has('is_ended');
@@ -101,9 +75,6 @@ class BeerwallController extends Controller
         return redirect()->route('beerwall.admin.index')->with('success', 'Dane piwa zostały zaktualizowane!');
     }
 
-    /**
-     * Szybka zmiana statusu (np. wyprzedane) bez wchodzenia w edycję
-     */
     public function updateStatus(Request $request, Beerwall $beerwall)
     {
         $type = $request->input('type'); // 'ended', 'coming', 'premiere'
@@ -119,18 +90,12 @@ class BeerwallController extends Controller
         return back()->with('success', 'Status piwa został zmieniony!');
     }
 
-    /**
-     * Usunięcie piwa z karty
-     */
     public function destroy(Beerwall $beerwall)
     {
         $beerwall->delete();
         return redirect()->route('beerwall.admin.index')->with('success', 'Piwo zostało usunięte z karty.');
     }
 
-    /**
-     * Klonowanie piwa (przydatne przy nowej warce tego samego stylu)
-     */
     public function clone(Beerwall $beerwall)
     {
         $newBeer = $beerwall->replicate();

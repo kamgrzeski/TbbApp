@@ -27,6 +27,11 @@
 							<input type="text" name="beer_style" value="{{ old('beer_style', $beerwall->beer_style ?? '') }}" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
 						</div>
 						
+						<div class="mb-6">
+							<label class="block text-sm font-bold text-gray-700 mb-1">Pozycja</label>
+							<input type="text" name="position" value="{{ old('position', $beerwall->position ?? '') }}" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+						</div>
+						
 						<div class="grid grid-cols-2 gap-4 mb-6">
 							<div>
 								<label class="block text-sm font-bold text-gray-700 mb-1">Ekstrakt (Blg)</label>
@@ -67,12 +72,12 @@
 								<span class="ml-3 font-semibold text-gray-700 uppercase text-sm">Oznacz jako PREMIERĘ</span>
 							</label>
 							<label class="flex items-center p-3 border rounded-md hover:bg-gray-50 cursor-pointer">
-								<input type="checkbox" name="is_coming_soon" class="rounded border-gray-300 text-amber-500 shadow-sm" {{ old('is_coming_soon', $beerwall->is_coming_soon ?? false) ? 'checked' : '' }}>
+								<input type="checkbox" name="is_coming_soon" class="rounded border-gray-300 text-amber-500 shadow-sm mr-3" {{ old('is_coming_soon', $beerwall->is_coming_soon ?? false) ? 'checked' : '' }}>
 								<span class="ml-3 font-semibold text-gray-700 uppercase text-sm text-amber-600">Oznacz jako WKRÓTCE</span>
 							</label>
 							<label class="flex items-center p-3 border rounded-md hover:bg-red-50 border-red-100 cursor-pointer">
 								<input type="checkbox" name="is_ended" class="rounded border-gray-300 text-gray-700 shadow-sm" {{ old('is_ended', $beerwall->is_ended ?? false) ? 'checked' : '' }}>
-								<span class="ml-3 font-semibold text-red-700 uppercase text-sm italic">WYPRZEDANE / KONIEC KRANU</span>
+								<span class="ml-3 font-semibold text-red-700 uppercase text-sm">WYPRZEDANE</span>
 							</label>
 						</div>
 						
