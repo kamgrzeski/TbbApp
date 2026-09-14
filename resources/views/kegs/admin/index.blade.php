@@ -186,7 +186,7 @@
 													</div>
 													
 													<div class="text-xs text-gray-400 mt-0.5">
-														{{ $stock->created_at->format('H:i') }}
+														{{ \Carbon\Carbon::parse($stock->created_at)->diffForHumans() }}
 													</div>
 												
 												</td>
@@ -208,28 +208,28 @@
 													@if($stock->full_kegs > 0)
 														
 														<span class="inline-flex items-center justify-center
-                                     min-w-[42px] px-3 py-1.5
-                                     rounded-lg
-                                     bg-emerald-50 text-emerald-700
-                                     border border-emerald-200
-                                     text-sm font-bold">
-
-                            {{ $stock->full_kegs }}
-
-                        </span>
+															 min-w-[42px] px-3 py-1.5
+															 rounded-lg
+															 bg-emerald-50 text-emerald-700
+															 border border-emerald-200
+															 text-sm font-bold">
+						
+															{{ $stock->full_kegs }}
+								
+														</span>
 													
 													@else
 														
 														<span class="inline-flex items-center justify-center
-                                     px-3 py-1.5
-                                     rounded-lg
-                                     bg-gray-100 text-gray-500
-                                     border border-gray-200
-                                     text-sm font-semibold">
-
-                            0
-
-                        </span>
+																 px-3 py-1.5
+																 rounded-lg
+																 bg-gray-100 text-gray-500
+																 border border-gray-200
+																 text-sm font-semibold">
+							
+														0
+							
+													</span>
 													
 													@endif
 												

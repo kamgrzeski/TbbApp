@@ -20,7 +20,7 @@ class KegStockController extends Controller
         $stocks = KegStock::query()
             ->with(['recipe', 'movements'])
             ->orderBy('full_kegs', 'desc')
-            ->get();
+            ->take(10)->get();
 
         $summary = $this->kegStockService->summary();
 
