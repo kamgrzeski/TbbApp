@@ -134,7 +134,7 @@
 								<p class="text-blue-700 font-black text-lg leading-none">{{ $recipe->primary_fermentation_start->format('d.m.Y H:i') }}</p>
 								<div class="mt-2 inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-[12px] font-bold">
 									@if($recipe->secondary_fermentation_start)
-										Trwała: {{ $formatDuration($recipe->primary_fermentation_start, $recipe->secondary_fermentation_start) }}
+										Czas trwania: {{ $formatDuration($recipe->primary_fermentation_start, $recipe->secondary_fermentation_start) }}
 									@else
 										Trwa: {{ $formatDuration($recipe->primary_fermentation_start) }}
 									@endif
@@ -154,7 +154,12 @@
 								<p class="text-purple-700 font-black text-lg leading-none">{{ $recipe->secondary_fermentation_start->format('d.m.Y H:i') }}</p>
 								<div class="mt-2 inline-block px-2 py-1 bg-purple-100 text-purple-800 rounded text-[12px] font-bold">
 									@if($recipe->finished_at)
-										Trwała: {{ $formatDuration($recipe->secondary_fermentation_start, $recipe->finished_at) }}
+										Czas trwania: {{ $formatDuration($recipe->secondary_fermentation_start, $recipe->finished_at) }}
+										@if($recipe->finished_at)
+										<p>
+											Od rozlewu mineło: {{ $formatDuration($recipe->finished_at) }}
+										</p>
+										@endif
 									@else
 										Trwa: {{ $formatDuration($recipe->secondary_fermentation_start) }}
 									@endif
@@ -172,7 +177,7 @@
 							<p class="text-[12px] font-bold text-gray-400 uppercase mb-2">Koniec</p>
 							@if($recipe->finished_at)
 								<p class="text-green-700 font-black text-lg leading-none">{{ $recipe->finished_at->format('d.m.Y H:i') }}</p>
-								<p class="text-green-600 text-[12px] font-bold mt-1 uppercase italic">Gotowe</p>
+								<p class="text-green-600 text-[12px] font-bold mt-1 uppercase italic">Piwo trafiło do chłodni</p>
 							@else
 								<form action="{{ route('brewing.status', $recipe) }}" method="POST">
 									@csrf
