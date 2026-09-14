@@ -108,7 +108,7 @@
 							
 							<div>
 								<h3 class="text-lg font-bold text-gray-800">
-									Ajtualny stan pełnych kegów w chłodni
+									Aktualny stan pełnych kegów w chłodni
 								</h3>
 								
 								<p class="text-sm text-gray-500 mt-1">
@@ -144,85 +144,124 @@
 							
 							<div class="overflow-x-auto">
 								
-								<table class="min-w-full divide-y divide-gray-200">
-									
-									<thead class="bg-gray-50 text-gray-500 uppercase text-xs">
-									
-									<tr>
-										
-										<th class="px-6 py-3 text-left font-bold tracking-wider">
-											Data rozlewu
-										</th>
-										
-										<th class="px-6 py-3 text-left font-bold tracking-wider">
-											Warka
-										</th>
-										
-										<th class="px-6 py-3 text-center font-bold tracking-wider">
-											Pełne kegi
-										</th>
-										
-										<th class="px-6 py-3 text-center font-bold tracking-wider">
-											Ilość piwa w litrach
-										</th>
-										
-										<th class="px-6 py-3 text-right font-bold tracking-wider">
-											Zgłoś podczepienie pod kran
-										</th>
-									
-									</tr>
-									
-									</thead>
-									
-									
-									<tbody class="bg-white divide-y divide-gray-200">
-									
-									@foreach($stocks->where('is_archived', 0) as $stock)
-										
-										<tr class="hover:bg-blue-50/50 transition duration-150">
+								<div class="overflow-x-auto">
+									<table class="min-w-full">
+										<thead>
+										<tr class="border-b-2 border-gray-200 bg-gray-50">
 											
-											<td class="px-6 py-4">
+											<th class="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">
+												Data rozlewu
+											</th>
+											
+											<th class="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">
+												Warka
+											</th>
+											
+											<th class="px-6 py-4 text-center text-xs font-extrabold text-gray-600 uppercase tracking-wider">
+												Pełne kegi
+											</th>
+											
+											<th class="px-6 py-4 text-center text-xs font-extrabold text-gray-600 uppercase tracking-wider">
+												Ilość piwa
+											</th>
+											
+											<th class="px-6 py-4 text-right text-xs font-extrabold text-gray-600 uppercase tracking-wider">
+												Akcja
+											</th>
+										
+										</tr>
+										</thead>
+										
+										<tbody class="divide-y divide-gray-100 bg-white">
+										
+										@foreach($stocks->where('is_archived', 0) as $stock)
+											
+											<tr class="group transition-colors duration-150 hover:bg-blue-50">
 												
-												<div class="text-gray-800">
-													{{ $stock->created_at }}
-												</div>
-											
-											</td>
-											<td class="px-6 py-4">
+												{{-- Data rozlewu --}}
+												<td class="px-6 py-4 whitespace-nowrap">
+													
+													<div class="text-sm font-semibold text-gray-800">
+														{{ $stock->created_at->format('d.m.Y') }}
+													</div>
+													
+													<div class="text-xs text-gray-400 mt-0.5">
+														{{ $stock->created_at->format('H:i') }}
+													</div>
 												
-												<div class="font-bold text-gray-800 text-lg">
-													{{ $stock->recipe->name }}
-												</div>
-											
-											</td>
-											
-											
-											<td class="px-6 py-4 text-center">
+												</td>
+												
+												
+												{{-- Warka --}}
+												<td class="px-6 py-4">
+													
+													<div class="font-bold text-gray-900 text-base">
+														{{ $stock->recipe->name }}
+													</div>
+												
+												</td>
+												
+												
+												{{-- Pełne kegi --}}
+												<td class="px-6 py-4 text-center whitespace-nowrap">
+													
+													@if($stock->full_kegs > 0)
+														
+														<span class="inline-flex items-center justify-center
+                                     min-w-[42px] px-3 py-1.5
+                                     rounded-lg
+                                     bg-emerald-50 text-emerald-700
+                                     border border-emerald-200
+                                     text-sm font-bold">
 
-                                            <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 font-bold">
-                                                {{ $stock->full_kegs }}
-                                            </span>
-											
-											</td>
-											
-											
-											<td class="px-6 py-4 text-center">
+                            {{ $stock->full_kegs }}
 
-                                            <span class="font-mono text-gray-600 bg-gray-100 px-3 py-1 rounded">
-                                                {{ $stock->full_kegs * 50 }} L
-                                            </span>
-											
-											</td>
-											
-											
-											<td class="px-6 py-4 text-right">
-												<div class="inline-flex items-center gap-2">
+                        </span>
+													
+													@else
+														
+														<span class="inline-flex items-center justify-center
+                                     px-3 py-1.5
+                                     rounded-lg
+                                     bg-gray-100 text-gray-500
+                                     border border-gray-200
+                                     text-sm font-semibold">
+
+                            0
+
+                        </span>
+													
+													@endif
+												
+												</td>
+												
+												
+												{{-- Ilość piwa --}}
+												<td class="px-6 py-4 text-center whitespace-nowrap">
+
+                    <span class="inline-flex items-center px-3 py-1.5
+                                 rounded-lg
+                                 bg-slate-50 text-slate-700
+                                 border border-slate-200
+                                 text-sm font-bold">
+
+                        {{ $stock->full_kegs * 50 }} L
+
+                    </span>
+												
+												</td>
+												
+												
+												{{-- Akcja --}}
+												<td class="px-6 py-4 text-right whitespace-nowrap">
 													
 													<form
 															method="POST"
 															action="{{ route('kegs.admin.issue.store') }}"
 															onsubmit="return confirm('Czy na pewno chcesz podłączyć keg pod kran?')"
+															class="inline-block"
 													>
+														
 														@csrf
 														
 														<input
@@ -239,26 +278,50 @@
 														
 														<button
 																type="submit"
-																class="inline-flex items-center justify-center px-4 h-10 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 active:scale-95 transition disabled:opacity-30 disabled:cursor-not-allowed"
-																title="Wydaj 1 keg"
 																@disabled($stock->full_kegs <= 0)
+																class="inline-flex items-center gap-2
+                                   px-4 py-2.5
+                                   rounded-lg
+                                   bg-blue-600 text-white
+                                   border border-blue-600
+                                   text-sm font-bold
+                                   shadow-sm
+                                   hover:bg-blue-700 hover:border-blue-700
+                                   active:scale-[0.98]
+                                   transition-all duration-150
+                                   disabled:bg-gray-100
+                                   disabled:text-gray-400
+                                   disabled:border-gray-200
+                                   disabled:shadow-none
+                                   disabled:cursor-not-allowed"
+																title="{{ $stock->full_kegs > 0 ? 'Podłącz 1 keg pod kran' : 'Brak pełnych kegów' }}"
 														>
-															Podłączono pod kran
+															
+															{{-- Ikona kranu/kega --}}
+															<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+																 viewBox="0 0 24 24">
+																<path stroke-linecap="round" stroke-linejoin="round"
+																	  d="M6 9h12M8 9V6a4 4 0 018 0v3M12 9v6m-4 0h8m-7 0v3m6-3v3"/>
+																<path stroke-linecap="round" stroke-linejoin="round"
+																	  d="M5 21h14"/>
+															</svg>
+															
+															Podłącz pod kran
+														
 														</button>
+													
 													</form>
 												
-												</div>
-											</td>
+												</td>
+											
+											</tr>
 										
+										@endforeach
 										
-										</tr>
+										</tbody>
 									
-									@endforeach
-									
-									</tbody>
-								
-								</table>
-							
+									</table>
+								</div>
 							</div>
 						
 						@endif

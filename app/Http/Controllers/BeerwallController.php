@@ -95,14 +95,4 @@ class BeerwallController extends Controller
         $beerwall->delete();
         return redirect()->route('beerwall.admin.index')->with('success', 'Piwo zostało usunięte z karty.');
     }
-
-    public function clone(Beerwall $beerwall)
-    {
-        $newBeer = $beerwall->replicate();
-        $newBeer->beer_name = $beerwall->beer_name . ' (Kopia)';
-        $newBeer->is_ended = false; // Nowa kranówka nie jest na start wyprzedana
-        $newBeer->save();
-
-        return redirect()->route('beerwall.admin.edit', $newBeer)->with('success', 'Skopiowano dane piwa.');
-    }
 }
