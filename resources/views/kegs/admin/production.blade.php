@@ -30,25 +30,23 @@
 							
 							<select
 									name="recipe_id"
-									class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									class="w-full rounded-md border-gray-300 bg-white px-3 py-2 text-sm shadow-sm
+           focus:border-blue-500 focus:ring-blue-500"
 									required
 							>
-								
-								<option value="">
-									-- wybierz warkę --
-								</option>
+								<option value="">-- wybierz warkę --</option>
 								
 								@foreach($recipes as $recipe)
-									
 									<option
 											value="{{ $recipe->id }}"
 											@selected(old('recipe_id') == $recipe->id)
 									>
-										{{ $recipe->name }}
+										Warka {{ $recipe->number }} — {{ $recipe->name }}
+										| Zbiornik {{ $recipe->tank_number }}
+										| {{ number_format($recipe->volume, 0, ',', ' ') }} L
+										| {{ $recipe->blg }}°Blg
 									</option>
-								
 								@endforeach
-							
 							</select>
 							
 							@error('recipe_id')

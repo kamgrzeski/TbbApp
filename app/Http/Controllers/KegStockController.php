@@ -27,14 +27,15 @@ class KegStockController extends Controller
         return view('kegs.admin.index', [
             'stocks' => $stocks,
             'summary' => $summary,
+            'stocksMovements' => $this->kegStockService->stocksMovements()
         ]);
     }
 
     public function createProduction()
     {
         $recipes = Recipe::query()
-            ->orderBy('name')
-            ->whereNull('finished_at')
+            ->orderByDesc('id')
+            ->whereDoesntHave('kegMovements')
             ->get();
 
         return view('kegs.admin.production', [
@@ -42,9 +43,6 @@ class KegStockController extends Controller
         ]);
     }
 
-    /**
-     * Zapis rozlewu.
-     */
     public function production(Request $request)
     {
         $data = $request->validate([

@@ -133,4 +133,9 @@ class KegStockService
             'full_liters' => $full * self::KEG_CAPACITY_LITERS,
         ];
     }
+
+    public function stocksMovements()
+    {
+        return KegMovement::with(['recipe', 'stock'])->get();
+    }
 }

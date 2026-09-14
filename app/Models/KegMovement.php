@@ -23,4 +23,9 @@ class KegMovement extends Model
     {
         return $this->belongsTo(Recipe::class)->orderByDesc('id');
     }
+
+    public function stock(): BelongsTo
+    {
+        return $this->belongsTo(KegStock::class, 'keg_stock_id')->orderByDesc('id');
+    }
 }

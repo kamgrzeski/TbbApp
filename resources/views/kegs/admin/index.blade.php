@@ -355,7 +355,7 @@
 								<p class="text-gray-500 text-lg">
 									Brak zarchiwizowanych rozlewów.
 								</p>
-								
+							
 							</div>
 						
 						@else
@@ -383,7 +383,7 @@
 										<th class="px-6 py-3 text-center font-bold tracking-wider">
 											Data ostatniego podłaczenia
 										</th>
-										
+									
 									</tr>
 									
 									</thead>
@@ -427,7 +427,7 @@
                                             </span>
 											
 											</td>
-											
+										
 										
 										</tr>
 									
@@ -440,6 +440,94 @@
 							</div>
 						
 						@endif
+					
+					</div>
+				
+				</div>
+				
+				<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100  mb-6">
+					
+					<div class="p-6 text-gray-900">
+						
+						<div class="flex justify-between items-center mb-6">
+							
+							<div>
+								<h3 class="text-lg font-bold text-gray-800">
+									Ostatnie podłączenia pod krany
+								</h3>
+								
+								<p class="text-sm text-gray-500 mt-1">
+									Lista ostatnich podłączeń piwa do kranu.
+								</p>
+							</div>
+						
+						</div>
+						
+						<div class="overflow-x-auto">
+							
+							<table class="min-w-full divide-y divide-gray-200 text-sm">
+								
+								<thead class="bg-gray-50 text-gray-500 uppercase text-[11px]">
+								<tr>
+									
+									<th class="px-4 py-2.5 text-left font-bold tracking-wider">
+										Piwo
+									</th>
+									
+									<th class="px-4 py-2.5 text-right font-bold tracking-wider">
+										Podłączono
+									</th>
+								
+								</tr>
+								</thead>
+								
+								<tbody class="bg-white divide-y divide-gray-100">
+								
+								@forelse($stocksMovements as $movement)
+									
+									<tr class="hover:bg-blue-50/50 transition-colors duration-100">
+										
+										{{-- Piwo --}}
+										<td class="px-4 py-2.5">
+											
+											<div class="font-semibold text-gray-800">
+												{{ $movement->recipe->name }}
+											</div>
+											
+											<div class="text-xs text-gray-400">
+												Warka #{{ $movement->recipe->number }}
+											</div>
+										
+										</td>
+										
+										{{-- Data --}}
+										<td class="px-4 py-2.5 text-right whitespace-nowrap">
+											
+											<div class="text-sm text-gray-600">
+												{{ $movement->created_at->format('d.m.Y H:i') }}
+											</div>
+											
+											<div class="text-[11px] text-gray-400">
+												{{ $movement->created_at->diffForHumans() }}
+											</div>
+										
+										</td>
+									
+									</tr>
+								
+								@empty
+									
+									<tr>
+										<td colspan="2" class="px-4 py-8 text-center text-sm text-gray-400">
+											Brak historii podłączeń.
+										</td>
+									</tr>
+								
+								@endforelse
+								
+								</tbody>
+							
+							</table>						</div>
 					
 					</div>
 				
