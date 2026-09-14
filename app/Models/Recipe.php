@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Recipe extends Model
 {
@@ -18,7 +20,7 @@ class Recipe extends Model
         'finished_at' => 'datetime',
     ];
 
-    public function malts()
+    public function malts(): HasMany
     {
         return $this->hasMany(Malt::class);
     }
@@ -28,11 +30,23 @@ class Recipe extends Model
         return $this->hasMany(Comment::class)->latest();
     }
 
-    public function gravityReadings() {
+    public function gravityReadings()
+    {
         return $this->hasMany(GravityReading::class)->latest();
     }
 
-    public function hops() {
+    public function hops() : HasMany
+    {
         return $this->hasMany(Hop::class);
+    }
+
+    public function kegStock(): HasOne
+    {
+        return $this->hasOne(KegStock::class);
+    }
+
+    public function kegMovements(): HasMany
+    {
+        return $this->hasMany(KegMovement::class);
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BeerwallController;
 use App\Http\Controllers\BrewingController;
+use App\Http\Controllers\KegStockController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,7 +46,14 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{beerwall}', [BeerwallController::class, 'destroy'])->name('beerwall.admin.destroy');
         Route::post('/{beerwall}/clone', [BeerwallController::class, 'clone'])->name('beerwall.admin.clone');
     });
-});
 
+    Route::prefix('admin/kegs')
+        ->group(function () {Route::get('/', [KegStockController::class, 'index'])->name('kegs.admin.index');
+            Route::get('/production', [KegStockController::class, 'createProduction'])->name('kegs.admin.production.create');
+            Route::post('/production', [KegStockController::class, 'production'])->name('kegs.admin.production.store');
+            Route::post('/issue', [KegStockController::class, 'issue'])->name('kegs.admin.issue.store');
+            Route::get('/movements', [KegStockController::class, 'movements'])->name('kegs.admin.movements');
+        });
+});
 
 Route::get('/bw', [BeerWallController::class, 'indexFront'])->name('beerwall.index-front');

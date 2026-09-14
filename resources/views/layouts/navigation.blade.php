@@ -22,7 +22,7 @@
                     </x-nav-link>
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('beerwall.admin.index')" :active="request()->routeIs('beerwall.admin.index')">
+                    <x-nav-link :href="route('kegs.admin.index')" :active="request()->routeIs('beerwall.admin.index')">
                         {{ __('Magazyn kegów') }}
                     </x-nav-link>
                 </div>
