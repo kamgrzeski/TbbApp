@@ -188,7 +188,7 @@
 				<div class="snack-price">10 zł</div>
 			</div>
 			<div class="snack-card">
-				<div class="snack-name">Coca-Cola 200ml</div>
+				<div class="snack-name">Coca-Cola 330ml</div>
 				<div class="snack-price">12 zł</div>
 			</div>
 			<div class="snack-card">
