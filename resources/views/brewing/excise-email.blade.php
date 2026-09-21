@@ -38,9 +38,8 @@
 		 CONTENT
 	================================================================= --}}
 	
-	<div class="py-6">
-		
-		<div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+	<div class="py-12">
+		<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 			
 			@foreach($recipe->batches->sortBy('batch_number') as $index => $batch)
 				
@@ -95,7 +94,7 @@
 					*/
 
 					$totalMalt = $batchMalts->sum('kg');
-
+					$totalHops = $batchHops->sum('amount') / 1000;
 
 					/*
 					|--------------------------------------------------------------------------
@@ -252,6 +251,13 @@
 						<p style="margin: 0 0 14px 0;">
 							Łączna ilość surowców słodowych:
 							' . number_format($totalMalt, 2, ',', ' ') . ' kg.
+						</p>
+					';
+
+					$emailHtml .= '
+						<p style="margin: 0 0 14px 0;">
+							Łączna ilość chmielu:
+							' . number_format($totalHops, 2, ',', ' ') . ' kg.
 						</p>
 					';
 
