@@ -136,6 +136,6 @@ class KegStockService
 
     public function stocksMovements()
     {
-        return KegMovement::with(['recipe', 'stock'])->get();
+        return KegMovement::with(['recipe', 'stock'])->where('type', 'issue')->get();
     }
 }

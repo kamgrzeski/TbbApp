@@ -66,6 +66,11 @@
 					Drukuj (Widok A4)
 				</a>
 				
+				<a href="{{ route('brewing.excise-email', $recipe) }}"
+				   class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 shadow-md transition">
+					Generuj e-mail akcyzowy
+				</a>
+				
 				<a href="{{ route('brewing.index') }}"
 				   class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition">
 					Powrót

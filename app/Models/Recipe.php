@@ -49,4 +49,9 @@ class Recipe extends Model
     {
         return $this->hasMany(KegMovement::class);
     }
+
+    public function batches(): HasMany
+    {
+        return $this->hasMany(RecipeBatches::class);
+    }
 }

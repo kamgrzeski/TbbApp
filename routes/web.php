@@ -25,7 +25,6 @@ require __DIR__.'/auth.php';
 Route::middleware(['auth'])->group(function () {
     Route::get('/brewing', [BrewingController::class, 'index'])->name('brewing.index');
     Route::get('/brewing/create', [BrewingController::class, 'create'])->name('brewing.create');
-    Route::post('/brewing', [BrewingController::class, 'store'])->name('brewing.store');
     Route::get('/brewing/{recipe}', [BrewingController::class, 'show'])->name('brewing.show');
     Route::post('/brewing/{recipe}/comments', [BrewingController::class, 'storeComment'])->name('comments.store');
     Route::delete('/brewing/{recipe}', [BrewingController::class, 'destroy'])->name('brewing.destroy');
@@ -35,6 +34,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/brewing/{recipe}/clone', [BrewingController::class, 'clone'])->name('brewing.clone');
     Route::patch('/brewing/{recipe}', [BrewingController::class, 'update'])->name('brewing.update');
     Route::get('/brewing/{recipe}/print', [BrewingController::class, 'print'])->name('brewing.print');
+    Route::get('/brewing/{recipe}/excise-email', [BrewingController::class, 'generateEmailContentExciseForRecipe'])->name('brewing.excise-email');
 
     Route::prefix('admin/beerwall')->group(function () {
         Route::get('/', [BeerwallController::class, 'index'])->name('beerwall.admin.index');

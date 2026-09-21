@@ -8,57 +8,19 @@ use Illuminate\Support\Facades\Auth;
 
 class BrewingController extends Controller
 {
-    public function index() {
+    public function index()
+    {
         $recipes = Auth::user()->recipes()->latest()->get();
         return view('brewing.index', compact('recipes'));
     }
 
-    public function create() {
+    public function create()
+    {
         return view('brewing.create');
     }
 
-    public function store(Request $request) {
-        $request->validate([
-            'recipe_name' => 'required|string|max:255',
-            'malts' => 'required|array',
-        ]);
-
-        $recipe = Recipe::create([
-            'user_id' => Auth::id(),
-            'number' => Auth::user()->recipes()->count() + 1,
-            'tank_number' => $request->tank_number,
-            'name' => $request->recipe_name,
-            'volume' => $request->volume,
-            'efficiency' => $request->efficiency,
-        ]);
-
-        foreach ($request->malts as $maltData) {
-            $recipe::find($recipe->id)->malts()->create([
-                'name' => $maltData['name'] ?? 'Słód',
-                'kg' => $maltData['kg'] ?? 0,
-                'extract' => $maltData['extract'] ?? 80,
-                'is_active' => isset($maltData['active']),
-                'batch_number' => $maltData['batch_number'] ?? 1,
-            ]);
-        }
-
-        if ($request->has('hops')) {
-            foreach ($request->hops as $hopData) {
-                $recipe->hops()->create([
-                    'name' => $hopData['name'] ?? 'Chmiel',
-                    'amount' => $hopData['amount'] ?? 0,
-                    'alpha_acids' => $hopData['alpha_acids'] ?? 0,
-                    'time' => $hopData['time'] ?? 0,
-                    'is_active' => isset($hopData['active']),
-                    'batch_number' => $hopData['batch_number'] ?? 1,
-                ]);
-            }
-        }
-
-        return redirect()->route('brewing.index')->with('success', 'Receptura zapisana!');
-    }
-
-    public function show(Recipe $recipe) {
+    public function show(Recipe $recipe)
+    {
         $recipe->load(['malts', 'comments.user']);
         return view('brewing.show', compact('recipe'));
     }
@@ -207,5 +169,17 @@ class BrewingController extends Controller
     public function print(Recipe $recipe)
     {
         return view('brewing.print', compact('recipe'));
+    }
+
+    public function generateEmailContentExciseForRecipe(Recipe $recipe)
+    {
+        $recipe->load(['malts', 'hops', 'batches']);
+
+        $totalMalt = $recipe->malts->sum('kg');
+
+        return view('brewing.excise-email', compact(
+            'recipe',
+            'totalMalt'
+        ));
     }
 }
