@@ -10,6 +10,8 @@ class RecipeBatches extends Model
     protected $fillable = [
         'recipe_id',
         'batch_number',
+        'start_time',
+        'end_time'
     ];
 
     public function recipe(): BelongsTo
