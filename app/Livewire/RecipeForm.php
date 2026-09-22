@@ -21,7 +21,7 @@ class RecipeForm extends Component
     public $efficiency = 75;
 
     public $yeast_pitch_temperature = 0;
-
+    public $fermentation_temperature = 0;
     // Składniki
     public $malts = [];
     public $hops = [];
@@ -36,6 +36,7 @@ class RecipeForm extends Component
             $this->tank_number = $recipe->tank_number;
             $this->batch_count = $recipe->batch_count;
             $this->yeast_pitch_temperature = $recipe->yeast_pitch_temperature;
+            $this->fermentation_temperature = $recipe->fermentation_temperature;
 
             $this->efficiency = $recipe->efficiency ?? 75;
 
@@ -159,7 +160,8 @@ class RecipeForm extends Component
                 'efficiency'  => $this->efficiency,
                 'blg'         => $this->stats['total_blg'],
                 'batch_count' => $this->batch_count,
-                'yeast_pitch_temperature' => $this->yeast_pitch_temperature
+                'yeast_pitch_temperature' => $this->yeast_pitch_temperature,
+                'fermentation_temperature' => $this->fermentation_temperature
             ];
 
             if ($this->recipeId && !$this->isClone) {

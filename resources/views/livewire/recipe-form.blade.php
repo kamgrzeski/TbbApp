@@ -51,6 +51,15 @@
                                     class="form-control border-gray-300 shadow-sm"
                             >
                         </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Temperatura fermetnacji</label>
+                            <input
+                                    type="number"
+                                    step="0.1"
+                                    wire:model.live="fermentation_temperature"
+                                    class="form-control border-gray-300 shadow-sm"
+                            >
+                        </div>
                     </div>
                     
                     @foreach([1, 2] as $batchIdx)

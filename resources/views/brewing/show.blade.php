@@ -269,7 +269,14 @@
         </span>
 							</div>
 						</div>
-					
+						
+						<div class="relative group p-3 md:p-5 bg-cyan-100 border border-cyan-300 rounded-xl md:rounded-2xl transition-all shadow-sm">
+							<p class="text-[12px] md:text-xs font-black text-cyan-800 uppercase tracking-tighter md:tracking-wider mb-1"> Temp. fermentacji </p>
+							<div class="flex items-baseline">
+								<span class="text-xl md:text-3xl font-black text-cyan-950"> {{ $recipe->fermentation_temperature ?? '—' }} </span>
+								<span class="ml-1 text-sm md:text-xl font-bold text-cyan-700"> °C </span>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
