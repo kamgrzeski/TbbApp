@@ -138,4 +138,54 @@ class KegStockService
     {
         return KegMovement::with(['recipe', 'stock'])->where('type', 'issue')->get();
     }
+
+    public function pool(Recipe $recipe, int $quantity, ?string $note = null): KegStock
+    {
+        if ($quantity <= 0) {
+            throw new RuntimeException('Ilość kegów musi być większa od 0.');
+        }
+
+        return DB::transaction(function () use ($recipe, $quantity, $note) {
+
+            $stock = KegStock::query()
+                ->where('recipe_id', $recipe->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$stock || $stock->full_kegs < $quantity) {
+                $available = $stock?->full_kegs ?? 0;
+
+                throw new RuntimeException(
+                    "Brak wystarczającej ilości pełnych kegów. " .
+                    "Dostępne: {$available}."
+                );
+            }
+
+            $stock->increment('full_kegs', $quantity);
+
+            KegMovement::create([
+                'recipe_id' => $recipe->id,
+                'keg_stock_id' => $stock->id,
+                'type' => 'production',
+                'quantity' => $quantity,
+                'note' => $note
+            ]);
+
+            $inventory = KegInventories::query()
+                ->lockForUpdate()
+                ->firstOrCreate(
+                    [],
+                    [
+                        'total_kegs' => self::TOTAL_KEGS,
+                        'empty_kegs' => self::TOTAL_KEGS,
+                    ]
+                );
+
+            $inventory->decrement('empty_kegs', $quantity);
+
+            $stock->refresh();
+
+            return $stock->fresh();
+        });
+    }
 }

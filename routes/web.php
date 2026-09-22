@@ -53,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/production', [KegStockController::class, 'production'])->name('kegs.admin.production.store');
             Route::post('/issue', [KegStockController::class, 'issue'])->name('kegs.admin.issue.store');
             Route::get('/movements', [KegStockController::class, 'movements'])->name('kegs.admin.movements');
+            Route::post('/pool', [KegStockController::class, 'pool'])->name('kegs.admin.pool.store');
         });
 });
 

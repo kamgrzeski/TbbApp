@@ -52,6 +52,7 @@
             grid-template-columns: 15vw 1fr 20vw;
             align-items: center;
             height: 145px;
+			margin-top: -20px;
         }
         .brand img { height: 14vh; width: auto; }
         .title-center .rule {

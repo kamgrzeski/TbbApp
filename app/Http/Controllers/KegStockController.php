@@ -112,4 +112,33 @@ class KegStockController extends Controller
             'movements' => $movements,
         ]);
     }
+
+    public function pool(Request $request)
+    {
+        $data = $request->validate([
+            'recipe_id' => ['required', 'exists:recipes,id'],
+            'quantity' => ['required', 'integer', 'min:1', 'max:20'],
+            'note' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        try {
+            $recipe = Recipe::findOrFail($data['recipe_id']);
+
+            $this->kegStockService->pool(
+                $recipe,
+                $data['quantity'],
+                $data['note'] ?? null
+            );
+
+            return redirect()
+                ->route('kegs.admin.index')
+                ->with('success', 'Keg został dodany do puli.');
+        } catch (Throwable $e) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'quantity' => $e->getMessage(),
+                ]);
+        }
+    }
 }

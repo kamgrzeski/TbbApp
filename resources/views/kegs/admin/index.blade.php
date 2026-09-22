@@ -255,62 +255,134 @@
 												{{-- Akcja --}}
 												<td class="px-6 py-4 text-right whitespace-nowrap">
 													
-													<form
-															method="POST"
-															action="{{ route('kegs.admin.issue.store') }}"
-															onsubmit="return confirm('Czy na pewno chcesz podłączyć keg pod kran?')"
-															class="inline-block"
-													>
+													<div class="inline-flex items-center gap-2">
 														
-														@csrf
-														
-														<input
-																type="hidden"
-																name="recipe_id"
-																value="{{ $stock->recipe_id }}"
+														{{-- Podłącz pod kran --}}
+														<form
+																method="POST"
+																action="{{ route('kegs.admin.issue.store') }}"
+																onsubmit="return confirm('Czy na pewno chcesz podłączyć keg pod kran?')"
+																class="inline-block"
 														>
-														
-														<input
-																type="hidden"
-																name="quantity"
-																value="1"
-														>
-														
-														<button
-																type="submit"
-																@disabled($stock->full_kegs <= 0)
-																class="inline-flex items-center gap-2
-                                   px-4 py-2.5
-                                   rounded-lg
-                                   bg-blue-600 text-white
-                                   border border-blue-600
-                                   text-sm font-bold
-                                   shadow-sm
-                                   hover:bg-blue-700 hover:border-blue-700
-                                   active:scale-[0.98]
-                                   transition-all duration-150
-                                   disabled:bg-gray-100
-                                   disabled:text-gray-400
-                                   disabled:border-gray-200
-                                   disabled:shadow-none
-                                   disabled:cursor-not-allowed"
-																title="{{ $stock->full_kegs > 0 ? 'Podłącz 1 keg pod kran' : 'Brak pełnych kegów' }}"
-														>
+															@csrf
 															
-															{{-- Ikona kranu/kega --}}
-															<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-																 viewBox="0 0 24 24">
-																<path stroke-linecap="round" stroke-linejoin="round"
-																	  d="M6 9h12M8 9V6a4 4 0 018 0v3M12 9v6m-4 0h8m-7 0v3m6-3v3"/>
-																<path stroke-linecap="round" stroke-linejoin="round"
-																	  d="M5 21h14"/>
-															</svg>
+															<input
+																	type="hidden"
+																	name="recipe_id"
+																	value="{{ $stock->recipe_id }}"
+															>
 															
-															Podłącz pod kran
+															<input
+																	type="hidden"
+																	name="quantity"
+																	value="1"
+															>
+															
+															<button
+																	type="submit"
+																	@disabled($stock->full_kegs <= 0)
+																	class="inline-flex items-center gap-2
+                    px-4 py-2.5
+                    rounded-lg
+                    bg-blue-600 text-white
+                    border border-blue-600
+                    text-sm font-bold
+                    shadow-sm
+                    hover:bg-blue-700
+                    hover:border-blue-700
+                    active:scale-[0.98]
+                    transition-all duration-150
+                    disabled:bg-gray-100
+                    disabled:text-gray-400
+                    disabled:border-gray-200
+                    disabled:shadow-none
+                    disabled:cursor-not-allowed"
+																	title="{{ $stock->full_kegs > 0 ? 'Podłącz 1 keg pod kran' : 'Brak pełnych kegów' }}"
+															>
+																
+																<svg class="w-4 h-4"
+																	 fill="none"
+																	 stroke="currentColor"
+																	 stroke-width="2"
+																	 viewBox="0 0 24 24">
+																	<path
+																			stroke-linecap="round"
+																			stroke-linejoin="round"
+																			d="M6 9h12M8 9V6a4 4 0 018 0v3M12 9v6m-4 0h8m-7 0v3m6-3v3"/>
+																	<path
+																			stroke-linecap="round"
+																			stroke-linejoin="round"
+																			d="M5 21h14"/>
+																</svg>
+																
+																Podłącz
+															
+															</button>
 														
-														</button>
+														</form>
+														
+														
+														{{-- Dodaj keg do puli --}}
+														<form
+																method="POST"
+																action="{{ route('kegs.admin.pool.store') }}"
+																onsubmit="return confirm('Czy na pewno chcesz dodać keg do puli?')"
+																class="inline-block"
+														>
+															@csrf
+															
+															<input
+																	type="hidden"
+																	name="recipe_id"
+																	value="{{ $stock->recipe_id }}"
+															>
+															
+															<input
+																	type="hidden"
+																	name="quantity"
+																	value="1"
+															>
+															
+															<button
+																	type="submit"
+																	@disabled($stock->full_kegs <= 0)
+																	class="inline-flex items-center gap-2
+                    px-4 py-2.5
+                    rounded-lg
+                    bg-green-600 text-white
+                    border border-green-600
+                    text-sm font-bold
+                    shadow-sm
+                    hover:bg-green-700
+                    hover:border-green-700
+                    active:scale-[0.98]
+                    transition-all duration-150
+                    disabled:bg-gray-100
+                    disabled:text-gray-400
+                    disabled:border-gray-200
+                    disabled:shadow-none
+                    disabled:cursor-not-allowed"
+																	title="{{ $stock->full_kegs > 0 ? 'Dodaj 1 keg do puli' : 'Brak pełnych kegów' }}"
+															>
+																
+																<svg class="w-4 h-4"
+																	 fill="none"
+																	 stroke="currentColor"
+																	 stroke-width="2"
+																	 viewBox="0 0 24 24">
+																	<path
+																			stroke-linecap="round"
+																			stroke-linejoin="round"
+																			d="M12 5v14M5 12h14"/>
+																</svg>
+																
+																Dodaj
+															
+															</button>
+														
+														</form>
 													
-													</form>
+													</div>
 												
 												</td>
 											
