@@ -25,6 +25,7 @@ class RecipeForm extends Component
     // Składniki
     public $malts = [];
     public $hops = [];
+    public float $akcpa_blg;
 
     public function mount($recipe = null, $isClone = false)
     {
@@ -37,7 +38,7 @@ class RecipeForm extends Component
             $this->batch_count = $recipe->batch_count;
             $this->yeast_pitch_temperature = $recipe->yeast_pitch_temperature;
             $this->fermentation_temperature = $recipe->fermentation_temperature;
-
+            $this->akcpa_blg = $recipe->akcpa_blg;
             $this->efficiency = $recipe->efficiency ?? 75;
 
             // Mapowanie słodów z bazy
@@ -138,6 +139,7 @@ class RecipeForm extends Component
             'w2' => ['kg' => $data[2]['kg'], 'blg' => $blg2, 'bags' => ceil($data[2]['kg'] / 25)],
             'total_kg' => $totalKg,
             'total_blg' => $totalBlg,
+            'akcpa_blg' => $this->akcpa_blg,
             'volume' => $totalVol
         ];
     }
@@ -158,10 +160,12 @@ class RecipeForm extends Component
                 'name'        => $this->recipe_name,
                 'volume'      => $this->batch_count * 500, // lub $this->stats['volume']
                 'efficiency'  => $this->efficiency,
-                'blg'         => $this->stats['total_blg'],
+                'blg'         => round($this->stats['total_blg'], 1),
                 'batch_count' => $this->batch_count,
                 'yeast_pitch_temperature' => $this->yeast_pitch_temperature,
-                'fermentation_temperature' => $this->fermentation_temperature
+                'fermentation_temperature' => $this->fermentation_temperature,
+                'akcpa_blg' => $this->akcpa_blg,
+                'akcpa_value' => $this->akcpa_blg * 10
             ];
 
             if ($this->recipeId && !$this->isClone) {

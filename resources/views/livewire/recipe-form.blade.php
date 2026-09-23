@@ -60,6 +60,15 @@
                                     class="form-control border-gray-300 shadow-sm"
                             >
                         </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">AKCPA Blg</label>
+                            <input
+                                    type="number"
+                                    step="0.1"
+                                    wire:model.live="akcpa_blg"
+                                    class="form-control border-gray-300 shadow-sm"
+                            >
+                        </div>
                     </div>
                     
                     @foreach([1, 2] as $batchIdx)

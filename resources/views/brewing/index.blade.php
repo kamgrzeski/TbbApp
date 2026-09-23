@@ -66,6 +66,10 @@
 										</th>
 										
 										<th class="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">
+											AKCPA
+										</th>
+										
+										<th class="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">
 											Wydajność
 										</th>
 										
@@ -134,6 +138,13 @@
                                  border border-amber-200
                                  text-sm font-bold">
                         {{ $recipe->blg }}°
+                    </span>
+											<td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md
+                                 bg-danger-50 text-danger-700
+                                 border border-danger-200
+                                 text-sm font-bold">
+                        {{ $recipe->akcpa_value }}
                     </span>
 											</td>
 											
