@@ -277,6 +277,7 @@
 								<span class="ml-1 text-sm md:text-xl font-bold text-cyan-700"> °C </span>
 							</div>
 						</div>
+					
 					</div>
 				</div>
 			</div>

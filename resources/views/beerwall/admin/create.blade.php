@@ -803,7 +803,7 @@
 									/>
 								</svg>
 								
-								Dodaj na Beer Wall
+								+ Dodaj
 							
 							@endif
 						
