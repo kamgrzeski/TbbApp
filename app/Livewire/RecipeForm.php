@@ -165,7 +165,7 @@ class RecipeForm extends Component
                 'yeast_pitch_temperature' => $this->yeast_pitch_temperature,
                 'fermentation_temperature' => $this->fermentation_temperature,
                 'akcpa_blg' => $this->akcpa_blg,
-                'akcpa_value' => $this->akcpa_blg * 10
+                'akcpa_value' => $this->akcpa_blg * $this->batch_count * 5
             ];
 
             if ($this->recipeId && !$this->isClone) {
