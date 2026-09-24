@@ -101,20 +101,22 @@
 												class="group cursor-pointer transition-colors duration-150 hover:bg-amber-50/50"
 										>
 											{{-- Numer --}}
-											<td class="px-6 py-4 whitespace-nowrap">
-												@forelse($recipe->batches as $batch)
-													<span class="inline-flex items-center px-2.5 py-1 rounded-md
-															 bg-gray-100 text-gray-700
-															 border border-gray-200
-															 text-xs font-bold font-mono
-															 group-hover:bg-amber-100 group-hover:text-amber-800
-															 group-hover:border-amber-200 transition-colors">
-														#{{ $batch->batch_number }}
-													</span>
-												@empty
-													<span class="text-xs text-gray-400 italic">Brak</span>
-												@endforelse
-											</td>
+							<td class="px-6 py-4 align-top">
+    @forelse($recipe->batches as $batch)
+        <div class="inline-block mb-1.5 last:mb-0">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-md
+                         bg-gray-100 text-gray-700
+                         border border-gray-200
+                         text-xs font-bold font-mono
+                         group-hover:bg-amber-100 group-hover:text-amber-800
+                         group-hover:border-amber-200 transition-colors">
+                #{{ $batch->batch_number }}
+            </span>
+        </div>
+    @empty
+        <span class="text-xs text-gray-400 italic">Brak</span>
+    @endforelse
+</td>
 											
 											{{-- Nazwa --}}
 											<td class="px-6 py-4">
@@ -212,25 +214,46 @@
 						<div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-xl border border-gray-200">
 							
 							{{-- Górny pasek miesiąca z podsumowaniem --}}
-							<div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-								<div class="flex items-center gap-2">
-									<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-									</svg>
-									<span class="text-base font-extrabold text-gray-800 uppercase tracking-wide">
-										{{ \Carbon\Carbon::createFromFormat('Y-m', $month)->translatedFormat('F Y') }}
-									</span>
-									<span class="text-xs font-semibold bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full ml-1">
-										{{ $monthRecipes->count() }} {{ $monthRecipes->count() === 1 ? 'warka' : 'warek' }}
-									</span>
-								</div>
-								
-								<div class="text-sm font-bold text-red-700 bg-red-50 border border-red-200 px-3 py-1 rounded-lg shadow-sm">
-									Suma AKC-PA:
-									<span class="text-base ml-1">{{ number_format($monthRecipes->sum('akcpa_value'), 2, ',', ' ') }}</span>
-								</div>
-							</div>
 							
+							<div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+
+        {{-- Lewa część --}}
+        <div class="flex items-center gap-2 min-w-0">
+            <svg class="w-5 h-5 text-gray-500 flex-shrink-0"
+                 fill="none"
+                 stroke="currentColor"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+
+            <div class="flex flex-wrap items-center gap-2 min-w-0">
+                <span class="text-sm sm:text-base font-extrabold text-gray-800 uppercase tracking-wide">
+                    {{ \Carbon\Carbon::createFromFormat('Y-m', $month)->translatedFormat('F Y') }}
+                </span>
+
+                <span class="text-xs font-semibold bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full whitespace-nowrap">
+                    {{ $monthRecipes->count() }}
+                    {{ $monthRecipes->count() === 1 ? 'warka' : 'warek' }}
+                </span>
+            </div>
+        </div>
+
+        {{-- AKC-PA --}}
+        <div class="text-sm font-bold text-red-700 bg-red-50 border border-red-200
+                    px-3 py-1.5 rounded-lg shadow-sm
+                    w-full sm:w-auto text-center sm:text-left">
+            AKC-PA:
+            <span class="text-base ml-1">
+                {{ number_format($monthRecipes->sum('akcpa_value'), 2, ',', ' ') }}
+            </span>
+        </div>
+
+    </div>
+</div>
 							{{-- Tabela warek danego miesiąca --}}
 							<div class="overflow-x-auto">
 								<table class="min-w-full divide-y divide-gray-200">

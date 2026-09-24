@@ -52,7 +52,7 @@
             grid-template-columns: 15vw 1fr 20vw;
             align-items: center;
             height: 145px;
-			margin-top: -20px;
+			margin-top: -8px;
         }
         .brand img { height: 14vh; width: auto; }
         .title-center .rule {
@@ -113,10 +113,10 @@
 
         .stats {
             display: grid; grid-template-columns: 1fr 1fr;
-            border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+           # border-left: 1px solid var(--border);# border-right: 1px solid var(--border);
         }
         .stat { text-align: center; }
-        .stat .val { font-size: 3.5vh; font-weight: bold; }
+        .stat .val { font-size: 4.0vh; font-weight: bold; }
         .stat .lbl { font-size: 2vh; color: var(--text-dim); text-transform: uppercase; }
 
         .prices { display: flex; gap: 1vw; justify-content: flex-end; }
@@ -124,7 +124,7 @@
             background: rgba(255,255,255,0.06); padding: 1vh; border-radius: 1vh;
             min-width: 5.5vw; text-align: center;
         }
-        .price .vol { font-size: 3vh; display: block; }
+        .price .vol { font-size: 3.1vh; display: block; }
         .price .amt { font-size: 6.9vh; font-weight: bold; color: var(--gold); }
 
         /* Snacks */
@@ -266,12 +266,12 @@
                     <div class="beer-desc">${beer.beer_description || ''}</div>
                 </div>
                 
-                <div class="stats">
+                <div class="stats" style="margin-right:35px">
                     <div class="stat">
                         <div class="val">${beer.beer_blg}°</div>
                         <div class="lbl">Blg</div>
                     </div>
-                    <div class="stat">
+                    <div class="stat" style="margin-left:15px">
                         <div class="val">${beer.beer_alc}%</div>
                         <div class="lbl">Alk.</div>
                     </div>
