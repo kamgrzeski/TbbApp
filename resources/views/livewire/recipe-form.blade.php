@@ -13,11 +13,11 @@
                 
                 <form wire:submit="save">
                     <div class="row mb-4 g-3">
-                        <div class="col-md-5">
+                        <div class="col-md-4">
                             <label class="form-label fw-bold">Nazwa receptury</label>
                             <input type="text" wire:model="recipe_name" class="form-control border-gray-300 shadow-sm">
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-1">
                             <label class="form-label fw-bold">Tank</label>
                             <select wire:model="tank_number" class="form-select border-gray-300">
                                 <option value="2">2</option>
@@ -35,13 +35,14 @@
                             <label class="form-label fw-bold">Objętość (L)</label>
                             <input type="text" class="form-control bg-light" value="{{ $this->stats['volume'] }}" readonly>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-4 g-3">
                         <div class="col-md-2">
                             <label class="form-label fw-bold">Wydajność (%)</label>
                             <input type="number" wire:model.live="efficiency" class="form-control border-gray-300 shadow-sm">
                         </div>
+                    </div>
+                    
+                    <div class="row mb-4 g-3">
+                        
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Temperatura zadania drożdży</label>
                             <input
@@ -51,7 +52,7 @@
                                     class="form-control border-gray-300 shadow-sm"
                             >
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-2">
                             <label class="form-label fw-bold">Temperatura fermetnacji</label>
                             <input
                                     type="number"
@@ -60,7 +61,7 @@
                                     class="form-control border-gray-300 shadow-sm"
                             >
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-2">
                             <label class="form-label fw-bold">AKCPA Blg</label>
                             <input
                                     type="number"

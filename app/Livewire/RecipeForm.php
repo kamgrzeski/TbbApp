@@ -25,7 +25,7 @@ class RecipeForm extends Component
     // Składniki
     public $malts = [];
     public $hops = [];
-    public float $akcpa_blg;
+    public float $akcpa_blg = 0.0;
 
     public function mount($recipe = null, $isClone = false)
     {
@@ -151,6 +151,7 @@ class RecipeForm extends Component
             'recipe_name' => 'required|string|max:255',
             'efficiency' => 'required|numeric|between:0,100',
             'malts' => 'required|array|min:1',
+            'akcpa_blg' => 'nullable|numeric|min:0',
         ]);
 
         DB::transaction(function () {

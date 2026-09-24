@@ -10,7 +10,8 @@ class BrewingController extends Controller
 {
     public function index()
     {
-        $recipes = Auth::user()->recipes()->latest()->get();
+        $recipes = Recipe::with('batches')->orderByDesc('recipes.id')->get();
+
         return view('brewing.index', compact('recipes'));
     }
 
