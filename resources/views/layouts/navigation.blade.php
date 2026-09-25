@@ -31,6 +31,11 @@
                         {{ __('GoPOS') }}
                     </x-nav-link>
                 </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('gopos.admin.webhooks')" :active="request()->routeIs('gopos.admin.webhooks')">
+                        {{ __('GoPOS Weebhooki') }}
+                    </x-nav-link>
+                </div>
             </div>
 
             <!-- Settings Dropdown -->
@@ -112,6 +117,14 @@
             
             <x-responsive-nav-link :href="route('kegs.admin.index')" :active="request()->routeIs('kegs.admin.index')">
                 {{ __('Magazyn kegów') }}
+            </x-responsive-nav-link>
+            
+            <x-responsive-nav-link :href="route('gopos.admin.index')" :active="request()->routeIs('gopos.admin.index')">
+                {{ __('GoPos') }}
+            </x-responsive-nav-link>
+            
+            <x-responsive-nav-link :href="route('gopos.admin.webhooks')" :active="request()->routeIs('gopos.admin.webhooks')">
+                {{ __('GoPOS Weebhooki') }}
             </x-responsive-nav-link>
             
         </div>

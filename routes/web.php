@@ -59,7 +59,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('admin/gopos')
         ->group(function () {Route::get('/', [GoPosController::class, 'index'])->name('gopos.admin.index');
-            Route::get('/production', [GoPosController::class, 'sync'])->name('gopos.admin.items.sync');
+            Route::get('/sync', [GoPosController::class, 'sync'])->name('gopos.admin.items.sync');
+            Route::get('/webhooks', [GoPosController::class, 'webhooksList'])->name('gopos.admin.webhooks');
     });
 });
 

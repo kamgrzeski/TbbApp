@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GoPosItems;
 use App\Models\KegMovement;
+use App\Models\WebhookHistory;
 use App\Services\GoPosApiService;
 
 class GoPosController extends Controller
@@ -49,23 +50,51 @@ class GoPosController extends Controller
     public function webhook()
     {
         $data = request()->all();
-        $eventType = $data['event_type'];
 
-        if ($eventType == 'ORDER_CREATED') {
+        $eventType = $data['event_type'] ?? null;
 
-            $orderDetails = $this->goPosApiService->getOrder($data['resource_id']);
+        $webhookHistory = WebhookHistory::create([
+            'event_type' => $data['event_type'] ?? null,
+            'type' => $data['type'] ?? null,
+            'organization_id' => $data['organization_id'] ?? null,
+            'resource_id' => $data['resource_id'] ?? null,
+            'occurred_at' => $data['occurred_at'] ?? null,
+            'payload' => $data,
+            'status' => 'received',
+        ]);
 
-            $items = $orderDetails['data']['items'];
+        $description = [];
 
-            $itemsName = [];
+        if ($eventType === 'ORDER_CREATED') {
+
+            $orderDetails = $this->goPosApiService->getOrder(
+                $data['resource_id']
+            );
+
+            $items = $orderDetails['data']['items'] ?? [];
+
+            $description[] = sprintf(
+                'Utworzono zamówienie. Liczba pozycji: %d.',
+                count($items)
+            );
+
+            $processedItems = 0;
+            $skippedItems = 0;
+            $totalDeduction = 0;
 
             foreach ($items as $item) {
 
                 $deductionMl = 0;
 
-                if (preg_match('/(\d+)\s*(ml|L)\b/i', $item['name'], $matches)) {
-
-                    $value = (int) $matches[1];
+                if (
+                    !empty($item['name']) &&
+                    preg_match(
+                        '/(\d+(?:[.,]\d+)?)\s*(ml|L)\b/i',
+                        $item['name'],
+                        $matches
+                    )
+                ) {
+                    $value = (float) str_replace(',', '.', $matches[1]);
                     $unit = strtolower($matches[2]);
 
                     $deductionMl = $unit === 'l'
@@ -73,25 +102,97 @@ class GoPosController extends Controller
                         : $value;
                 }
 
-                $itemsName[] = [
-                    'item_id' => $item['item_id'],
-                    'original_name' => $item['name'],
-                    'deduction' => $deductionMl,
-                    'created_at' => $item['created_at']
-                ];
-            }
+                // Nie ma pojemności w nazwie produktu
+                if ($deductionMl <= 0) {
 
-            foreach ($itemsName as $item) {
+                    $skippedItems++;
+
+                    $description[] = sprintf(
+                        'Pominięto produkt "%s" (ID GoPos: %s) - nie znaleziono pojemności w nazwie.',
+                        $item['name'] ?? '-',
+                        $item['item_id'] ?? '-'
+                    );
+
+                    continue;
+                }
+
                 $kegMovement = KegMovement::where('is_current', 1)
                     ->whereHas('recipe', function ($query) use ($item) {
-                        $query->whereJsonContains('gopos_item_ids', (string) $item['item_id']);
+                        $query->whereJsonContains(
+                            'gopos_item_ids',
+                            (string) $item['item_id']
+                        );
                     })
                     ->first();
 
-                if($kegMovement) {
-                    $kegMovement->decrement('capacity', $item['deduction']);
+                if (!$kegMovement) {
+
+                    $skippedItems++;
+
+                    $description[] = sprintf(
+                        'Pominięto produkt "%s" (ID GoPos: %s, %s ml) - nie znaleziono aktywnej beczki z przypisaną recepturą.',
+                        $item['name'] ?? '-',
+                        $item['item_id'] ?? '-',
+                        $deductionMl
+                    );
+
+                    continue;
                 }
+
+                $oldCapacity = $kegMovement->capacity;
+
+                $kegMovement->decrement(
+                    'capacity',
+                    $deductionMl
+                );
+
+                $newCapacity = $oldCapacity - $deductionMl;
+
+                $processedItems++;
+                $totalDeduction += $deductionMl;
+
+                $description[] = sprintf(
+                    'Produkt "%s" (ID GoPos: %s) - odjęto %s ml z KegMovement #%s. Pojemność: %s ml → %s ml.',
+                    $item['name'] ?? '-',
+                    $item['item_id'] ?? '-',
+                    number_format($deductionMl, 0, ',', ' '),
+                    $kegMovement->id,
+                    number_format($oldCapacity, 0, ',', ' '),
+                    number_format($newCapacity, 0, ',', ' ')
+                );
             }
+
+            $description[] = sprintf(
+                'Podsumowanie: przetworzono %d pozycji, pominięto %d pozycji, łącznie odjęto %s ml.',
+                $processedItems,
+                $skippedItems,
+                number_format($totalDeduction, 0, ',', ' ')
+            );
+        } else {
+
+            $description[] = sprintf(
+                'Webhook typu "%s" został odebrany. Brak dodatkowej obsługi dla tego typu zdarzenia.',
+                $eventType ?? '-'
+            );
         }
+
+        $webhookHistory->update([
+            'status' => 'processed',
+            'description' => implode("\n", $description),
+            'processed_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    public function webhooksList()
+    {
+        $webhooks = WebhookHistory::orderByDesc('id')->get();
+
+        return view('gopos.webhooks', [
+            'webhooks' => $webhooks
+        ]);
     }
 }
