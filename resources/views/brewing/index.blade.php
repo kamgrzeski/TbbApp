@@ -121,7 +121,7 @@
 											{{-- Nazwa --}}
 											<td class="px-6 py-4">
 												<div class="font-bold text-gray-900 group-hover:text-amber-800 transition-colors">
-													#{{ $recipe->number }} - {{ $recipe->name }}
+													{{ $recipe->name }} #{{ $recipe->number }}
 												</div>
 											</td>
 											
@@ -285,7 +285,7 @@
 											{{-- Nazwa --}}
 											<td class="px-6 py-4">
 												<div class="font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
-													#{{ $recipe->number }} - {{ $recipe->name }}
+													{{ $recipe->name }} #{{ $recipe->number }}
 												</div>
 											</td>
 											

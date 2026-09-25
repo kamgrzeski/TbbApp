@@ -22,8 +22,8 @@ class GoPosApiService
     public function __construct()
     {
         $this->baseUrl = 'https://app.gopos.io';
-        $this->clientId = '14db196f-82d6-40dc-a370-ce463c28c9e1';
-        $this->clientSecret = '9356e1d6-a4f9-42e6-b4a5-a93328c3e88a';
+        $this->clientId = '428bc2bd-c3cb-46f4-97e2-164b00510f73';
+        $this->clientSecret = '4447dafe-28d8-4f52-a1f2-7e241b246254';
         $this->organizationId = '15066';
     }
 

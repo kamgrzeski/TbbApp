@@ -88,7 +88,9 @@ class GoPosController extends Controller
                     })
                     ->first();
 
-                $kegMovement->decrement('capacity', $item['deduction']);
+                if($kegMovement) {
+                    $kegMovement->decrement('capacity', $item['deduction']);
+                }
             }
         }
     }

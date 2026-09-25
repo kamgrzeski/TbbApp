@@ -196,7 +196,7 @@
 												<td class="px-6 py-4">
 													
 													<div class="font-bold text-gray-900 text-base">
-														{{ $stock->recipe->name }}
+														{{ $stock->recipe->name }} #{{ $stock->recipe->number }}
 													</div>
 												
 												</td>
@@ -402,103 +402,94 @@
 				
 				</div>
 				
-				<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100  mb-6">
-					
+				<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100 mb-6">
 					<div class="p-6 text-gray-900">
-						
 						<div class="flex justify-between items-center mb-6">
-							
 							<div>
 								<h3 class="text-lg font-bold text-gray-800">
 									Ostatnie podłączenia pod krany
 								</h3>
-								
 								<p class="text-sm text-gray-500 mt-1">
 									Lista ostatnich podłączeń piwa do kranu.
 								</p>
 							</div>
-						
 						</div>
 						
 						<div class="overflow-x-auto">
-							
 							<table class="min-w-full divide-y divide-gray-200 text-sm">
-								
 								<thead class="bg-gray-50 text-gray-500 uppercase text-[11px]">
 								<tr>
-									
 									<th class="px-4 py-2.5 text-left font-bold tracking-wider">
 										Piwo
 									</th>
-									
-									<th class="px-4 py-2.5 text-left font-bold tracking-wider">
+									<th class="px-4 py-2.5 text-left font-bold tracking-wider w-64">
 										Pojemność
 									</th>
-									
 									<th class="px-4 py-2.5 text-right font-bold tracking-wider">
 										Podłączono
 									</th>
-								
 								</tr>
 								</thead>
 								
 								<tbody class="bg-white divide-y divide-gray-100">
-								
 								@forelse($stocksMovements as $movement)
+									@php
+										$maxCapacity = 50000;
+										// Obliczanie procentu z zabezpieczeniem od 0% do 100%
+										$percentage = min(100, max(0, round(($movement->capacity / $maxCapacity) * 100)));
+									@endphp
 									
 									<tr class="hover:bg-blue-50/50 transition-colors duration-100">
-										
 										{{-- Piwo --}}
-										<td class="px-4 py-2.5">
-											
+										<td class="px-4 py-3">
 											<div class="font-semibold text-gray-800">
-												<a href="{{ route('brewing.show', $movement->recipe) }}">{{ $movement->recipe->name }}</a>
+												<a href="{{ route('brewing.show', $movement->recipe) }}" class="hover:text-blue-600">
+													{{ $movement->recipe->name }} #{{ $movement->recipe->number }}
+												</a>
 											</div>
-											
-											<div class="text-xs text-gray-400">
-												Warka #{{ $movement->recipe->number }}
-											</div>
-											
 										</td>
 										
-										<td class="px-4 py-2.5">
-											
-											<div class="font-semibold text-gray-800">
-												{{ $movement->capacity }} ml
+										{{-- Pojemność (Progress Bar) --}}
+										<td class="px-4 py-3">
+											<div class="w-full">
+												<div class="flex justify-between items-center mb-1 text-xs">
+                                        <span class="font-semibold text-gray-700">
+                                            {{ number_format($movement->capacity, 0, ',', ' ') }} / 50 000 ml
+                                        </span>
+													<span class="font-medium {{ $percentage > 20 ? 'text-blue-600' : 'text-amber-600' }}">
+                                            {{ $percentage }}%
+                                        </span>
+												</div>
+												<div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+													<div
+															class="h-2 rounded-full transition-all duration-300 {{ $percentage > 20 ? 'bg-blue-600' : 'bg-amber-500' }}"
+															style="width: {{ $percentage }}%;"
+													></div>
+												</div>
 											</div>
 										</td>
 										
 										{{-- Data --}}
-										<td class="px-4 py-2.5 text-right whitespace-nowrap">
-											
+										<td class="px-4 py-3 text-right whitespace-nowrap">
 											<div class="text-sm text-gray-600">
 												{{ $movement->created_at->format('d.m.Y H:i') }}
 											</div>
-											
 											<div class="text-[11px] text-gray-400">
 												{{ $movement->created_at->diffForHumans() }}
 											</div>
-										
 										</td>
-									
 									</tr>
-								
 								@empty
-									
 									<tr>
-										<td colspan="2" class="px-4 py-8 text-center text-sm text-gray-400">
+										<td colspan="3" class="px-4 py-8 text-center text-sm text-gray-400">
 											Brak historii podłączeń.
 										</td>
 									</tr>
-								
 								@endforelse
-								
 								</tbody>
-							
-							</table>						</div>
-					
+							</table>
+						</div>
 					</div>
-				
 				</div>
 				
 				<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100  mb-6">
