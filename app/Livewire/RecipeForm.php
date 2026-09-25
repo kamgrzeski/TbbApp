@@ -26,6 +26,7 @@ class RecipeForm extends Component
     public $malts = [];
     public $hops = [];
     public float $akcpa_blg = 0.0;
+    public string $gopos_item_ids;
 
     public function mount($recipe = null, $isClone = false)
     {
@@ -40,6 +41,12 @@ class RecipeForm extends Component
             $this->fermentation_temperature = $recipe->fermentation_temperature;
             $this->akcpa_blg = $recipe->akcpa_blg;
             $this->efficiency = $recipe->efficiency ?? 75;
+
+            if (is_array($recipe->gopos_item_ids)) {
+                $this->gopos_item_ids = implode(', ', $recipe->gopos_item_ids);
+            } else {
+                $this->gopos_item_ids = (string) $recipe->gopos_item_ids;
+            }
 
             // Mapowanie słodów z bazy
             $this->malts = $recipe->malts->map(fn($m) => [
@@ -152,9 +159,15 @@ class RecipeForm extends Component
             'efficiency' => 'required|numeric|between:0,100',
             'malts' => 'required|array|min:1',
             'akcpa_blg' => 'nullable|numeric|min:0',
+            'gopos_item_ids' => 'nullable|string'
         ]);
 
-        DB::transaction(function () {
+        $goposArray = array_values(array_filter(
+            array_map('trim', explode(',', $this->gopos_item_ids)),
+            fn($item) => $item !== ''
+        ));
+
+        DB::transaction(function () use ($goposArray) {
             // 2. Przygotowanie danych receptury
             $recipeData = [
                 'tank_number' => $this->tank_number,
@@ -166,7 +179,8 @@ class RecipeForm extends Component
                 'yeast_pitch_temperature' => $this->yeast_pitch_temperature,
                 'fermentation_temperature' => $this->fermentation_temperature,
                 'akcpa_blg' => $this->akcpa_blg,
-                'akcpa_value' => $this->akcpa_blg * $this->batch_count * 5
+                'akcpa_value' => $this->akcpa_blg * $this->batch_count * 5,
+                'gopos_item_ids' => $goposArray,
             ];
 
             if ($this->recipeId && !$this->isClone) {

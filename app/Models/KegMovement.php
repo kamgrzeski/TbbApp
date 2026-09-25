@@ -13,10 +13,12 @@ class KegMovement extends Model
         'type',
         'quantity',
         'note',
+        'is_current',
+        'capacity'
     ];
 
     protected $casts = [
-        'quantity' => 'integer',
+        'quantity' => 'integer'
     ];
 
     public function recipe(): BelongsTo

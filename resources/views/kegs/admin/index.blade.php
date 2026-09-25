@@ -431,6 +431,10 @@
 										Piwo
 									</th>
 									
+									<th class="px-4 py-2.5 text-left font-bold tracking-wider">
+										Pojemność
+									</th>
+									
 									<th class="px-4 py-2.5 text-right font-bold tracking-wider">
 										Podłączono
 									</th>
@@ -448,13 +452,20 @@
 										<td class="px-4 py-2.5">
 											
 											<div class="font-semibold text-gray-800">
-												{{ $movement->recipe->name }}
+												<a href="{{ route('brewing.show', $movement->recipe) }}">{{ $movement->recipe->name }}</a>
 											</div>
 											
 											<div class="text-xs text-gray-400">
 												Warka #{{ $movement->recipe->number }}
 											</div>
+											
+										</td>
 										
+										<td class="px-4 py-2.5">
+											
+											<div class="font-semibold text-gray-800">
+												{{ $movement->capacity }} ml
+											</div>
 										</td>
 										
 										{{-- Data --}}

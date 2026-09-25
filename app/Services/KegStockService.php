@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\GoPosItems;
 use App\Models\KegMovement;
 use App\Models\KegStock;
 use App\Models\Recipe;
@@ -77,6 +78,8 @@ class KegStockService
                 ->lockForUpdate()
                 ->first();
 
+            $goPosItems = GoPosItems::get();
+
             if (!$stock || $stock->full_kegs < $quantity) {
                 $available = $stock?->full_kegs ?? 0;
 
@@ -88,12 +91,16 @@ class KegStockService
 
             $stock->decrement('full_kegs', $quantity);
 
+            KegMovement::where('recipe_id' , $recipe->id)->where('keg_stock_id', $stock->id)->where('type', 'issue')->update(['is_current' => false]);
+
             KegMovement::create([
                 'recipe_id' => $recipe->id,
                 'keg_stock_id' => $stock->id,
                 'type' => 'issue',
                 'quantity' => -$quantity,
                 'note' => $note,
+                'is_current' => true,
+                'capacity' => 50000,
             ]);
 
             $inventory = KegInventories::query()
@@ -136,7 +143,7 @@ class KegStockService
 
     public function stocksMovements()
     {
-        return KegMovement::with(['recipe', 'stock'])->where('type', 'issue')->get();
+        return KegMovement::with(['recipe', 'stock'])->where('type', 'issue')->orderByDesc('id')->get();
     }
 
     public function pool(Recipe $recipe, int $quantity, ?string $note = null): KegStock

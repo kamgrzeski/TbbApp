@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BeerwallController;
 use App\Http\Controllers\BrewingController;
+use App\Http\Controllers\GoPosController;
 use App\Http\Controllers\KegStockController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -54,7 +55,13 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/issue', [KegStockController::class, 'issue'])->name('kegs.admin.issue.store');
             Route::get('/movements', [KegStockController::class, 'movements'])->name('kegs.admin.movements');
             Route::post('/pool', [KegStockController::class, 'pool'])->name('kegs.admin.pool.store');
-        });
+    });
+
+    Route::prefix('admin/gopos')
+        ->group(function () {Route::get('/', [GoPosController::class, 'index'])->name('gopos.admin.index');
+            Route::get('/production', [GoPosController::class, 'sync'])->name('gopos.admin.items.sync');
+    });
 });
 
 Route::get('/bw', [BeerWallController::class, 'indexFront'])->name('beerwall.index-front');
+Route::get('/gopos/webhook', [GoPosController::class, 'webhook']);

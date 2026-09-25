@@ -70,6 +70,15 @@
                                     class="form-control border-gray-300 shadow-sm"
                             >
                         </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">GoPos Items Ids</label>
+                            <input
+                                    type="text"
+                                    wire:model.blur="gopos_item_ids"
+                                    placeholder="np. 1, 2, 3"
+                                    class="form-control border-gray-300 shadow-sm"
+                            >
+                        </div>
                     </div>
                     
                     @foreach([1, 2] as $batchIdx)

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Recipe extends Model
 {
     protected $fillable = [
-        'number', 'name', 'tank_number', 'volume', 'batch_count', 'efficiency', 'blg', 'akcpa_value', 'akcpa_blg', 'user_id', 'yeast_pitched_at',
+        'number', 'name', 'gopos_item_ids', 'tank_number', 'volume', 'batch_count', 'efficiency', 'blg', 'akcpa_value', 'akcpa_blg', 'user_id', 'yeast_pitched_at',
         'yeast_pitch_temperature', 'fermentation_temperature', 'primary_fermentation_start', 'secondary_fermentation_start', 'finished_at'
     ];
 
@@ -18,6 +18,7 @@ class Recipe extends Model
         'primary_fermentation_start' => 'datetime',
         'secondary_fermentation_start' => 'datetime',
         'finished_at' => 'datetime',
+        'gopos_item_ids' => 'array'
     ];
 
     public function malts(): HasMany
