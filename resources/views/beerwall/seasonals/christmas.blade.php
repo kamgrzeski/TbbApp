@@ -26,7 +26,6 @@
     .title-center .rule {
         color: #ff3838 !important;
         text-shadow: 0 0 15px rgba(255, 56, 56, 0.7), 0 0 30px rgba(255, 192, 72, 0.5) !important;
-        letter-spacing: 0.25em !important;
     }
 
     /* Karty piw - oszronione szkło (choinka delikatnie przez nie przebija) */

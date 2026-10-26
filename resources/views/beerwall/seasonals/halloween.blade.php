@@ -25,7 +25,6 @@
     /* Płonący / krwisty nagłówek */
     .title-center .rule {
         text-shadow: 0 0 15px rgba(255, 80, 0, 0.8), 0 0 30px rgba(220, 20, 0, 0.6) !important;
-        letter-spacing: 0.25em !important;
     }
 
     /* Karty piw w klimacie lochu (dynia z tła subtelnie przez nie przebija) */

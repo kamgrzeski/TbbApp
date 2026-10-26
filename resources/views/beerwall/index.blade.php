@@ -54,12 +54,15 @@
             height: 145px;
 			margin-top: -8px;
         }
+        .brand {z-index: 100 !important;}
         .brand img { height: 14vh; width: auto; }
         .title-center .rule {
             color: var(--gold); font-size: 6.5vh; text-align: center;
             letter-spacing: 0.2em; text-transform: uppercase; font-weight: bold;
+            z-index: 100 !important;
         }
-        .clock { text-align: right; }
+		.title-center {z-index: 100 !important;}
+        .clock { text-align: right; z-index: 100 !important;}
         .clock .time { font-size: 7.5vh; font-weight: bold; line-height: 1; }
         .clock .date { font-size: 2.5vh; color: var(--text-muted); text-transform: uppercase; }
 
