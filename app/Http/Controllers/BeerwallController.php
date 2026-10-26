@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Beerwall;
+use App\Models\BeerwallSetting;
 use Illuminate\Http\Request;
 
 class BeerwallController extends Controller
@@ -10,20 +11,63 @@ class BeerwallController extends Controller
     public function indexFront()
     {
         return view('beerwall.index')->with([
-            'beerwall' => Beerwall::orderBy('position')->get()
+            'beerwall' => Beerwall::orderBy('position')->get(),
+            'settings' => BeerwallSetting::first()
         ]);
     }
-
+    public function indexHalloween()
+    {
+        return view('beerwall.index_halloween')->with([
+            'beerwall' => Beerwall::orderBy('position')->get(),
+            'settings' => BeerwallSetting::first()
+        ]);
+    }
+    public function indexChristmas()
+    {
+        return view('beerwall.index_christmas')->with([
+            'beerwall' => Beerwall::orderBy('position')->get(),
+            'settings' => BeerwallSetting::first()
+        ]);
+    }
     public function index()
     {
-        $beers = Beerwall::orderBy('id', 'asc')->get();
+        $beers = Beerwall::orderBy('position', 'asc')->get();
         return view('beerwall.admin.index', compact('beers'));
+    }
+
+    public function editSettings()
+    {
+        $settings = BeerwallSetting::first();
+        return view('beerwall.admin.settings', compact('settings'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $data = $request->validate([
+            'monday_close_time' => 'nullable|date_format:H:i',
+            'tuesday_close_time' => 'nullable|date_format:H:i',
+            'wednesday_close_time' => 'nullable|date_format:H:i',
+            'thursday_close_time' => 'nullable|date_format:H:i',
+            'friday_close_time' => 'nullable|date_format:H:i',
+            'saturday_close_time' => 'nullable|date_format:H:i',
+            'sunday_close_time' => 'nullable|date_format:H:i',
+        ]);
+
+        $settings = BeerwallSetting::firstOrCreate(
+            ['id' => 1],
+            $data
+        );
+
+        $settings->update($data);
+
+        return redirect()->route('beerwall.admin.settings.edit')->with('success', 'Ustawienia godzin zamknięcia zostały zapisane!');
     }
 
     public function create()
     {
         return view('beerwall.admin.create');
     }
+
 
     public function store(Request $request)
     {
@@ -38,9 +82,12 @@ class BeerwallController extends Controller
             'beer_price_large' => 'required|numeric',
         ]);
 
-        $data['is_ended'] = $request->has('is_ended');
-        $data['is_coming_soon'] = $request->has('is_coming_soon');
-        $data['is_premiere'] = $request->has('is_premiere');
+        $data['is_ended'] = $request->beer_status === 'ended';
+        $data['is_coming_soon'] = $request->beer_status === 'coming_soon';
+        $data['is_premiere'] = $request->beer_status === 'premiere';
+        $data['is_draft'] = $request->beer_status === 'is_draft';
+
+        unset($data['beer_status']);
 
         Beerwall::create($data);
 
@@ -66,9 +113,12 @@ class BeerwallController extends Controller
             'position' => 'required|numeric'
         ]);
 
-        $data['is_ended'] = $request->has('is_ended');
-        $data['is_coming_soon'] = $request->has('is_coming_soon');
-        $data['is_premiere'] = $request->has('is_premiere');
+        $data['is_ended'] = $request->beer_status === 'ended';
+        $data['is_coming_soon'] = $request->beer_status === 'coming_soon';
+        $data['is_premiere'] = $request->beer_status === 'premiere';
+        $data['is_draft'] = $request->beer_status === 'is_draft';
+
+        unset($data['beer_status']);
 
         $beerwall->update($data);
 

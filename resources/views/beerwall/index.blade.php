@@ -159,11 +159,63 @@
             border-radius: 0.5vh;
             z-index: 10;
         }
+		
+        /* Overlay zamknięcia sprzedaży */
+        .closed-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            font-family: sans-serif;
+        }
+        .closed-overlay h1 {
+            font-size: 7vh;
+            font-weight: 900;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 3vh;
+
+            /* Złota ramka i dopasowanie */
+            border: 3px solid var(--gold);          /* Złota linia */
+            padding: 1.5vh 4vh;                     /* Odstęp tekstu od ramki */
+            border-radius: 12px;                    /* Delikatne zaokrąglenie rogów */
+            box-shadow: 0 0 20px rgba(199, 161, 58, 0.25); /* Złota poświata ramki */
+            display: inline-block;                  /* Sprawia, że ramka dopasowuje się do szerokości tekstu */
+        }
+        .closed-overlay p {
+            font-size: 3.5vh;
+            color: var(--text-muted);
+        }
+
+        .closed-logo {
+            height: 35vh; /* Dostosuj wysokość według uznania */
+            width: auto;
+            margin-bottom: 4vh;
+            filter: drop-shadow(0 0 20px rgba(199,161,58,0.3)); /* Delikatna poświata wokół logo */
+	
+		
 	</style>
 </head>
 <body>
 
 <main class="page">
+	<div id="closed-overlay" class="closed-overlay" style="display: none;">
+		<img src="https://twinbrothersbrewery.com/twinbrothers00_white.png"
+			 alt="Twin Brothers Logo"
+			 class="closed-logo">
+		<h1>Sprzedaż zamknięta</h1>
+		<p id="closed-message">
+			Świeże i dobre piwo smakuje najlepiej w dobrym towarzystwie. 🍻<br>
+			Do zobaczenia przy kolejnym!
+		</p>
+	</div>
 	<header class="header">
 		<div class="brand"><img src="https://twinbrothersbrewery.com/twinbrothers00_white.png" alt="Logo"></div>
 		<div class="title-center"><div class="rule">KARTA DOSTĘPNYCH PIW</div></div>
@@ -199,131 +251,7 @@
 	</section>
 </main>
 
-<!-- Firebase SDK -->
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    // Konfiguracja Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyD9VCl6GVfQ-x6ACq7h0d_7jYyH-8reDzk",
-        authDomain: "tbbspzoo-e8c83.firebaseapp.com",
-        databaseURL: "https://tbbspzoo-e8c83-default-rtdb.firebaseio.com",
-        projectId: "tbbspzoo-e8c83",
-        storageBucket: "tbbspzoo-e8c83.firebasestorage.app",
-        messagingSenderId: "828358200785",
-        appId: "1:828358200785:web:0eadc8f11e37c3572924f0",
-        measurementId: "G-B1L955ERC3"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const beerRef = ref(db, 'beers');
-
-    // Funkcja renderująca piwa na żywo
-    onValue(beerRef, (snapshot) => {
-        const data = snapshot.val();
-        const listContainer = document.getElementById('list');
-        listContainer.innerHTML = ''; // Wyczyść listę przed renderowaniem
-
-        if (data) {
-            // Zamień obiekt na tablicę i przejdź przez każde piwo
-            const beersArray = Array.isArray(data) ? data : Object.values(data);
-
-            beersArray.forEach((beer, index) => {
-                const row = document.createElement('article');
-                row.className = `row ${beer.is_ended ? 'is-end' : ''} ${beer.is_coming_soon ? 'is-coming' : ''}`;
-
-                // Logika odznak (badges)
-                let badgeHtml = '';
-                if (beer.is_coming_soon) {
-                    badgeHtml = '<div class="coming-soon-badge">WKRÓTCE DOSTĘPNE</div>';
-                } else if (beer.is_premiere) {
-                    badgeHtml = '<div class="premiere-badge">PREMIERA</div>';
-                } else if (beer.is_limited) {
-                    badgeHtml = '<div class="limited-badge">LIMITOWANA EDYCJA</div>';
-                }
-
-                const endOverlay = beer.is_ended ? '<div class="end-overlay">WYPRZEDANE</div>' : '';
-
-                row.innerHTML = `
-                ${badgeHtml}
-                ${endOverlay}
-                
-                <div class="mug">
-                    <div class="beer-badge">${index + 1}</div>
-                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M14 16h28v34a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6V16z"/>
-                        <path d="M42 22h6a6 6 0 0 1 6 6v10a6 6 0 0 1-6 6h-6"/>
-                    </svg>
-                </div>
-                
-                <div class="info">
-                    <div class="name">
-                        ${beer.beer_name}
-                        <span class="style-line">/ ${beer.beer_style}</span>
-                    </div>
-                    <div class="beer-desc">${beer.beer_description || ''}</div>
-                </div>
-                
-                <div class="stats" style="margin-right:35px">
-                    <div class="stat">
-                        <div class="val">${beer.beer_blg}°</div>
-                        <div class="lbl">Blg</div>
-                    </div>
-                    <div class="stat" style="margin-left:15px">
-                        <div class="val">${beer.beer_alc}%</div>
-                        <div class="lbl">Alk.</div>
-                    </div>
-                </div>
-                
-                <div class="prices">
-                    <div class="price">
-                        <span class="vol">0.25L</span>
-                        <span class="amt">${beer.beer_price_small} <span style="font-size: 20px">zł</span></span>
-                    </div>
-                    <div class="price">
-                        <span class="vol">0.5L</span>
-                        <span class="amt">${beer.beer_price_medium} <span style="font-size: 20px">zł</span></span>
-                    </div>
-                    <div class="price">
-                        <span class="vol">1L</span>
-                        <span class="amt">${beer.beer_price_large} <span style="font-size: 20px">zł</span></span>
-                    </div>
-                </div>
-            `;
-                listContainer.appendChild(row);
-            });
-        }
-    });
-</script>
-
-<script>
-    function tick() {
-        const d = new Date();
-        document.getElementById('time').textContent = d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
-        const months = ["stycznia","lutego","marca","kwietnia","maja","czerwca","lipca","sierpnia","września","października","listopada","grudnia"];
-        const days = ["Niedz.","Pon.","Wt.","Śr.","Czw.","Pt.","Sob."];
-        document.getElementById('date').textContent = `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-    }
-    tick();
-    setInterval(tick, 2000);
-</script>
-
-<video id="noSleepVideo" loop muted playsinline style="position:absolute; width:1px; height:1px; opacity: 0.01;">
-	<source src="https://github.com/intel-iot-devkit/sample-videos/raw/master/bottle-detection.mp4" type="video/mp4">
-</video>
-
-<script>
-    window.addEventListener('load', () => {
-        const video = document.getElementById('noSleepVideo');
-        video.play().catch(error => {
-            document.body.addEventListener('click', () => {
-                video.play();
-            }, { once: true });
-        });
-    });
-</script>
+@include('beerwall.partials.scripts')
 
 </body>
 </html>

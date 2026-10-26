@@ -39,6 +39,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('admin/beerwall')->group(function () {
         Route::get('/', [BeerwallController::class, 'index'])->name('beerwall.admin.index');
+        Route::get('/settings/edit', [BeerwallController::class, 'editSettings'])->name('beerwall.admin.settings.edit');
+        Route::post('/settings/update', [BeerwallController::class, 'updateSettings'])->name('beerwall.admin.settings.update');
         Route::get('/create', [BeerwallController::class, 'create'])->name('beerwall.admin.create');
         Route::post('/', [BeerwallController::class, 'store'])->name('beerwall.admin.store');
         Route::get('/{beerwall}/edit', [BeerwallController::class, 'edit'])->name('beerwall.admin.edit');
@@ -65,4 +67,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/bw', [BeerWallController::class, 'indexFront'])->name('beerwall.index-front');
+Route::get('/bw-halloween', [BeerWallController::class, 'indexHalloween'])->name('beerwall.index-hallowen');
+Route::get('/bw-christmas', [BeerWallController::class, 'indexChristmas'])->name('beerwall.index-christmas');
 Route::get('/gopos/webhook', [GoPosController::class, 'webhook']);
+
+Route::get('/api/beerwall/settings', function() {
+    return response()->json(\App\Models\BeerwallSetting::first());
+})->middleware(['auth']);

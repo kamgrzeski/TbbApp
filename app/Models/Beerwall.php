@@ -24,5 +24,6 @@ class Beerwall extends Model
         'is_coming_soon',
         'is_premiere',
         'position',
+        'is_draft',
     ];
 }

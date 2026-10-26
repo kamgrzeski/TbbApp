@@ -561,6 +561,8 @@
 								$currentStatus = 'coming_soon';
 							} elseif ($beerwall->is_ended) {
 								$currentStatus = 'ended';
+                            } elseif($beerwall->is_draft) {
+                                    $currentStatus = 'is_draft';
 							} else {
 								$currentStatus = 'normal';
 							}
@@ -729,6 +731,32 @@
 										Piwo niedostępne
 									</div>
 								
+								</div>
+							
+							</label>
+							
+							<label class="relative flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer
+              transition hover:bg-zinc-50
+              {{ $currentStatus === 'is_draft'
+                    ? 'border-zinc-500 bg-zinc-100'
+                    : 'border-gray-200 bg-white' }}">
+								
+								<input
+										type="radio"
+										name="beer_status"
+										value="is_draft"
+										class="w-5 h-5 border-gray-300 text-zinc-700 focus:ring-zinc-500"
+										{{ $currentStatus === 'is_draft' ? 'checked' : '' }}
+								>
+								
+								<div>
+									<div class="font-bold text-sm text-zinc-700">
+										SZKIC
+									</div>
+									
+									<div class="text-xs text-gray-500 mt-0.5">
+										Wersja robocza, niewidoczna na kranie
+									</div>
 								</div>
 							
 							</label>
