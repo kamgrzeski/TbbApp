@@ -100,7 +100,7 @@ class KegStockService
                 'quantity' => -$quantity,
                 'note' => $note,
                 'is_current' => true,
-                'capacity' => 50000,
+                'capacity' => 47000,
             ]);
 
             $inventory = KegInventories::query()
@@ -193,6 +193,54 @@ class KegStockService
             $stock->refresh();
 
             return $stock->fresh();
+        });
+    }
+
+    public function remove(Recipe $recipe, int $quantity, ?string $note = null): void
+    {
+        if ($quantity <= 0) {
+            throw new RuntimeException('Ilość kegów musi być większa od 0.');
+        }
+
+        DB::transaction(function () use ($recipe, $quantity, $note) {
+            $stock = KegStock::query()
+                ->where('recipe_id', $recipe->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$stock || $stock->full_kegs < $quantity) {
+                $available = $stock?->full_kegs ?? 0;
+                throw new RuntimeException(
+                    "Brak wystarczającej ilości pełnych kegów do usunięcia. " .
+                    "Dostępne: {$available}."
+                );
+            }
+
+            $stock->decrement('full_kegs', $quantity);
+
+            KegMovement::create([
+                'recipe_id' => $recipe->id,
+                'keg_stock_id' => $stock->id,
+                'type' => 'return',
+                'quantity' => -$quantity,
+                'note' => $note,
+            ]);
+
+            $inventory = KegInventories::query()
+                ->lockForUpdate()
+                ->firstOrCreate(
+                    [],
+                    [
+                        'total_kegs' => self::TOTAL_KEGS,
+                        'empty_kegs' => self::TOTAL_KEGS,
+                    ]
+                );
+
+            $inventory->increment('empty_kegs', $quantity);
+
+            if ($stock->full_kegs == 0) {
+                $stock->update(['is_archived' => true]);
+            }
         });
     }
 }

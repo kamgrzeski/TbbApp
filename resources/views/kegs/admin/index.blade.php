@@ -320,8 +320,7 @@
 															</button>
 														
 														</form>
-														
-														
+                                                        
 														{{-- Dodaj keg do puli --}}
 														<form
 																method="POST"
@@ -330,19 +329,16 @@
 																class="inline-block"
 														>
 															@csrf
-															
 															<input
 																	type="hidden"
 																	name="recipe_id"
 																	value="{{ $stock->recipe_id }}"
 															>
-															
 															<input
 																	type="hidden"
 																	name="quantity"
 																	value="1"
 															>
-															
 															<button
 																	type="submit"
 																	@disabled($stock->full_kegs <= 0)
@@ -364,7 +360,7 @@
                     disabled:cursor-not-allowed"
 																	title="{{ $stock->full_kegs > 0 ? 'Dodaj 1 keg do puli' : 'Brak pełnych kegów' }}"
 															>
-																
+                                                                
 																<svg class="w-4 h-4"
 																	 fill="none"
 																	 stroke="currentColor"
@@ -375,13 +371,65 @@
 																			stroke-linejoin="round"
 																			d="M12 5v14M5 12h14"/>
 																</svg>
-																
+                                                                
 																Dodaj
-															
 															</button>
-														
 														</form>
-													
+
+														{{-- Usuń keg z puli --}}
+														<form
+																method="POST"
+																action="{{ route('kegs.admin.remove.store') }}"
+																onsubmit="return confirm('Czy na pewno chcesz usunąć 1 keg z chłodni?')"
+																class="inline-block"
+														>
+															@csrf
+															<input
+																	type="hidden"
+																	name="recipe_id"
+																	value="{{ $stock->recipe_id }}"
+															>
+															<input
+																	type="hidden"
+																	name="quantity"
+																	value="1"
+															>
+															<button
+																	type="submit"
+																	@disabled($stock->full_kegs <= 0)
+																	class="inline-flex items-center gap-2
+                    px-4 py-2.5
+                    rounded-lg
+                    bg-red-600 text-white
+                    border border-red-600
+                    text-sm font-bold
+                    shadow-sm
+                    hover:bg-red-700
+                    hover:border-red-700
+                    active:scale-[0.98]
+                    transition-all duration-150
+                    disabled:bg-gray-100
+                    disabled:text-gray-400
+                    disabled:border-gray-200
+                    disabled:shadow-none
+                    disabled:cursor-not-allowed"
+																	title="{{ $stock->full_kegs > 0 ? 'Usuń 1 keg z chłodni' : 'Brak pełnych kegów' }}"
+															>
+                                                                
+																<svg class="w-4 h-4"
+																	fill="none"
+																	stroke="currentColor"
+																	stroke-width="2"
+																	viewBox="0 0 24 24">
+																	<path
+																			stroke-linecap="round"
+																			stroke-linejoin="round"
+																			d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+																</svg>
+                                                                
+																Usuń kega
+															</button>
+														</form>													
 													</div>
 												
 												</td>
@@ -434,7 +482,7 @@
 								<tbody class="bg-white divide-y divide-gray-100">
 								@forelse($stocksMovements as $movement)
 									@php
-										$maxCapacity = 50000;
+										$maxCapacity = 47000;
 										// Obliczanie procentu z zabezpieczeniem od 0% do 100%
 										$percentage = min(100, max(0, round(($movement->capacity / $maxCapacity) * 100)));
 									@endphp
@@ -454,7 +502,7 @@
 											<div class="w-full">
 												<div class="flex justify-between items-center mb-1 text-xs">
                                         <span class="font-semibold text-gray-700">
-                                            {{ number_format($movement->capacity, 0, ',', ' ') }} / 50 000 ml
+                                            {{ number_format($movement->capacity, 0, ',', ' ') }} / 47 000 ml
                                         </span>
 													<span class="font-medium {{ $percentage > 20 ? 'text-blue-600' : 'text-amber-600' }}">
                                             {{ $percentage }}%
