@@ -189,7 +189,9 @@ class GoPosController extends Controller
 
     public function webhooksList()
     {
-        $webhooks = WebhookHistory::orderByDesc('id')->get();
+        $webhooks = WebhookHistory::whereDate('created_at', now()->toDateString())
+            ->orderByDesc('id')
+            ->get();
 
         return view('gopos.webhooks', [
             'webhooks' => $webhooks
