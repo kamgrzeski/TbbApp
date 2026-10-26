@@ -126,6 +126,7 @@
         .price {
             background: rgba(255,255,255,0.06); padding: 1vh; border-radius: 1vh;
             min-width: 5.5vw; text-align: center;
+            border: 1px solid rgba(255, 192, 72, 0.3) !important;
         }
         .price .vol { font-size: 3.1vh; display: block; }
         .price .amt { font-size: 6.9vh; font-weight: bold; color: var(--gold); }
