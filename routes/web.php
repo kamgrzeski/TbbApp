@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/movements', [KegStockController::class, 'movements'])->name('kegs.admin.movements');
             Route::post('/pool', [KegStockController::class, 'pool'])->name('kegs.admin.pool.store');
             Route::post('/remove', [KegStockController::class, 'remove'])->name('kegs.admin.remove.store');
+            Route::patch('/movements/{movement}', [KegStockController::class, 'updateMovement'])->name('kegs.admin.movements.update');
     });
 
     Route::prefix('admin/gopos')

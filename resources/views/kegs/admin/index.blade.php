@@ -476,6 +476,9 @@
 									<th class="px-4 py-2.5 text-right font-bold tracking-wider">
 										Podłączono
 									</th>
+									<th class="px-4 py-2.5 text-right font-bold tracking-wider">
+										Akcja
+									</th>
 								</tr>
 								</thead>
 								
@@ -526,10 +529,22 @@
 												{{ $movement->created_at->diffForHumans() }}
 											</div>
 										</td>
+
+										{{-- Akcja --}}
+										<td class="px-4 py-3 text-right whitespace-nowrap">
+											<form method="POST" action="{{ route('kegs.admin.movements.update', $movement) }}" class="inline-flex gap-2">
+												@csrf
+												@method('PATCH')
+												<input type="number" name="capacity" value="{{ $movement->capacity }}" class="w-24 px-2 py-1 text-xs border rounded text-right">
+												<button type="submit" class="px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded hover:bg-blue-700 transition-colors">
+													Zapisz
+												</button>
+											</form>
+										</td>
 									</tr>
 								@empty
 									<tr>
-										<td colspan="3" class="px-4 py-8 text-center text-sm text-gray-400">
+										<td colspan="4" class="px-4 py-8 text-center text-sm text-gray-400">
 											Brak historii podłączeń.
 										</td>
 									</tr>

@@ -27,7 +27,8 @@ class KegStockController extends Controller
         return view('kegs.admin.index', [
             'stocks' => $stocks,
             'summary' => $summary,
-            'stocksMovements' => $this->kegStockService->stocksMovements()
+            'stocksMovements' => $this->kegStockService->stocksMovements(),
+            'archivedStocksMovements' => $this->kegStockService->archivedStocksMovements()
         ]);
     }
 
@@ -168,6 +169,26 @@ class KegStockController extends Controller
                 ->withErrors([
                     'quantity' => $e->getMessage(),
                 ]);
+        }
+    }
+
+    public function updateMovement(Request $request, KegMovement $movement)
+    {
+        $data = $request->validate([
+            'capacity' => ['required', 'integer', 'min:0'],
+        ]);
+
+        try {
+            $movement->update([
+                'capacity' => $data['capacity'],
+            ]);
+
+            return redirect()
+                ->route('kegs.admin.index')
+                ->with('success', 'Ilość mililitrów została zaktualizowana.');
+        } catch (Throwable $e) {
+            return back()
+                ->withErrors(['capacity' => 'Wystąpił błąd podczas aktualizacji.']);
         }
     }
 }

@@ -146,6 +146,11 @@ class KegStockService
         return KegMovement::with(['recipe', 'stock'])->where('is_current', 1)->where('type', 'issue')->orderByDesc('id')->get();
     }
 
+    public function archivedStocksMovements()
+    {
+        return KegMovement::with(['recipe', 'stock'])->where('is_current', 0)->where('type', 'issue')->orderByDesc('id')->get();
+    }
+
     public function pool(Recipe $recipe, int $quantity, ?string $note = null): KegStock
     {
         if ($quantity <= 0) {
