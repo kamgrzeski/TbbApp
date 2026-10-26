@@ -44,13 +44,13 @@ class BeerwallController extends Controller
     public function updateSettings(Request $request)
     {
         $data = $request->validate([
-            'monday_close_time' => 'nullable|date_format:H:i',
-            'tuesday_close_time' => 'nullable|date_format:H:i',
-            'wednesday_close_time' => 'nullable|date_format:H:i',
-            'thursday_close_time' => 'nullable|date_format:H:i',
-            'friday_close_time' => 'nullable|date_format:H:i',
-            'saturday_close_time' => 'nullable|date_format:H:i',
-            'sunday_close_time' => 'nullable|date_format:H:i',
+            'monday_close_time' => 'nullable',
+            'tuesday_close_time' => 'nullable',
+            'wednesday_close_time' => 'nullable',
+            'thursday_close_time' => 'nullable',
+            'friday_close_time' => 'nullable',
+            'saturday_close_time' => 'nullable',
+            'sunday_close_time' => 'nullable',
         ]);
 
         $settings = BeerwallSetting::firstOrCreate(

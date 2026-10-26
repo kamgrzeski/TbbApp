@@ -119,7 +119,6 @@
             const closeTimeStr = settings[dayKey + '_close_time'];
 
             if (closeTimeStr) {
-                // Obcinamy sekundy z bazy (np. "11:21:00" -> "11:21")
                 const formattedCloseTime = closeTimeStr.substring(0, 5);
 
                 const hours = String(now.getHours()).padStart(2, '0');
