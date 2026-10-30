@@ -41,6 +41,10 @@ class BrewingController extends Controller
 
     public function destroy(Recipe $recipe)
     {
+        if ($recipe->yeast_pitched_at && $recipe->yeast_pitched_at->isPast()) {
+            return back()->with('error', 'Nie można usunąć warki, która została już zrealizowana.');
+        }
+
         // Sprawdzenie uprawnień
         if ($recipe->user_id !== auth()->id()) {
             abort(403);
@@ -55,12 +59,17 @@ class BrewingController extends Controller
     {
         $type = $request->input('type');
 
-        if ($type === 'yeast') $recipe->yeast_pitched_at = now(); // Nowa linia
+        if ($type === 'yeast') {
+            $recipe->yeast_pitched_at = now();
+            $recipe->created_at = now();
+        }
+
         if ($type === 'primary') $recipe->primary_fermentation_start = now();
         if ($type === 'secondary') $recipe->secondary_fermentation_start = now();
         if ($type === 'finish') $recipe->finished_at = now();
 
         $recipe->save();
+
         return back()->with('success', 'Status warki został zaktualizowany!');
     }
 

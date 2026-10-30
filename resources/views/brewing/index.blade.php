@@ -39,6 +39,26 @@
 				@php
 					// Rozdzielenie na wersje robocze (bez daty zadania drożdży) oraz warki z datą
 					[$draftRecipes, $pitchedRecipes] = $recipes->partition(fn($recipe) => is_null($recipe->yeast_pitched_at));
+					
+					// Zgrupowanie warek według formatu ROK-MIESIĄC (np. "2024-10")
+					$groupedPitched = $pitchedRecipes->groupBy(fn($recipe) => $recipe->yeast_pitched_at->format('Y-m'));
+					
+					// Ustalenie zakresu miesięcy: od najstarszej warki (lub początku bieżącego roku) do bieżącego miesiąca
+					$startDate = $pitchedRecipes->min('yeast_pitched_at')?->copy()->startOfMonth() ?? now()->startOfYear();
+					$endDate = now()->startOfMonth();
+					
+					// Jeśli są warki zaplanowane w przyszłości, uwzględnij najdalszy miesiąc
+					if ($pitchedRecipes->isNotEmpty() && $pitchedRecipes->max('yeast_pitched_at')->startOfMonth()->gt($endDate)) {
+						$endDate = $pitchedRecipes->max('yeast_pitched_at')->copy()->startOfMonth();
+					}
+					
+					// Generujemy listę miesięcy malejąco (od najnowszego do najstarszego)
+					$monthsRange = collect();
+					$cursor = $endDate->copy();
+					while ($cursor->gte($startDate)) {
+						$monthsRange->push($cursor->format('Y-m'));
+						$cursor->subMonth();
+					}
 				@endphp
 				
 				<div class="space-y-8">
@@ -101,22 +121,22 @@
 												class="group cursor-pointer transition-colors duration-150 hover:bg-amber-50/50"
 										>
 											{{-- Numer --}}
-							<td class="px-6 py-4 align-top">
-    @forelse($recipe->batches as $batch)
-        <div class="inline-block mb-1.5 last:mb-0">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-md
-                         bg-gray-100 text-gray-700
-                         border border-gray-200
-                         text-xs font-bold font-mono
-                         group-hover:bg-amber-100 group-hover:text-amber-800
-                         group-hover:border-amber-200 transition-colors">
-                #{{ $batch->batch_number }}
-            </span>
-        </div>
-    @empty
-        <span class="text-xs text-gray-400 italic">Brak</span>
-    @endforelse
-</td>
+											<td class="px-6 py-4 align-top">
+												@forelse($recipe->batches as $batch)
+													<div class="inline-block mb-1.5 last:mb-0">
+														<span class="inline-flex items-center px-2.5 py-1 rounded-md
+																	 bg-gray-100 text-gray-700
+																	 border border-gray-200
+																	 text-xs font-bold font-mono
+																	 group-hover:bg-amber-100 group-hover:text-amber-800
+																	 group-hover:border-amber-200 transition-colors">
+															#{{ $batch->batch_number }}
+														</span>
+													</div>
+												@empty
+													<span class="text-xs text-gray-400 italic">Brak</span>
+												@endforelse
+											</td>
 											
 											{{-- Nazwa --}}
 											<td class="px-6 py-4">
@@ -208,13 +228,15 @@
 					@endif
 					
 					{{-- SEKCJA: WARKI ZREALIZOWANE POGRUPOWANE WG MIESIĘCY --}}
-					@foreach($pitchedRecipes->groupBy(fn($recipe) => $recipe->yeast_pitched_at->format('Y-m')) as $month => $monthRecipes)
+					@foreach($monthsRange as $month)
+						@php
+							$monthRecipes = $groupedPitched->get($month, collect());
+						@endphp
 						
 						{{-- KARTA DLA POJEDYNCZEGO MIESIĄCA --}}
 						<div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-xl border border-gray-200">
 							
 							{{-- Górny pasek miesiąca z podsumowaniem --}}
-							
 							<div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
 								<div class="flex items-center gap-2">
 									<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,6 +255,7 @@
 									<span class="text-base ml-1">{{ number_format($monthRecipes->sum('akcpa_value'), 2, ',', ' ') }}</span>
 								</div>
 							</div>
+							
 							{{-- Tabela warek danego miesiąca --}}
 							<div class="overflow-x-auto">
 								<table class="min-w-full divide-y divide-gray-200">
@@ -263,14 +286,14 @@
 									</thead>
 									
 									<tbody class="divide-y divide-gray-100 bg-white">
-									@foreach($monthRecipes as $recipe)
+									@forelse($monthRecipes as $recipe)
 										<tr
 												onclick="window.location='{{ route('brewing.show', $recipe) }}'"
 												class="group cursor-pointer transition-colors duration-150 hover:bg-blue-50/60"
 										>
 											{{-- Numer --}}
 											<td class="px-6 py-4 whitespace-nowrap">
-												@foreach($recipe->batches as $batch)
+												@forelse($recipe->batches as $batch)
 													<span class="inline-flex items-center px-2.5 py-1 rounded-md
 															 bg-gray-100 text-gray-700
 															 border border-gray-200
@@ -279,7 +302,9 @@
 															 group-hover:border-blue-200 transition-colors">
 														#{{ $batch->batch_number }}
 													</span>
-												@endforeach
+												@empty
+													<span class="text-xs text-gray-400 italic">Brak</span>
+												@endforelse
 											</td>
 											
 											{{-- Nazwa --}}
@@ -326,35 +351,57 @@
 											
 											{{-- Akcje --}}
 											<td class="px-6 py-4 whitespace-nowrap text-right">
-												<form
-														action="{{ route('brewing.destroy', $recipe) }}"
-														method="POST"
-														onclick="event.stopPropagation()"
-														onsubmit="return confirm('Czy na pewno chcesz usunąć recepturę: {{ $recipe->name }}?');"
-														class="inline-block"
-												>
-													@csrf
-													@method('DELETE')
-													
-													<button
-															type="submit"
+												@if($recipe->yeast_pitched_at->isPast())
+													{{-- Zablokowane usuwanie dla warek z przeszłości --}}
+													<span
+															title="Nie można usunąć zrealizowanej warki z przeszłości"
 															class="inline-flex items-center gap-1.5 px-3 py-1.5
-															   rounded-lg
-															   bg-red-50 text-red-700
-															   border border-red-200
-															   text-sm font-semibold
-															   hover:bg-red-600 hover:text-white hover:border-red-600
-															   transition-all duration-150"
+                   rounded-lg bg-gray-100 text-gray-400 border border-gray-200
+                   text-sm font-semibold cursor-not-allowed select-none"
 													>
-														<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-															<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4v3m-7 0h10"/>
-														</svg>
-														Usuń
-													</button>
-												</form>
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            Zablokowana
+        </span>
+												@else
+													{{-- Normalny przycisk usuwania dla przyszłych warek --}}
+													<form
+															action="{{ route('brewing.destroy', $recipe) }}"
+															method="POST"
+															onclick="event.stopPropagation()"
+															onsubmit="return confirm('Czy na pewno chcesz usunąć recepturę: {{ $recipe->name }}?');"
+															class="inline-block"
+													>
+														@csrf
+														@method('DELETE')
+														
+														<button
+																type="submit"
+																class="inline-flex items-center gap-1.5 px-3 py-1.5
+                       rounded-lg
+                       bg-red-50 text-red-700
+                       border border-red-200
+                       text-sm font-semibold
+                       hover:bg-red-600 hover:text-white hover:border-red-600
+                       transition-all duration-150"
+														>
+															<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+																<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4v3m-7 0h10"/>
+															</svg>
+															Usuń
+														</button>
+													</form>
+												@endif
 											</td>
 										</tr>
-									@endforeach
+									@empty
+										<tr>
+											<td colspan="7" class="px-6 py-8 text-center text-sm text-gray-400 italic bg-gray-50/30">
+												Brak warek w tym miesiącu
+											</td>
+										</tr>
+									@endforelse
 									</tbody>
 								</table>
 							</div>
