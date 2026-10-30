@@ -32,7 +32,8 @@ class BeerwallController extends Controller
     public function index()
     {
         $beers = Beerwall::orderBy('position', 'asc')->get();
-        return view('beerwall.admin.index', compact('beers'));
+        $drafts = Beerwall::where('is_draft', true)->orderBy('created_at', 'desc')->get();
+        return view('beerwall.admin.index', compact('beers', 'drafts'));
     }
 
     public function editSettings()
@@ -144,5 +145,21 @@ class BeerwallController extends Controller
     {
         $beerwall->delete();
         return redirect()->route('beerwall.admin.index')->with('success', 'Piwo zostało usunięte z karty.');
+    }
+
+    public function duplicate(Beerwall $beerwall)
+    {
+        $beer = $beerwall->replicate();
+        $beer->beer_name = $beerwall->beer_name . ' (kopia)';
+        
+        // Ustawiamy statusy na podstawie oryginału
+        $beer->is_ended = $beerwall->is_ended;
+        $beer->is_coming_soon = $beerwall->is_coming_soon;
+        $beer->is_premiere = $beerwall->is_premiere;
+        $beer->is_draft = $beerwall->is_draft;
+        
+        $beer->save();
+
+        return redirect()->route('beerwall.admin.edit', $beer)->with('success', 'Piwo zostało skopiowane. Możesz teraz edytować jego dane!');
     }
 }

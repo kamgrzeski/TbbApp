@@ -134,7 +134,7 @@
         .snacks-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5vw; }
         .snack-card {
             background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-            border-radius: 1vh; padding: 1.5vh; display: flex; justify-content: space-between; align-items: center;
+            border-radius: 1vh; padding: 0.5vh; display: flex; justify-content: space-between; align-items: center;
         }
         .snack-name { font-size: 3vh; font-weight: bold; }
         .snack-price { font-size: 5.5vh; font-weight: bold; color: var(--blue); }

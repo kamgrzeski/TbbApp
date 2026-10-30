@@ -47,6 +47,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{beerwall}', [BeerwallController::class, 'update'])->name('beerwall.admin.update');
         Route::patch('/{beerwall}/status', [BeerwallController::class, 'updateStatus'])->name('beerwall.admin.status');
         Route::delete('/{beerwall}', [BeerwallController::class, 'destroy'])->name('beerwall.admin.destroy');
+        Route::post('/{beerwall}/duplicate', [BeerwallController::class, 'duplicate'])->name('beerwall.admin.duplicate');
         Route::post('/{beerwall}/clone', [BeerwallController::class, 'clone'])->name('beerwall.admin.clone');
     });
 
