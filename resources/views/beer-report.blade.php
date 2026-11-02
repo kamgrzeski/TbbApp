@@ -66,7 +66,7 @@
 			</div>
 			
 			<div class="glass-card rounded-2xl p-6 border-t-2 border-sky-400">
-				<div class="text-gray-400 text-xs uppercase font-bold tracking-wider">Wylany Wolumen</div>
+				<div class="text-gray-400 text-xs uppercase font-bold tracking-wider">Sprzedaż w litrach</div>
 				<div class="text-3xl font-black text-white mt-2">{{ number_format($report['totalLiters'], 1, ',', ' ') }} L</div>
 				<div class="text-xs text-gray-400 mt-2">
 					Odpowiednik: <strong class="text-sky-300">{{ round($report['totalLiters'] / 50, 1) }} kega (50L)</strong>
@@ -112,7 +112,7 @@
 					<div class="bg-cyan-400 h-2" style="width: {{ $report['takeoutPercent'] }}%"></div>
 				</div>
 				<div class="flex justify-between text-[11px] text-gray-400 mt-2">
-					<span>Szkło: {{ number_format($report['onPremiseLiters'], 1) }} L</span>
+					<span>W kuflu: {{ number_format($report['onPremiseLiters'], 1) }} L</span>
 					<span>Butelka PET: {{ number_format($report['petLiters'], 1) }} L</span>
 				</div>
 			</div>

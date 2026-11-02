@@ -288,9 +288,9 @@ class BeerReportController extends Controller
         $nameLower = mb_strtolower($name);
 
         if (str_contains($nameLower, 'pet')) return '1L PET (Na wynos)';
-        if (str_contains($nameLower, '1000')) return '1000 ml (Kufel 1L)';
-        if (str_contains($nameLower, '500')) return '500 ml (Duży)';
-        if (str_contains($nameLower, '250')) return '250 ml (Mały)';
+        if (str_contains($nameLower, '1000')) return '1000 ml';
+        if (str_contains($nameLower, '500')) return '500 ml';
+        if (str_contains($nameLower, '250')) return '250 ml';
 
         return 'Standard';
     }
