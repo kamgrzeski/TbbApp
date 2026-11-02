@@ -152,18 +152,3 @@
     tick();
     setInterval(tick, 2000);
 </script>
-
-<video id="noSleepVideo" loop muted playsinline style="position:absolute; width:1px; height:1px; opacity: 0.01;">
-	<source src="https://github.com/intel-iot-devkit/sample-videos/raw/master/bottle-detection.mp4" type="video/mp4">
-</video>
-
-<script>
-    window.addEventListener('load', () => {
-        const video = document.getElementById('noSleepVideo');
-        video.play().catch(error => {
-            document.body.addEventListener('click', () => {
-                video.play();
-            }, { once: true });
-        });
-    });
-</script>

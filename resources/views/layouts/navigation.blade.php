@@ -27,6 +27,11 @@
                     </x-nav-link>
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('malts.admin.index')" :active="request()->routeIs('malts.admin.index')">
+                        {{ __('Magazyn słodów') }}
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('gopos.admin.index')" :active="request()->routeIs('gopos.admin.index')">
                         {{ __('GoPOS') }}
                     </x-nav-link>
@@ -118,7 +123,11 @@
             <x-responsive-nav-link :href="route('kegs.admin.index')" :active="request()->routeIs('kegs.admin.index')">
                 {{ __('Magazyn kegów') }}
             </x-responsive-nav-link>
-            
+
+            <x-responsive-nav-link :href="route('malts.admin.index')" :active="request()->routeIs('malts.admin.index')">
+                {{ __('Magazyn słodów') }}
+            </x-responsive-nav-link>
+
             <x-responsive-nav-link :href="route('gopos.admin.index')" :active="request()->routeIs('gopos.admin.index')">
                 {{ __('GoPos') }}
             </x-responsive-nav-link>

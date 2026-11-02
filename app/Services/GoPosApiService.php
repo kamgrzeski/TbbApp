@@ -164,4 +164,24 @@ class GoPosApiService
             return $response;
         });
     }
+
+    public function makeGetWebhooksRequest()
+    {
+        return Http::timeout(self::HTTP_TIMEOUT)
+            ->withToken($this->getAccessToken())
+            ->acceptJson()
+            ->get(
+                $this->baseUrl . '/api/v3/' . $this->organizationId . '/webhooks'
+            );
+    }
+
+    public function makeGetWebhookRequest($webhookId)
+    {
+        return Http::timeout(self::HTTP_TIMEOUT)
+            ->withToken($this->getAccessToken())
+            ->acceptJson()
+            ->get(
+                $this->baseUrl . '/api/v3/' . $this->organizationId . '/webhooks/' . $webhookId
+            );
+    }
 }

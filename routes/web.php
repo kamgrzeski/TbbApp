@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\BeerReportController;
 use App\Http\Controllers\BeerwallController;
 use App\Http\Controllers\BrewingController;
 use App\Http\Controllers\GoPosController;
 use App\Http\Controllers\KegStockController;
+use App\Http\Controllers\MaltStockController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +26,10 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/raport-piwa', [BeerReportController::class, 'index'])->name('beer.report.index');
+    Route::post('/raport-piwa', [BeerReportController::class, 'upload'])->name('beer.report.upload');
+
     Route::get('/brewing', [BrewingController::class, 'index'])->name('brewing.index');
     Route::get('/brewing/create', [BrewingController::class, 'create'])->name('brewing.create');
     Route::get('/brewing/{recipe}', [BrewingController::class, 'show'])->name('brewing.show');
@@ -63,10 +69,24 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::prefix('admin/gopos')
-        ->group(function () {Route::get('/', [GoPosController::class, 'index'])->name('gopos.admin.index');
+        ->group(function () {
+            Route::get('/', [GoPosController::class, 'index'])->name('gopos.admin.index');
             Route::get('/sync', [GoPosController::class, 'sync'])->name('gopos.admin.items.sync');
             Route::get('/webhooks', [GoPosController::class, 'webhooksList'])->name('gopos.admin.webhooks');
-    });
+            Route::post('/webhooks/sync', [GoPosController::class, 'syncWebhooks'])->name('gopos.admin.webhooks.sync');
+        });
+
+    Route::prefix('admin/malts')
+        ->group(function () {
+            Route::get('/', [MaltStockController::class, 'index'])->name('malts.admin.index');
+            Route::get('/create', [MaltStockController::class, 'create'])->name('malts.admin.create');
+            Route::post('/', [MaltStockController::class, 'store'])->name('malts.admin.store');
+            Route::get('/{maltStock}/edit', [MaltStockController::class, 'edit'])->name('malts.admin.edit');
+            Route::put('/{maltStock}', [MaltStockController::class, 'update'])->name('malts.admin.update');
+            Route::post('/{maltStock}/subtract-bag', [MaltStockController::class, 'subtractBag'])->name('malts.admin.subtract-bag');
+            Route::delete('/{maltStock}', [MaltStockController::class, 'destroy'])->name('malts.admin.destroy');
+        });
+
 });
 
 Route::get('/bw', [BeerWallController::class, 'indexFront'])->name('beerwall.index-front');
