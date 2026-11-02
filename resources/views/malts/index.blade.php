@@ -1,74 +1,85 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Magazyn słodów') }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                {{ __('Magazyn słodów') }}
+            </h2>
+            <a href="{{ route('malts.admin.create') }}">
+                <x-primary-button class="flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    {{ __('Dodaj słód') }}
+                </x-primary-button>
+            </a>
+        </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="mb-6 flex justify-end">
-                <a href="{{ route('malts.admin.create') }}">
-                    <x-primary-button>
-                        {{ __('Dodaj słód') }}
-                    </x-primary-button>
-                </a>
-            </div>
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="p-0 text-gray-900 dark:text-gray-100">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead>
+                        <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nazwa</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ilość (kg)</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ekstrakt</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Numer faktury</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Akcje</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nazwa słodu</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ilość w magazynie</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ekstrakt</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Faktura</th>
+                                <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Zarządzanie</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             @foreach($malts as $maltStock)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $maltStock->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $maltStock->kg }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $maltStock->extract }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $maltStock->invoice_number }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium">{{ $maltStock->name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $maltStock->kg <= 0 ? 'bg-red-600 text-white animate-pulse' : ($maltStock->kg < 50 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300') }}">
+                                            {{ $maltStock->kg <= 0 ? 'BRAK ZAPASU' : number_format($maltStock->kg, 2) . ' kg' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <span class="text-sm">{{ number_format($maltStock->extract, 2) }}</span>
+                                            <span class="ml-1 text-xs text-gray-400">%</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $maltStock->invoice_number ?? '—' }}
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex justify-end gap-2">
                                             <form action="{{ route('malts.admin.subtract-bag', $maltStock->id) }}" method="POST" class="inline">
                                                 @csrf
-                                                <x-primary-button
-                                                    class="!bg-orange-100 !text-orange-700 dark:!bg-orange-900/30 dark:!text-orange-300 hover:!bg-orange-200 dark:hover:!bg-orange-900/50 !border-none"
+                                                <button type="submit" 
+                                                    class="inline-flex items-center px-3 py-1.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-md text-xs font-medium hover:bg-orange-100 transition-colors dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800 dark:hover:bg-orange-900/30"
                                                     onclick="return confirm('Czy na pewno chcesz odjąć jeden worek (25kg)?')"
                                                 >
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                                                     </svg>
                                                     -25kg
-                                                </x-primary-button>
+                                                </button>
                                             </form>
-                                            <form action="{{ route('malts.admin.edit', $maltStock->id) }}" method="GET" class="inline">
-                                                <x-primary-button
-                                                    class="!bg-indigo-100 !text-indigo-700 dark:!bg-indigo-900/30 dark:!text-indigo-300 hover:!bg-indigo-200 dark:hover:!bg-indigo-900/50 !border-none"
-                                                >
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                    </svg>
-                                                    Edytuj
-                                                </x-primary-button>
-                                            </form>
+                                            <a href="{{ route('malts.admin.edit', $maltStock->id) }}" 
+                                               class="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-md text-xs font-medium hover:bg-indigo-100 transition-colors dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800 dark:hover:bg-indigo-900/30">
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                                Edytuj
+                                            </a>
                                             <form action="{{ route('malts.admin.destroy', $maltStock->id) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <x-primary-button
-                                                    class="!bg-red-100 !text-red-700 dark:!bg-red-900/30 dark:!text-red-300 hover:!bg-red-200 dark:hover:!bg-red-900/50 !border-none"
+                                                <button type="submit"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-md text-xs font-medium hover:bg-red-100 transition-colors dark:bg-red-900/20 dark:text-red-300 dark:border-red-800 dark:hover:bg-red-900/30"
                                                     onclick="return confirm('Czy na pewno chcesz usunąć ten słód?')"
                                                 >
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                                     </svg>
                                                     Usuń
-                                                </x-primary-button>
+                                                </button>
                                             </form>
                                         </div>
                                     </td>

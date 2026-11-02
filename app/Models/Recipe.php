@@ -23,7 +23,7 @@ class Recipe extends Model
 
     public function malts(): HasMany
     {
-        return $this->hasMany(Malt::class);
+        return $this->hasMany(RecipeMalt::class);
     }
 
     public function comments()

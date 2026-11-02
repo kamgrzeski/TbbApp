@@ -7,7 +7,7 @@
     
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                 <!-- Bootstrap CSS dla tabel i siatki -->
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
                 
@@ -92,7 +92,7 @@
                                         <tr>
                                             <th class="text-start">Nazwa słodu</th>
                                             <th style="width: 180px;">Kg</th>
-                                            <th style="width: 120px;">Ekstrakt %</th>
+                                            <th style="width: 100px;">Ekstrakt (%)</th>
                                             <th style="width: 80px;">Akt.</th>
                                             <th style="width: 50px;"></th>
                                         </tr>
@@ -101,7 +101,33 @@
                                         @foreach($malts as $idx => $malt)
                                             @if($malt['batch_number'] == $batchIdx)
                                                 <tr wire:key="malt-row-{{ $idx }}">
-                                                    <td><input type="text" wire:model="malts.{{ $idx }}.name" class="form-control"></td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <div class="flex-grow-1 position-relative">
+                                                                <select wire:model.live="malts.{{ $idx }}.malt_stock_id" 
+                                                                        wire:change="updateMaltExtract({{ $idx }}, $event.target.value)" 
+                                                                        class="form-select shadow-sm">
+                                                                    <option value="">Wybierz słód...</option>
+                                                                    @foreach($this->availableMalts as $availableMalt)
+                                                                        <option value="{{ $availableMalt->id }}" 
+                                                                            {{ $malt['malt_stock_id'] == $availableMalt->id ? 'selected' : '' }}>
+                                                                            {{ $availableMalt->name }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                            @php
+                                                                $selectedMalt = $this->availableMalts->firstWhere('id', $malt['malt_stock_id']);
+                                                            @endphp
+                                                            @if($selectedMalt)
+                                                                <div class="text-nowrap">
+                                                                    <span class="badge bg-light text-dark border fw-normal" style="font-size: 0.7rem;">
+                                                                        📦 {{ number_format($selectedMalt->kg, 2) }} kg
+                                                                    </span>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    </td>
                                                     <td>
                                                         <div class="input-group">
                                                             <input type="number" step="0.01" wire:model.live="malts.{{ $idx }}.kg" class="form-control">
@@ -110,8 +136,18 @@
                                                                 </span>
                                                         </div>
                                                     </td>
-                                                    <td><input type="number" wire:model.live="malts.{{ $idx }}.extract" class="form-control"></td>
-                                                    <td class="text-center"><input type="checkbox" wire:model.live="malts.{{ $idx }}.is_active" class="form-check-input"></td>
+                                                    <td class="text-center">
+                                                        <input type="text" class="form-control text-center bg-light" value="{{ $malt['extract'] ?? '0' }}" readonly>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <div class="d-flex align-items-center justify-content-center gap-1">
+                                                            <span class="text-muted small">Aktywny:</span>
+                                                            <input type="checkbox" 
+                                                                   disabled 
+                                                                   {{ $malt['is_active'] ? 'checked' : '' }} 
+                                                                   class="form-check-input">
+                                                        </div>
+                                                    </td>
                                                     <td><button type="button" wire:click="removeMalt({{ $idx }})" class="btn btn-outline-danger btn-sm">X</button></td>
                                                 </tr>
                                             @endif

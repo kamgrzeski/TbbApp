@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\Attributes\Computed;
 use App\Models\Recipe;
+use App\Models\MaltStock;
 
 class RecipeForm extends Component
 {
@@ -27,6 +28,13 @@ class RecipeForm extends Component
     public $hops = [];
     public float $akcpa_blg = 0.0;
     public string $gopos_item_ids;
+
+    #[Computed]
+    public function availableMalts()
+    {
+        return MaltStock::orderBy('name')
+            ->get(['id', 'name', 'extract', 'kg', 'is_active']);
+    }
 
     public function mount($recipe = null, $isClone = false)
     {
@@ -51,10 +59,10 @@ class RecipeForm extends Component
             // Mapowanie słodów z bazy
             $this->malts = $recipe->malts->map(fn($m) => [
                 'batch_number' => $m->batch_number,
+                'malt_stock_id' => $m->malt_stock_id,
                 'name' => $m->name,
                 'kg' => $m->kg,
-                'extract' => $m->extract,
-                'is_active' => (bool)$m->is_active,
+                'is_active' => $m->maltStock ? (bool)$m->maltStock->is_active : false,
             ])->toArray();
 
             // Mapowanie chmieli z bazy
@@ -67,8 +75,10 @@ class RecipeForm extends Component
                 'is_active' => (bool)$h->is_active,
             ])->toArray();
         } else {
-            $this->addMalt(1, 'Słód Pilzneński', 100);
-            $this->addMalt(2, 'Słód Pilzneński', 100);
+            // Zamiast domyślnego 'Słód Pilzneński', dodajemy puste wiersze 
+            // aby użytkownik musiał wybrać słód z listy.
+            $this->addMalt(1);
+            $this->addMalt(2);
             $this->addHop(1);
             $this->addHop(2);
         }
@@ -80,9 +90,21 @@ class RecipeForm extends Component
             'batch_number' => $batch,
             'name' => $name,
             'kg' => $kg,
-            'extract' => 80,
-            'is_active' => true
+            'malt_stock_id' => null,
+            'extract' => 0,
+            'is_active' => false,
         ];
+    }
+
+    public function updateMaltExtract($index, $maltId)
+    {
+        $malt = MaltStock::find($maltId);
+        if ($malt) {
+            $this->malts[$index]['malt_stock_id'] = $maltId;
+            $this->malts[$index]['name'] = $malt->name;
+            $this->malts[$index]['extract'] = (float)$malt->extract;
+            $this->malts[$index]['is_active'] = (bool)$malt->is_active;
+        }
     }
 
     public function removeMalt($index)
@@ -128,9 +150,21 @@ class RecipeForm extends Component
             $kg = (float)$m['kg'];
             $data[$b]['kg'] += $kg;
 
-            if ($m['is_active']) {
-                $data[$b]['ext_sum'] += ($kg * ((float)$m['extract'] / 100));
+            // Słody nieaktywne enzymatycznie (is_active = 0) nie dokładają się do ekstrakcie
+            if (isset($m['is_active']) && (bool)$m['is_active'] === false) {
+                continue;
             }
+
+            // Pobieramy ekstrakt z magazynu, jeśli słód jest przypisany
+            $extract = 80; // domyślna wartość
+            if (!empty($m['malt_stock_id'])) {
+                $stockMalt = MaltStock::find($m['malt_stock_id']);
+                $extract = $stockMalt ? (float)$stockMalt->extract : 80;
+            } elseif (isset($m['extract'])) {
+                $extract = (float)$m['extract'];
+            }
+
+            $data[$b]['ext_sum'] += ($kg * ($extract / 100));
         }
 
         $blg1 = ($vBatch > 0) ? ($data[1]['ext_sum'] / $vBatch * 100 * $eff) : 0;
@@ -226,18 +260,26 @@ class RecipeForm extends Component
                 }
             }
 
-            // 3. Zapis Słodów
+            // 3. Zapis Słodów i odjęcie z magazynu
             foreach ($this->malts as $maltData) {
-                // Pomijamy puste wiersze, jeśli użytkownik takie zostawił
                 if (empty($maltData['name']) && empty($maltData['kg'])) continue;
 
+                $stockMalt = null;
+                if (!empty($maltData['malt_stock_id'])) {
+                    $stockMalt = MaltStock::find($maltData['malt_stock_id']);
+                }
+
                 $recipe->malts()->create([
-                    'name'         => $maltData['name'] ?: 'Słód',
-                    'kg'           => $maltData['kg'] ?: 0,
-                    'extract'      => $maltData['extract'] ?: 80,
-                    'is_active'    => (bool)$maltData['is_active'],
-                    'batch_number' => $maltData['batch_number'],
+                    'malt_stock_id' => $maltData['malt_stock_id'] ?? null,
+                    'name'          => $stockMalt ? $stockMalt->name : ($maltData['name'] ?: 'Słód'),
+                    'kg'            => $maltData['kg'] ?: 0,
+                    'batch_number'  => $maltData['batch_number'],
                 ]);
+
+                // Odejmij ilość słodu z magazynu
+                if ($stockMalt && !empty($maltData['kg'])) {
+                    $stockMalt->decrement('kg', $maltData['kg']);
+                }
             }
 
             // 4. Zapis Chmieli
