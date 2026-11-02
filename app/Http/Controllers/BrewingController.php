@@ -62,6 +62,13 @@ class BrewingController extends Controller
         if ($type === 'yeast') {
             $recipe->yeast_pitched_at = now();
             $recipe->created_at = now();
+
+            // Odejmowanie słodów z magazynu przy zadawaniu drożdży
+            foreach ($recipe->malts as $malt) {
+                if (!empty($malt->malt_stock_id)) {
+                    \App\Models\MaltStock::where('id', $malt->malt_stock_id)->decrement('kg', $malt->kg);
+                }
+            }
         }
 
         if ($type === 'primary') $recipe->primary_fermentation_start = now();

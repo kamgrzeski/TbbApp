@@ -260,7 +260,7 @@ class RecipeForm extends Component
                 }
             }
 
-            // 3. Zapis Słodów i odjęcie z magazynu
+            // 3. Zapis Słodów
             foreach ($this->malts as $maltData) {
                 if (empty($maltData['name']) && empty($maltData['kg'])) continue;
 
@@ -275,11 +275,6 @@ class RecipeForm extends Component
                     'kg'            => $maltData['kg'] ?: 0,
                     'batch_number'  => $maltData['batch_number'],
                 ]);
-
-                // Odejmij ilość słodu z magazynu
-                if ($stockMalt && !empty($maltData['kg'])) {
-                    $stockMalt->decrement('kg', $maltData['kg']);
-                }
             }
 
             // 4. Zapis Chmieli

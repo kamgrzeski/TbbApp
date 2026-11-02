@@ -11,7 +11,7 @@ class MaltStockController extends Controller
 {
     public function index(): View
     {
-        $malts = MaltStock::where('is_active', true)->get();
+        $malts = MaltStock::orderBy('kg', 'desc')->get();
         return view('malts.index', compact('malts'));
     }
 
@@ -62,13 +62,6 @@ class MaltStockController extends Controller
 
     public function subtractBag(MaltStock $maltStock): RedirectResponse
     {
-        $bagWeight = 25;
-        if ($maltStock->kg < $bagWeight) {
-            return redirect()->route('malts.admin.index')->with('error', 'Zbyt mała ilość słodu w magazynie, aby odjąć jeden worek (25kg).');
-        }
-
-        $maltStock->decrement('kg', $bagWeight);
-
-        return redirect()->route('malts.admin.index')->with('success', 'Odjęto jeden worek (25kg) słodu: ' . $maltStock->name);
+        return redirect()->route('malts.admin.index')->with('error', 'Ta funkcja została wyłączona.');
     }
 }

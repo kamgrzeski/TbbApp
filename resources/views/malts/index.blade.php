@@ -35,7 +35,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap font-medium">{{ $maltStock->name }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $maltStock->kg <= 0 ? 'bg-red-600 text-white animate-pulse' : ($maltStock->kg < 50 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300') }}">
-                                            {{ $maltStock->kg <= 0 ? 'BRAK ZAPASU' : number_format($maltStock->kg, 2) . ' kg' }}
+                                            {{ $maltStock->kg <= 0 ? number_format($maltStock->kg, 2) . ' kg' : number_format($maltStock->kg, 2) . ' kg' }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -49,18 +49,6 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex justify-end gap-2">
-                                            <form action="{{ route('malts.admin.subtract-bag', $maltStock->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit" 
-                                                    class="inline-flex items-center px-3 py-1.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-md text-xs font-medium hover:bg-orange-100 transition-colors dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800 dark:hover:bg-orange-900/30"
-                                                    onclick="return confirm('Czy na pewno chcesz odjąć jeden worek (25kg)?')"
-                                                >
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
-                                                    </svg>
-                                                    -25kg
-                                                </button>
-                                            </form>
                                             <a href="{{ route('malts.admin.edit', $maltStock->id) }}" 
                                                class="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-md text-xs font-medium hover:bg-indigo-100 transition-colors dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800 dark:hover:bg-indigo-900/30">
                                                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
