@@ -304,7 +304,7 @@
 								<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-left">{{ $malt->name }}</td>
 								<td class="px-6 py-4 text-sm font-bold">{{ number_format($malt->kg, 2) }} kg</td>
 								<td class="px-6 py-4 text-sm font-bold text-orange-600">{{ ceil($malt->kg / 25) }} szt.</td>
-								<td class="px-6 py-4 text-sm text-gray-500">{{ $malt->extract }} %</td>
+								<td class="px-6 py-4 text-sm text-gray-500">{{ $malt->maltStock->extract ?? '—' }} %</td>
 								<td class="px-6 py-4 text-sm">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
                                         {{ $w1TotalKg > 0 ? number_format(($malt->kg / $w1TotalKg) * 100, 1) : 0 }} %
@@ -347,7 +347,7 @@
 								<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-left">{{ $malt->name }}</td>
 								<td class="px-6 py-4 text-sm font-bold">{{ number_format($malt->kg, 2) }} kg</td>
 								<td class="px-6 py-4 text-sm font-bold text-orange-600">{{ ceil($malt->kg / 25) }} szt.</td>
-								<td class="px-6 py-4 text-sm text-gray-500">{{ $malt->extract }} %</td>
+								<td class="px-6 py-4 text-sm text-gray-500">{{ $malt->maltStock->extract ?? '—' }} %</td>
 								<td class="px-6 py-4 text-sm">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
                                         {{ $w2TotalKg > 0 ? number_format(($malt->kg / $w2TotalKg) * 100, 1) : 0 }} %
