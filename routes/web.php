@@ -92,7 +92,7 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/bw', [BeerWallController::class, 'indexFront'])->name('beerwall.index-front');
 Route::get('/bw-halloween', [BeerWallController::class, 'indexHalloween'])->name('beerwall.index-hallowen');
 Route::get('/bw-christmas', [BeerWallController::class, 'indexChristmas'])->name('beerwall.index-christmas');
-Route::get('/gopos/webhook', [GoPosController::class, 'webhook']);
+Route::any('/gopos/webhook', [GoPosController::class, 'webhook']);
 
 Route::get('/api/beerwall/settings', function() {
     return response()->json(\App\Models\BeerwallSetting::first());
