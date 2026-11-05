@@ -315,7 +315,7 @@
 																			d="M5 21h14"/>
 																</svg>
 																
-																Podłącz
+																Podłącz kega
 															
 															</button>
 														
@@ -372,7 +372,7 @@
 																			d="M12 5v14M5 12h14"/>
 																</svg>
                                                                 
-																Dodaj
+																Dodaj kega
 															</button>
 														</form>
 
