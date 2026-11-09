@@ -185,6 +185,37 @@ class RecipeForm extends Component
         ];
     }
 
+    // Udział procentowy słodów aktywnych enzymatycznie (malt_stocks.is_active = 1)
+    // w kg aktywnych słodów tej samej warki. Zwraca [indeks wiersza => procent].
+    #[Computed]
+    public function enzymaticShares()
+    {
+        $stocks = $this->availableMalts->keyBy('id');
+        $shares = [];
+
+        foreach ([1, 2] as $batch) {
+            $activeKg = [];
+
+            foreach ($this->malts as $idx => $m) {
+                if ((int)$m['batch_number'] !== $batch || empty($m['malt_stock_id'])) {
+                    continue;
+                }
+
+                $stock = $stocks->get($m['malt_stock_id']);
+                if ($stock && $stock->is_active) {
+                    $activeKg[$idx] = (float)$m['kg'];
+                }
+            }
+
+            $sum = array_sum($activeKg);
+            foreach ($activeKg as $idx => $kg) {
+                $shares[$idx] = $sum > 0 ? round($kg / $sum * 100, 1) : 0;
+            }
+        }
+
+        return $shares;
+    }
+
     public function save()
     {
         // 1. Walidacja danych

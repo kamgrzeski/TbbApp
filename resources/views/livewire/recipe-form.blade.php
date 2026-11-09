@@ -1,4 +1,34 @@
 <div>
+    <style>
+        @media (max-width: 767.98px) {
+            .stack-mobile thead { display: none; }
+            .stack-mobile,
+            .stack-mobile tbody,
+            .stack-mobile tr,
+            .stack-mobile td { display: block; width: 100%; }
+            .stack-mobile tr {
+                border: 1px solid #dee2e6;
+                border-radius: .375rem;
+                margin-bottom: .75rem;
+                padding: .5rem .75rem;
+            }
+            .stack-mobile td {
+                border: 0 !important;
+                padding: .35rem 0 !important;
+                text-align: left !important;
+            }
+            .stack-mobile td[data-label]::before {
+                content: attr(data-label);
+                display: block;
+                font-size: .72rem;
+                font-weight: 600;
+                color: #6c757d;
+                text-transform: uppercase;
+                margin-bottom: .2rem;
+            }
+            .stack-mobile td.td-action { text-align: right !important; }
+        }
+    </style>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ $isClone ? 'Klonowanie: '.$recipe_name : ($recipeId ? 'Edycja: '.$recipe_name : 'Nowa receptura') }}
@@ -87,13 +117,12 @@
                                 <h4 class="fw-bold {{ $batchIdx == 1 ? 'text-primary' : 'text-success' }} mb-3">WARKA {{ $batchIdx }}</h4>
                                 
                                 <div class="table-responsive mb-3">
-                                    <table class="table table-bordered align-middle bg-white">
+                                    <table class="stack-mobile table table-bordered align-middle bg-white">
                                         <thead class="{{ $batchIdx == 1 ? 'table-primary' : 'table-success' }} text-center">
                                         <tr>
                                             <th class="text-start">Nazwa słodu</th>
                                             <th style="width: 180px;">Kg</th>
-                                            <th style="width: 100px;">Ekstrakt (%)</th>
-                                            <th style="width: 80px;">Akt.</th>
+                                            <th style="width: 140px;">Udział aktywnych (%)</th>
                                             <th style="width: 50px;"></th>
                                         </tr>
                                         </thead>
@@ -101,7 +130,7 @@
                                         @foreach($malts as $idx => $malt)
                                             @if($malt['batch_number'] == $batchIdx)
                                                 <tr wire:key="malt-row-{{ $idx }}">
-                                                    <td>
+                                                    <td data-label="Nazwa słodu">
                                                         <div class="d-flex align-items-center gap-2">
                                                             <div class="flex-grow-1 position-relative">
                                                                 <select wire:model.live="malts.{{ $idx }}.malt_stock_id" 
@@ -128,7 +157,7 @@
                                                             @endif
                                                         </div>
                                                     </td>
-                                                    <td>
+                                                    <td data-label="Kg">
                                                         <div class="input-group">
                                                             <input type="number" step="0.01" wire:model.live="malts.{{ $idx }}.kg" class="form-control">
                                                             <span class="input-group-text small">
@@ -136,19 +165,18 @@
                                                                 </span>
                                                         </div>
                                                     </td>
-                                                    <td class="text-center">
-                                                        <input type="text" class="form-control text-center bg-light" value="{{ $malt['extract'] ?? '0' }}" readonly>
+                                                    <td class="text-center" data-label="Udział aktywnych (%)">
+                                                        @if(array_key_exists($idx, $this->enzymaticShares))
+                                                            <input type="text" class="form-control text-center bg-light" value="{{ $this->enzymaticShares[$idx] }}%" readonly>
+                                                        @else
+                                                            @if(!empty($malt['malt_stock_id']))
+                                                                <span class="badge bg-secondary">nieaktywny enzymatycznie</span>
+                                                            @else
+                                                                <span class="text-muted small">—</span>
+                                                            @endif
+                                                        @endif
                                                     </td>
-                                                    <td class="text-center">
-                                                        <div class="d-flex align-items-center justify-content-center gap-1">
-                                                            <span class="text-muted small">Aktywny:</span>
-                                                            <input type="checkbox" 
-                                                                   disabled 
-                                                                   {{ $malt['is_active'] ? 'checked' : '' }} 
-                                                                   class="form-check-input">
-                                                        </div>
-                                                    </td>
-                                                    <td><button type="button" wire:click="removeMalt({{ $idx }})" class="btn btn-outline-danger btn-sm">X</button></td>
+                                                    <td class="td-action"><button type="button" wire:click="removeMalt({{ $idx }})" class="btn btn-outline-danger btn-sm">X</button></td>
                                                 </tr>
                                             @endif
                                         @endforeach
@@ -159,7 +187,7 @@
                                 
                                 <h5 class="fw-bold mt-4 mb-3">Chmielenie</h5>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered align-middle bg-white text-center">
+                                    <table class="stack-mobile table table-bordered align-middle bg-white text-center">
                                         <thead class="table-dark">
                                         <tr>
                                             <th class="text-start">Chmiel</th>
@@ -174,12 +202,12 @@
                                         @foreach($hops as $idx => $hop)
                                             @if($hop['batch_number'] == $batchIdx)
                                                 <tr wire:key="hop-row-{{ $idx }}">
-                                                    <td><input type="text" wire:model="hops.{{ $idx }}.name" class="form-control text-start"></td>
-                                                    <td><input type="number" step="0.1" wire:model="hops.{{ $idx }}.amount" class="form-control"></td>
-                                                    <td><input type="number" step="0.1" wire:model="hops.{{ $idx }}.alpha_acids" class="form-control"></td>
-                                                    <td><input type="number" wire:model="hops.{{ $idx }}.time" class="form-control"></td>
-                                                    <td><input type="checkbox" wire:model="hops.{{ $idx }}.is_active" class="form-check-input"></td>
-                                                    <td><button type="button" wire:click="removeHop({{ $idx }})" class="btn btn-outline-danger btn-sm">X</button></td>
+                                                    <td data-label="Chmiel"><input type="text" wire:model="hops.{{ $idx }}.name" class="form-control text-start"></td>
+                                                    <td data-label="Gramy"><input type="number" step="0.1" wire:model="hops.{{ $idx }}.amount" class="form-control"></td>
+                                                    <td data-label="Alfa %"><input type="number" step="0.1" wire:model="hops.{{ $idx }}.alpha_acids" class="form-control"></td>
+                                                    <td data-label="Czas"><input type="number" wire:model="hops.{{ $idx }}.time" class="form-control"></td>
+                                                    <td data-label="Akt."><input type="checkbox" wire:model="hops.{{ $idx }}.is_active" class="form-check-input"></td>
+                                                    <td class="td-action"><button type="button" wire:click="removeHop({{ $idx }})" class="btn btn-outline-danger btn-sm">X</button></td>
                                                 </tr>
                                             @endif
                                         @endforeach
