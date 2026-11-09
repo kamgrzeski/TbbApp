@@ -12,15 +12,6 @@
 				</p>
 			</div>
 			
-			<div class="flex gap-2">
-				
-				<a
-						href="{{ route('kegs.admin.production.create') }}"
-						class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150"
-				>
-					+ Dodaj
-				</a>
-			</div>
 		</div>
 	</x-slot>
 	
@@ -29,6 +20,14 @@
 		
 		<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 			
+			@if($errors->any())
+				<div style="margin-bottom: 16px; padding: 12px 16px; border-left: 4px solid #dc2626; border-radius: 6px; background: #fef2f2; color: #991b1b; font-size: 0.875rem; font-weight: 600;">
+					@foreach($errors->all() as $error)
+						<div>{{ $error }}</div>
+					@endforeach
+				</div>
+			@endif
+
 			@if(session('success'))
 				<div class="mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded shadow-sm">
 					{{ session('success') }}
@@ -75,7 +74,7 @@
 					</div>
 					
 					<div class="mt-2 text-3xl font-bold text-gray-600">
-						{{ $summary['empty'] - 4 }}
+						{{ $summary['available_empty'] }}
 					</div>
 					
 					<div class="text-xs text-gray-400 mt-1">
@@ -104,356 +103,241 @@
 					
 					<div class="p-6 text-gray-900">
 						
-						<div class="flex justify-between items-center mb-6">
-							
-							<div>
-								<h3 class="text-lg font-bold text-gray-800">
-									Aktualny stan pełnych kegów w chłodni
-								</h3>
-								
-								<p class="text-sm text-gray-500 mt-1">
-									Każdy keg ma pojemność 50 litrów. Kegi są napełnione i oznaczone.
-								</p>
-							</div>
-						
-						</div>
-						
-						
-						@if($stocks->where('is_archived', 0)->isEmpty())
-							
-							<div class="text-center py-10">
-								
-								<div class="text-4xl mb-3">
-									🍺
+							<div class="flex flex-wrap justify-between items-start gap-4 mb-6">
+
+								<div>
+									<h3 class="text-lg font-bold text-gray-800">
+										Krany
+									</h3>
+
+									<p class="text-sm text-gray-500 mt-1">
+										Wybierz kran i podłącz do niego keg. W chłodni: {{ $summary['full'] }} pełnych kegów (50 L każdy), razem {{ number_format($summary['full_liters'], 0, ',', ' ') }} L.
+									</p>
 								</div>
-								
-								<p class="text-gray-500 text-lg">
-									Brak pełnych kegów.
-								</p>
-								
-								<a
-										href="{{ route('kegs.admin.production.create') }}"
-										class="inline-block mt-3 text-green-600 hover:underline font-medium"
-								>
-									Zgłoś napełnione kegi
-								</a>
-							
+
+								{{-- Dodaj keg do puli (modal) --}}
+								<div x-data="{ open: false, qty: 1 }" class="inline-block">
+									<button
+											type="button"
+											@click="open = true"
+											@disabled($summary['available_empty'] <= 0)
+											class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-600 text-white border border-green-600 text-sm font-bold shadow-sm hover:bg-green-700 hover:border-green-700 active:scale-[0.98] transition-all duration-150 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:shadow-none disabled:cursor-not-allowed"
+											title="{{ $summary['available_empty'] > 0 ? 'Dodaj kegi do puli' : 'Brak wolnych kegów - 4 krany są zajęte' }}"
+									>
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
+										</svg>
+										Dodaj kega
+									</button>
+
+									<template x-teleport="body">
+										<div x-show="open" x-transition.opacity
+											 style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 9999; align-items: center; justify-content: center; padding: 16px; background: rgba(0, 0, 0, 0.5);"
+											 class="flex"
+										>
+											<div @click="open = false" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;"></div>
+
+											<div @click.stop
+												 style="position: relative; width: 100%; max-width: 26rem; box-sizing: border-box; padding: 24px; border-radius: 12px; background: #ffffff; box-shadow: 0 20px 25px -5px rgba(0,0,0,.2), 0 8px 10px -6px rgba(0,0,0,.2); color: #1f2937;"
+											>
+												<h3 style="margin: 0 0 12px; font-size: 1.125rem; font-weight: 700; color: #1f2937;">Dodaj kegi do puli</h3>
+
+												<div style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #f9fafb; border: 1px solid #e5e7eb; font-size: 0.875rem; line-height: 1.6; color: #374151;">
+													<div><span style="color: #6b7280;">Dostępne do napełnienia (bez 4 kranów):</span> <strong>{{ $summary['available_empty'] }}</strong></div>
+												</div>
+
+												<form method="POST" action="{{ route('kegs.admin.pool.store') }}">
+													@csrf
+
+													<label style="display: block; margin-bottom: 4px; font-size: 0.875rem; font-weight: 600; color: #374151;">Receptura</label>
+													<select name="recipe_id" required
+															style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 12px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem; background: #ffffff;">
+														@foreach($recipes as $recipe)
+															<option value="{{ $recipe->id }}">
+																Warka {{ $recipe->number }} — {{ $recipe->name }}
+																| Zbiornik {{ $recipe->tank_number }}
+																| {{ number_format($recipe->volume, 0, ',', ' ') }} L
+																| {{ $recipe->blg }}°Blg
+															</option>
+														@endforeach
+													</select>
+
+													<label style="display: block; margin-bottom: 4px; font-size: 0.875rem; font-weight: 600; color: #374151;">Ilość kegów (50 L każdy)</label>
+													<input
+															type="number"
+															name="quantity"
+															x-model.number="qty"
+															min="1"
+															max="{{ max(1, min(20, $summary['available_empty'])) }}"
+															style="display: block; width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem;"
+													>
+
+													<div style="margin-top: 12px; font-size: 0.875rem; line-height: 1.6; color: #374151;">
+														<div>Dodasz: <strong x-text="Number(qty) || 0"></strong> kega = <strong x-text="(Number(qty) || 0) * 50"></strong> L</div>
+													</div>
+
+													<div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+														<button type="button" @click="open = false"
+																style="padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 8px; background: #ffffff; color: #374151; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+															Anuluj
+														</button>
+														<button type="submit"
+																style="padding: 8px 16px; border: 0; border-radius: 8px; background: #16a34a; color: #ffffff; font-size: 0.875rem; font-weight: 700; cursor: pointer;">
+															Dodaj <span x-text="Number(qty) || 0"></span>
+														</button>
+													</div>
+												</form>
+											</div>
+										</div>
+									</template>
+								</div>
 							</div>
-						
-						@else
-							
-							<div class="overflow-x-auto">
-								
-								<div class="overflow-x-auto">
-									<table class="min-w-full">
-										<thead>
-										<tr class="border-b-2 border-gray-200 bg-gray-50">
-											
-											<th class="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">
-												Data rozlewu
-											</th>
-											
-											<th class="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">
-												Warka
-											</th>
-											
-											<th class="px-6 py-4 text-center text-xs font-extrabold text-gray-600 uppercase tracking-wider">
-												Pełne kegi
-											</th>
-											
-											<th class="px-6 py-4 text-center text-xs font-extrabold text-gray-600 uppercase tracking-wider">
-												Ilość piwa
-											</th>
-											
-											<th class="px-6 py-4 text-right text-xs font-extrabold text-gray-600 uppercase tracking-wider">
-												Akcja
-											</th>
-										
-										</tr>
-										</thead>
-										
-										<tbody class="divide-y divide-gray-100 bg-white">
-										
-										@foreach($stocks->where('is_archived', 0) as $stock)
-											
-											<tr class="group transition-colors duration-150 hover:bg-blue-50">
-												
-												{{-- Data rozlewu --}}
-												<td class="px-6 py-4 whitespace-nowrap">
-													
-													<div class="text-sm font-semibold text-gray-800">
-														{{ $stock->created_at->format('d.m.Y') }}
-													</div>
-													
-													<div class="text-xs text-gray-400 mt-0.5">
-														{{ \Carbon\Carbon::parse($stock->created_at)->diffForHumans() }}
-													</div>
-												
-												</td>
-												
-												
-												{{-- Warka --}}
-												<td class="px-6 py-4">
-													
-													<div class="font-bold text-gray-900 text-base">
-														{{ $stock->recipe->name }} #{{ $stock->recipe->number }}
-													</div>
-												
-												</td>
-												
-												
-												{{-- Pełne kegi --}}
-												<td class="px-6 py-4 text-center whitespace-nowrap">
-													
-													@if($stock->full_kegs > 0)
-														
-														<span class="inline-flex items-center justify-center
-															 min-w-[42px] px-3 py-1.5
-															 rounded-lg
-															 bg-emerald-50 text-emerald-700
-															 border border-emerald-200
-															 text-sm font-bold">
-						
-															{{ $stock->full_kegs }}
-								
-														</span>
-													
-													@else
-														
-														<span class="inline-flex items-center justify-center
-																 px-3 py-1.5
-																 rounded-lg
-																 bg-gray-100 text-gray-500
-																 border border-gray-200
-																 text-sm font-semibold">
-							
-														0
-							
+
+							@php
+								$connectedTaps = $stocksMovements->keyBy('tap_number');
+								// Piwo już podłączone do jakiegoś kranu nie może być wydane na kolejny kran.
+								$connectedRecipeIds = $stocksMovements->pluck('recipe_id');
+								$issuable = $stocks
+									->where('is_archived', 0)
+									->where('full_kegs', '>', 0)
+									->reject(fn ($stock) => $connectedRecipeIds->contains($stock->recipe_id));
+							@endphp
+
+							{{-- Krany --}}
+							<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+								@for ($tap = 0; $tap < \App\Services\KegStockService::TAPS_COUNT; $tap++)
+									@php $connected = $connectedTaps->get($tap + 1); @endphp
+
+									<div class="rounded-xl p-5 flex flex-col {{ $connected ? 'bg-white border-2 border-blue-200 shadow-sm' : 'bg-gray-50 border-2 border-dashed border-gray-300' }}">
+
+										<div class="flex justify-between items-center">
+											<span class="text-xs font-extrabold text-gray-500 uppercase tracking-wider">
+												Kran {{ $tap + 1 }}
+											</span>
+
+											@if($connected)
+												<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
+													Podłączony
+												</span>
+											@else
+												<span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 border border-gray-200 text-xs font-semibold">
+													Wolny
+												</span>
+											@endif
+										</div>
+
+										@if($connected)
+											<div class="mt-3 font-bold text-gray-900 text-base">
+												{{ $connected->recipe->name }} #{{ $connected->recipe->number }}
+											</div>
+
+											@php
+												$connectedFullKegs = $connected->stock?->full_kegs ?? 0;
+												$connectedLiters = $connectedFullKegs * \App\Services\KegStockService::KEG_CAPACITY_LITERS;
+												// 0 L → czerwony, poniżej 200 L → pomarańczowy, reszta → niebieski
+												$litersTone = match (true) {
+													$connectedLiters <= 0 => 'bg-red-600',
+													$connectedLiters < 200 => 'bg-orange-500',
+													default => 'bg-blue-600',
+												};
+											@endphp
+
+											<div class="mt-4 rounded-lg {{ $litersTone }} px-4 py-3 text-white">
+												<div class="flex items-baseline justify-between gap-2">
+													<span class="text-2xl sm:text-3xl font-bold tabular-nums leading-none">
+														{{ $connectedLiters }} L
 													</span>
-													
-													@endif
-												
-												</td>
-												
-												
-												{{-- Ilość piwa --}}
-												<td class="px-6 py-4 text-center whitespace-nowrap">
+													<span class="text-xs font-semibold text-blue-100 whitespace-nowrap">
+														{{ $connected->stock?->full_kegs ?? 0 }} kegów w chłodni
+													</span>
+												</div>
+											</div>
 
-                    <span class="inline-flex items-center px-3 py-1.5
-                                 rounded-lg
-                                 bg-slate-50 text-slate-700
-                                 border border-slate-200
-                                 text-sm font-bold">
+											<form
+													method="POST"
+													action="{{ route('kegs.admin.remove.store') }}"
+													onsubmit="return confirm('Odjąć 1 keg z tego piwa w chłodni?')"
+													class="mt-auto pt-4"
+											>
+												@csrf
+												<input type="hidden" name="recipe_id" value="{{ $connected->recipe_id }}">
+												<input type="hidden" name="quantity" value="1">
 
-                        {{ $stock->full_kegs * 50 }} L
+												<button
+														type="submit"
+														@disabled(($connected->stock?->full_kegs ?? 0) <= 0)
+														class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white text-red-600 border border-red-200 text-sm font-bold hover:bg-red-50 transition-all duration-150 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed"
+														title="{{ ($connected->stock?->full_kegs ?? 0) > 0 ? 'Odejmij 1 keg' : 'Brak pełnych kegów' }}"
+												>
+													Odejmij 1 keg
+												</button>
+											</form>
+											@else
+												<div class="mt-3 text-sm text-gray-500">
+													Brak podłączonego kega.
+												</div>
+											@endif
 
-                    </span>
-												
-												</td>
-												
-												
-												{{-- Akcja --}}
-												<td class="px-6 py-4 text-right whitespace-nowrap">
-													
-													<div class="inline-flex items-center gap-2">
-														
-														{{-- Podłącz pod kran --}}
-														<form
-																method="POST"
-																action="{{ route('kegs.admin.issue.store') }}"
-																onsubmit="return confirm('Czy na pewno chcesz podłączyć keg pod kran?')"
-																class="inline-block"
-														>
-															@csrf
-															
-															<input
-																	type="hidden"
-																	name="recipe_id"
-																	value="{{ $stock->recipe_id }}"
-															>
-															
-															<input type="hidden" name="quantity" value="1">
-															
-															<button
-																	type="submit"
-																	@disabled($stock->full_kegs <= 0)
-																	class="inline-flex items-center gap-2
-                    px-4 py-2.5
-                    rounded-lg
-                    bg-blue-600 text-white
-                    border border-blue-600
-                    text-sm font-bold
-                    shadow-sm
-                    hover:bg-blue-700
-                    hover:border-blue-700
-                    active:scale-[0.98]
-                    transition-all duration-150
-                    disabled:bg-gray-100
-                    disabled:text-gray-400
-                    disabled:border-gray-200
-                    disabled:shadow-none
-                    disabled:cursor-not-allowed"
-																	title="{{ $stock->full_kegs > 0 ? 'Podłącz 1 keg pod kran' : 'Brak pełnych kegów' }}"
-															>
-																
-																<svg class="w-4 h-4"
-																	 fill="none"
-																	 stroke="currentColor"
-																	 stroke-width="2"
-																	 viewBox="0 0 24 24">
-																	<path
-																			stroke-linecap="round"
-																			stroke-linejoin="round"
-																			d="M6 9h12M8 9V6a4 4 0 018 0v3M12 9v6m-4 0h8m-7 0v3m6-3v3"/>
-																	<path
-																			stroke-linecap="round"
-																			stroke-linejoin="round"
-																			d="M5 21h14"/>
-																</svg>
-																
-																Podłącz kega
-															
-															</button>
-														
-														</form>
-                                                        
-														{{-- Dodaj keg do puli (modal) --}}
-<div x-data="{ open: false, qty: 1 }" class="inline-block">
-	<button
-			type="button"
-			@click="open = true"
-			@disabled($stock->full_kegs <= 0)
-			class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-600 text-white border border-green-600 text-sm font-bold shadow-sm hover:bg-green-700 hover:border-green-700 active:scale-[0.98] transition-all duration-150 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:shadow-none disabled:cursor-not-allowed"
-			title="{{ $stock->full_kegs > 0 ? 'Dodaj kegi do puli' : 'Brak pełnych kegów' }}"
-	>
-		<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
-		</svg>
-		Dodaj kega
-	</button>
+											@php
+												$tapLabel = $tap + 1;
+												$connectedEmpty = $connected && ($connected->stock?->full_kegs ?? 0) <= 0;
+												// Wolny kran albo piwo z kranu skończyło się w chłodni: można wybrać inne piwo.
+												$canSelect = ! $connected || $connectedEmpty;
+												$confirmMsg = match (true) {
+													$connectedEmpty => "To ostatnia sztuka kega. Odłączyć ją z kranu {$tapLabel} i podłączyć wybrane piwo?",
+													$connected => "Kran {$tapLabel} ma już podłączony keg. Podłączyć kolejny keg tego piwa?",
+													default => "Czy na pewno chcesz podłączyć keg pod kran {$tapLabel}?",
+												};
+											@endphp
 
-	<template x-teleport="body">
-		<div x-show="open" x-transition.opacity
-			 style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 9999; align-items: center; justify-content: center; padding: 16px; background: rgba(0, 0, 0, 0.5);"
-			 class="flex"
-		>
-			<div @click="open = false" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;"></div>
+											<form
+													method="POST"
+													action="{{ route('kegs.admin.issue.store') }}"
+													onsubmit="return confirm(this.dataset.confirm)"
+													data-confirm="{{ $confirmMsg }}"
+													class="mt-auto pt-4 space-y-2"
+											>
+												@csrf
+												<input type="hidden" name="quantity" value="1">
+												<input type="hidden" name="tap_number" value="{{ $tap + 1 }}">
+												@if($connected && ! $connectedEmpty)<input type="hidden" name="recipe_id" value="{{ $connected->recipe_id }}">@endif
 
-			<div @click.stop
-				 style="position: relative; width: 100%; max-width: 26rem; box-sizing: border-box; padding: 24px; border-radius: 12px; background: #ffffff; box-shadow: 0 20px 25px -5px rgba(0,0,0,.2), 0 8px 10px -6px rgba(0,0,0,.2); color: #1f2937;"
-			>
-				<h3 style="margin: 0 0 12px; font-size: 1.125rem; font-weight: 700; color: #1f2937;">Dodaj kegi do puli</h3>
-
-				<div style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #f9fafb; border: 1px solid #e5e7eb; font-size: 0.875rem; line-height: 1.6; color: #374151;">
-					<div><span style="color: #6b7280;">Receptura:</span> <strong>{{ $stock->recipe->name }} #{{ $stock->recipe->number }}</strong></div>
-					<div><span style="color: #6b7280;">Pełne kegi w chłodni:</span> <strong>{{ $stock->full_kegs }}</strong> ({{ $stock->full_kegs * 50 }} L)</div>
-					<div><span style="color: #6b7280;">Puste kegi w chłodni:</span> <strong>{{ $summary['empty'] }}</strong></div>
-				</div>
-
-				<form method="POST" action="{{ route('kegs.admin.pool.store') }}">
-					@csrf
-					<input type="hidden" name="recipe_id" value="{{ $stock->recipe_id }}">
-
-					<label style="display: block; margin-bottom: 4px; font-size: 0.875rem; font-weight: 600; color: #374151;">Ilość kegów (50 L każdy)</label>
-					<input
-							type="number"
-							name="quantity"
-							x-model.number="qty"
-							min="1"
-							max="{{ max(1, min(20, $stock->full_kegs)) }}"
-							style="display: block; width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem;"
-					>
-
-					<div style="margin-top: 12px; font-size: 0.875rem; line-height: 1.6; color: #374151;">
-						<div>Dodasz: <strong x-text="Number(qty) || 0"></strong> kega = <strong x-text="(Number(qty) || 0) * 50"></strong> L</div>
-						<div>Pełne kegi po dodaniu: <strong x-text="{{ $stock->full_kegs }} + (Number(qty) || 0)"></strong></div>
-					</div>
-
-					<div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-						<button type="button" @click="open = false"
-								style="padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 8px; background: #ffffff; color: #374151; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
-							Anuluj
-						</button>
-						<button type="submit"
-								style="padding: 8px 16px; border: 0; border-radius: 8px; background: #16a34a; color: #ffffff; font-size: 0.875rem; font-weight: 700; cursor: pointer;">
-							Dodaj <span x-text="Number(qty) || 0"></span>
-						</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</template>
-</div>
-
-{{-- Usuń keg z puli --}}
-														<form
-																method="POST"
-																action="{{ route('kegs.admin.remove.store') }}"
-																onsubmit="return confirm('Czy na pewno chcesz usunąć 1 keg z chłodni?')"
-																class="inline-block"
-														>
-															@csrf
-															<input
-																	type="hidden"
-																	name="recipe_id"
-																	value="{{ $stock->recipe_id }}"
-															>
-															<input
-																	type="hidden"
-																	name="quantity"
-																	value="1"
-															>
-															<button
-																	type="submit"
-																	@disabled($stock->full_kegs <= 0)
-																	class="inline-flex items-center gap-2
-                    px-4 py-2.5
-                    rounded-lg
-                    bg-red-600 text-white
-                    border border-red-600
-                    text-sm font-bold
-                    shadow-sm
-                    hover:bg-red-700
-                    hover:border-red-700
-                    active:scale-[0.98]
-                    transition-all duration-150
-                    disabled:bg-gray-100
-                    disabled:text-gray-400
-                    disabled:border-gray-200
-                    disabled:shadow-none
-                    disabled:cursor-not-allowed"
-																	title="{{ $stock->full_kegs > 0 ? 'Usuń 1 keg z chłodni' : 'Brak pełnych kegów' }}"
-															>
-                                                                
-																<svg class="w-4 h-4"
-																	fill="none"
-																	stroke="currentColor"
-																	stroke-width="2"
-																	viewBox="0 0 24 24">
-																	<path
-																			stroke-linecap="round"
-																			stroke-linejoin="round"
-																			d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-																</svg>
-                                                                
-																Usuń kega
-															</button>
-														</form>													
+												@if($connectedEmpty)
+													<div class="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs font-semibold text-amber-800">
+														To ostatnia sztuka kega tego piwa. Po zmianie warki zostanie odłączona z kranu.
 													</div>
-												
-												</td>
-											
-											</tr>
-										
-										@endforeach
-										
-										</tbody>
-									
-									</table>
-								</div>
+												@endif
+
+												@if($canSelect && $issuable->isNotEmpty())
+													<select name="recipe_id" required
+															class="block w-full rounded-lg border-gray-300 text-sm">
+														@foreach($issuable as $stock)
+															<option value="{{ $stock->recipe_id }}">
+																{{ $stock->recipe->name }} #{{ $stock->recipe->number }} ({{ $stock->full_kegs }} szt.)
+															</option>
+														@endforeach
+													</select>
+												@endif
+
+												<button
+														type="submit"
+														@disabled($canSelect && $issuable->isEmpty())
+														class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 text-white border border-emerald-600 text-sm font-bold shadow-sm hover:bg-emerald-700 hover:border-emerald-700 active:scale-[0.98] transition-all duration-150 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:shadow-none disabled:cursor-not-allowed"
+														title="{{ $connectedEmpty ? 'Odłącz puste piwo i podłącz wybrane' : ($connected ? 'Podłącz kolejny keg tego piwa' : ($issuable->isNotEmpty() ? 'Podłącz keg do kranu ' . ($tap + 1) : 'Brak pełnych kegów w chłodni')) }}"
+												>
+													{{ $connectedEmpty ? 'Zmień warkę' : ($connected ? 'Podłącz kolejny keg' : 'Podłącz kega') }}
+												</button>
+
+												@if($canSelect && $issuable->isEmpty())
+													<p class="text-xs text-gray-400">
+														Brak pełnych kegów w chłodni.
+													</p>
+												@endif
+											</form>
+
+									</div>
+								@endfor
 							</div>
-						
-						@endif
 					
 					</div>
 				
@@ -477,6 +361,9 @@
 								<thead class="bg-gray-50 text-gray-500 uppercase text-[11px]">
 								<tr>
 									<th class="px-4 py-2.5 text-left font-bold tracking-wider">
+						Kran
+					</th>
+					<th class="px-4 py-2.5 text-left font-bold tracking-wider">
 										Piwo
 									</th>
 									<th class="px-4 py-2.5 text-left font-bold tracking-wider w-64">
@@ -492,15 +379,24 @@
 								</thead>
 								
 								<tbody class="bg-white divide-y divide-gray-100">
-								@forelse($stocksMovements as $movement)
+								@forelse($recentConnections as $movement)
 									@php
-										$maxCapacity = 47000;
+										$maxCapacity = \App\Services\KegStockService::KEG_MAX_ML;
 										// Obliczanie procentu z zabezpieczeniem od 0% do 100%
 										$percentage = min(100, max(0, round(($movement->capacity / $maxCapacity) * 100)));
 									@endphp
 									
 									<tr class="hover:bg-blue-50/50 transition-colors duration-100">
-										{{-- Piwo --}}
+										{{-- Kran --}}
+										<td class="px-4 py-3 whitespace-nowrap">
+											@if($movement->tap_number)
+												<span class="font-semibold text-gray-800">Kran {{ $movement->tap_number }}</span>
+											@else
+												<span class="text-gray-400">—</span>
+											@endif
+						</td>
+
+						{{-- Piwo --}}
 										<td class="px-4 py-3">
 											<div class="font-semibold text-gray-800">
 												<a href="{{ route('brewing.show', $movement->recipe) }}" class="hover:text-blue-600">
@@ -514,7 +410,7 @@
 											<div class="w-full">
 												<div class="flex justify-between items-center mb-1 text-xs">
                                         <span class="font-semibold text-gray-700">
-                                            {{ number_format($movement->capacity, 0, ',', ' ') }} / 47 000 ml
+                                            {{ number_format($movement->capacity, 0, ',', ' ') }} / {{ number_format(\App\Services\KegStockService::KEG_MAX_ML, 0, ',', ' ') }} ml
                                         </span>
 													<span class="font-medium {{ $percentage > 20 ? 'text-blue-600' : 'text-amber-600' }}">
                                             {{ $percentage }}%
@@ -593,19 +489,19 @@
 					@csrf
 					@method('PATCH')
 
-					<label style="display: block; margin-bottom: 4px; font-size: 0.875rem; font-weight: 600; color: #374151;">Ilość w kegu (ml), maks. 47 000</label>
+					<label style="display: block; margin-bottom: 4px; font-size: 0.875rem; font-weight: 600; color: #374151;">Ilość w kegu (ml), maks. {{ number_format(\App\Services\KegStockService::KEG_MAX_ML, 0, ',', ' ') }}</label>
 					<input
 							type="number"
 							name="capacity"
 							x-model.number="ml"
 							min="0"
-							max="47000"
+							max="{{ \App\Services\KegStockService::KEG_MAX_ML }}"
 							style="display: block; width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem;"
 					>
 
 					<div style="margin-top: 12px; font-size: 0.875rem; line-height: 1.6; color: #374151;">
 						<div>Po zapisie: <strong x-text="(Number(ml) || 0).toLocaleString('pl-PL')"></strong> ml
-							(<strong x-text="Math.min(100, Math.max(0, Math.round(((Number(ml) || 0) / 47000) * 100)))"></strong>%)</div>
+							(<strong x-text="Math.min(100, Math.max(0, Math.round(((Number(ml) || 0) / {{ \App\Services\KegStockService::KEG_MAX_ML }}) * 100)))"></strong>%)</div>
 					</div>
 
 					<div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
@@ -629,7 +525,7 @@
 									</tr>
 								@empty
 									<tr>
-										<td colspan="4" class="px-4 py-8 text-center text-sm text-gray-400">
+										<td colspan="5" class="px-4 py-8 text-center text-sm text-gray-400">
 											Brak historii podłączeń.
 										</td>
 									</tr>
@@ -692,7 +588,7 @@
 										</th>
 										
 										<th class="px-6 py-3 text-center font-bold tracking-wider">
-											Data ostatniego podłaczenia
+											Data ostatniego podłączenia
 										</th>
 									
 									</tr>
@@ -703,6 +599,11 @@
 									<tbody class="bg-white divide-y divide-gray-200">
 									
 									@foreach($stocks->where('is_archived', 1) as $stock)
+										@php
+											// Ostatnie podłączenie tego kega (wydanie = ujemna ilość w rejestrze)
+											$lastIssue = $stock->movements->where('type', 'issue')->sortByDesc('id')->first();
+											$archivedKegs = $lastIssue ? abs($lastIssue->quantity) : 0;
+										@endphp
 										
 										<tr class="hover:bg-blue-50/50 transition duration-150">
 											
@@ -717,7 +618,7 @@
 											<td class="px-6 py-4 text-center">
 
                                             <span class="font-mono text-gray-600 bg-gray-100 px-3 py-1 rounded">
-                                                {{ $stock->movements->first()->quantity }}
+                                                {{ $archivedKegs }}
                                             </span>
 											
 											</td>
@@ -725,7 +626,7 @@
 											<td class="px-6 py-4 text-center">
 
                                             <span class="font-mono text-gray-600 bg-gray-100 px-3 py-1 rounded">
-                                                {{ $stock->movements->first()->quantity * 50 }} L
+                                                {{ $archivedKegs * \App\Services\KegStockService::KEG_CAPACITY_LITERS }} L
                                             </span>
 											
 											</td>
@@ -733,8 +634,8 @@
 											<td class="px-6 py-4 text-center">
 
                                             <span class="font-mono text-gray-600 bg-gray-100 px-3 py-1 rounded">
-                                                {{ $stock->movements->last()->created_at }}
-												({{ \Carbon\Carbon::parse($stock->movements->last()->created_at)->diffForHumans() }})
+                                                @if($lastIssue){{ $lastIssue->created_at }}@else —@endif
+												@if($lastIssue)({{ $lastIssue->created_at->diffForHumans() }})@endif
                                             </span>
 											
 											</td>

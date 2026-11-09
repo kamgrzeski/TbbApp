@@ -36,6 +36,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/brewing/{recipe}/comments', [BrewingController::class, 'storeComment'])->name('comments.store');
     Route::delete('/brewing/{recipe}', [BrewingController::class, 'destroy'])->name('brewing.destroy');
     Route::post('/brewing/{recipe}/status', [BrewingController::class, 'updateStatus'])->name('brewing.status');
+    Route::post('/brewing/{recipe}/archive', [BrewingController::class, 'toggleArchive'])->name('brewing.archive');
     Route::post('/brewing/{recipe}/gravity', [BrewingController::class, 'storeGravity'])->name('gravity.store');
     Route::get('/brewing/{recipe}/edit', [BrewingController::class, 'edit'])->name('brewing.edit');
     Route::get('/brewing/{recipe}/clone', [BrewingController::class, 'clone'])->name('brewing.clone');
@@ -59,8 +60,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('admin/kegs')
         ->group(function () {Route::get('/', [KegStockController::class, 'index'])->name('kegs.admin.index');
-            Route::get('/production', [KegStockController::class, 'createProduction'])->name('kegs.admin.production.create');
-            Route::post('/production', [KegStockController::class, 'production'])->name('kegs.admin.production.store');
             Route::post('/issue', [KegStockController::class, 'issue'])->name('kegs.admin.issue.store');
             Route::get('/movements', [KegStockController::class, 'movements'])->name('kegs.admin.movements');
             Route::post('/pool', [KegStockController::class, 'pool'])->name('kegs.admin.pool.store');

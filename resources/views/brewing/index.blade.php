@@ -173,8 +173,8 @@
 											<td class="px-6 py-4 whitespace-nowrap">
 												@if($recipe->akcpa_value)
 													<span class="inline-flex items-center px-2.5 py-1 rounded-md
-																 bg-red-50 text-red-700
-																 border border-red-200
+																 bg-indigo-50 text-indigo-700
+																 border border-indigo-200
 																 text-sm font-bold">
 														{{ $recipe->akcpa_value }}
 													</span>
@@ -250,7 +250,7 @@
 									</span>
 								</div>
 								
-								<div class="text-sm font-bold text-red-700 bg-red-50 border border-red-200 px-3 py-1 rounded-lg shadow-sm">
+								<div class="text-sm font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-lg shadow-sm">
 									Suma AKC-PA:
 									<span class="text-base ml-1">{{ number_format($monthRecipes->sum('akcpa_value'), 2, ',', ' ') }}</span>
 								</div>
@@ -335,8 +335,8 @@
 											{{-- AKCPA --}}
 											<td class="px-6 py-4 whitespace-nowrap">
 												<span class="inline-flex items-center px-2.5 py-1 rounded-md
-															 bg-red-50 text-red-700
-															 border border-red-200
+															 bg-indigo-50 text-indigo-700
+															 border border-indigo-200
 															 text-sm font-bold">
 													{{ $recipe->akcpa_value }}
 												</span>

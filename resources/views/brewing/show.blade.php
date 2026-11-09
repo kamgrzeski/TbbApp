@@ -51,6 +51,14 @@
 				</h2>
 			</div>
 			<div class="flex space-x-3 no-print">
+				<form action="{{ route('brewing.archive', $recipe) }}" method="POST" class="flex">
+					@csrf
+					<button type="submit"
+					        class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg font-semibold text-xs whitespace-nowrap uppercase tracking-widest shadow-md transition {{ $recipe->is_archived ? 'bg-amber-500 text-white hover:bg-amber-600' : 'bg-gray-500 text-white hover:bg-gray-600' }}">
+						{{ $recipe->is_archived ? 'Przywróć' : 'Archiwizuj' }}
+					</button>
+				</form>
+
 				<a href="{{ route('brewing.clone', $recipe) }}"
 				   class="inline-flex items-center px-4 py-2 bg-emerald-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-emerald-700 shadow-md transition">
 					Klonuj Recepturę

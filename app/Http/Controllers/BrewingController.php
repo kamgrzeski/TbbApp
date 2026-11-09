@@ -80,6 +80,16 @@ class BrewingController extends Controller
         return back()->with('success', 'Status warki został zaktualizowany!');
     }
 
+    public function toggleArchive(Recipe $recipe)
+    {
+        $recipe->is_archived = !$recipe->is_archived;
+        $recipe->save();
+
+        return back()->with('success', $recipe->is_archived
+            ? 'Receptura została zarchiwizowana.'
+            : 'Receptura została przywrócona z archiwum.');
+    }
+
     public function storeGravity(Request $request, Recipe $recipe) {
         $request->validate(['value' => 'required|numeric|min:0|max:100']);
         $recipe->gravityReadings()->create(['value' => $request->value]);

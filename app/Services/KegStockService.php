@@ -14,6 +14,10 @@ class KegStockService
 {
     public const TOTAL_KEGS = 20;
     public const KEG_CAPACITY_LITERS = 50;
+    public const KEG_MAX_ML = 47000;
+
+    // Liczba kranów - ich kegi są zawsze podłączone, więc nie wchodzą do puli
+    public const TAPS_COUNT = 4;
 
     /**
      * Rozlanie piwa do kegów.
@@ -65,13 +69,17 @@ class KegStockService
         });
     }
 
-    public function issue(Recipe $recipe, int $quantity, ?string $note = null): KegStock
+    public function issue(Recipe $recipe, int $quantity, int $tapNumber, ?string $note = null): KegStock
     {
         if ($quantity <= 0) {
             throw new RuntimeException('Ilość kegów musi być większa od 0.');
         }
 
-        return DB::transaction(function () use ($recipe, $quantity, $note) {
+        if ($tapNumber < 1 || $tapNumber > self::TAPS_COUNT) {
+            throw new RuntimeException('Nieprawidłowy numer kranu.');
+        }
+
+        return DB::transaction(function () use ($recipe, $quantity, $tapNumber, $note) {
 
             $stock = KegStock::query()
                 ->where('recipe_id', $recipe->id)
@@ -89,9 +97,49 @@ class KegStockService
                 );
             }
 
-            $stock->decrement('full_kegs', $quantity);
+            $onOtherTap = KegMovement::query()
+                ->where('type', 'issue')
+                ->where('is_current', true)
+                ->where('recipe_id', $recipe->id)
+                ->where('tap_number', '!=', $tapNumber)
+                ->lockForUpdate()
+                ->first();
 
-            KegMovement::where('recipe_id' , $recipe->id)->where('keg_stock_id', $stock->id)->where('type', 'issue')->update(['is_current' => false]);
+            if ($onOtherTap) {
+                throw new RuntimeException("Piwo {$recipe->name} jest już podłączone do kranu {$onOtherTap->tap_number}.");
+            }
+
+            $tapCurrent = KegMovement::query()
+                ->where('type', 'issue')
+                ->where('is_current', true)
+                ->where('tap_number', $tapNumber)
+                ->lockForUpdate()
+                ->get();
+
+            if ($tapCurrent->isNotEmpty()) {
+                // Inne piwo można podłączyć dopiero, gdy poprzednie skończyło się w chłodni.
+                $otherRecipeIds = $tapCurrent
+                    ->pluck('recipe_id')
+                    ->reject(fn ($id) => $id === $recipe->id);
+
+                if ($otherRecipeIds->isNotEmpty()) {
+                    $stillInCooler = KegStock::query()
+                        ->whereIn('recipe_id', $otherRecipeIds)
+                        ->where('full_kegs', '>', 0)
+                        ->exists();
+
+                    if ($stillInCooler) {
+                        throw new RuntimeException("Kran {$tapNumber} ma podłączone inne piwo z pełnymi kegami w chłodni.");
+                    }
+                }
+
+                // Nowy keg zastępuje poprzedni w rejestrze podłączeń tego kranu.
+                KegMovement::query()
+                    ->whereIn('id', $tapCurrent->pluck('id'))
+                    ->update(['is_current' => false]);
+            }
+
+            $stock->decrement('full_kegs', $quantity);
 
             KegMovement::create([
                 'recipe_id' => $recipe->id,
@@ -100,7 +148,8 @@ class KegStockService
                 'quantity' => -$quantity,
                 'note' => $note,
                 'is_current' => true,
-                'capacity' => 47000,
+                'tap_number' => $tapNumber,
+                'capacity' => self::KEG_MAX_ML,
             ]);
 
             $inventory = KegInventories::query()
@@ -137,6 +186,7 @@ class KegStockService
             'total' => $inventory->total_kegs,
             'full' => $full,
             'empty' => $empty,
+            'available_empty' => max(0, $empty - self::TAPS_COUNT),
             'full_liters' => $full * self::KEG_CAPACITY_LITERS,
         ];
     }
@@ -149,6 +199,18 @@ class KegStockService
     public function archivedStocksMovements()
     {
         return KegMovement::with(['recipe', 'stock'])->where('is_current', 0)->where('type', 'issue')->orderByDesc('id')->get();
+    }
+
+    /**
+     * Keg podłączone obecnie do kranów (is_current = 1).
+     */
+    public function currentTapConnections()
+    {
+        return KegMovement::with('recipe')
+            ->where('type', 'issue')
+            ->where('is_current', true)
+            ->orderByDesc('id')
+            ->get();
     }
 
     public function pool(Recipe $recipe, int $quantity, ?string $note = null): KegStock
@@ -164,11 +226,28 @@ class KegStockService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$stock || $stock->full_kegs < $quantity) {
-                $available = $stock?->full_kegs ?? 0;
+            if (!$stock) {
+                $stock = KegStock::create([
+                    'recipe_id' => $recipe->id,
+                    'full_kegs' => 0,
+                ]);
+            }
 
+            $inventory = KegInventories::query()
+                ->lockForUpdate()
+                ->firstOrCreate(
+                    [],
+                    [
+                        'total_kegs' => self::TOTAL_KEGS,
+                        'empty_kegs' => self::TOTAL_KEGS,
+                    ]
+                );
+
+            $available = max(0, $inventory->empty_kegs - self::TAPS_COUNT);
+
+            if ($available < $quantity) {
                 throw new RuntimeException(
-                    "Brak wystarczającej ilości pełnych kegów. " .
+                    "Brak wystarczającej ilości kegów do napełnienia (4 krany są zajęte). " .
                     "Dostępne: {$available}."
                 );
             }
@@ -182,16 +261,6 @@ class KegStockService
                 'quantity' => $quantity,
                 'note' => $note
             ]);
-
-            $inventory = KegInventories::query()
-                ->lockForUpdate()
-                ->firstOrCreate(
-                    [],
-                    [
-                        'total_kegs' => self::TOTAL_KEGS,
-                        'empty_kegs' => self::TOTAL_KEGS,
-                    ]
-                );
 
             $inventory->decrement('empty_kegs', $quantity);
 

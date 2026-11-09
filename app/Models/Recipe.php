@@ -10,16 +10,22 @@ class Recipe extends Model
 {
     protected $fillable = [
         'number', 'name', 'gopos_item_ids', 'tank_number', 'volume', 'batch_count', 'efficiency', 'blg', 'akcpa_value', 'akcpa_blg', 'user_id', 'yeast_pitched_at',
-        'yeast_pitch_temperature', 'fermentation_temperature', 'primary_fermentation_start', 'secondary_fermentation_start', 'finished_at', 'created_at'
+        'yeast_pitch_temperature', 'fermentation_temperature', 'primary_fermentation_start', 'secondary_fermentation_start', 'finished_at', 'is_archived', 'created_at'
     ];
 
     protected $casts = [
+        'is_archived' => 'boolean',
         'yeast_pitched_at' => 'datetime',
         'primary_fermentation_start' => 'datetime',
         'secondary_fermentation_start' => 'datetime',
         'finished_at' => 'datetime',
         'gopos_item_ids' => 'array'
     ];
+
+    public function scopeNotArchived($query)
+    {
+        return $query->where('is_archived', false);
+    }
 
     public function malts(): HasMany
     {

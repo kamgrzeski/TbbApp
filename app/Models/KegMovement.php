@@ -14,6 +14,7 @@ class KegMovement extends Model
         'quantity',
         'note',
         'is_current',
+        'tap_number',
         'capacity'
     ];
 

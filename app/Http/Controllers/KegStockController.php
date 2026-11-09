@@ -7,6 +7,7 @@ use App\Models\KegStock;
 use App\Models\Recipe;
 use App\Services\KegStockService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Throwable;
 
 class KegStockController extends Controller
@@ -24,60 +25,31 @@ class KegStockController extends Controller
 
         $summary = $this->kegStockService->summary();
 
-        return view('kegs.admin.index', [
-            'stocks' => $stocks,
-            'summary' => $summary,
-            'stocksMovements' => $this->kegStockService->stocksMovements(),
-            'archivedStocksMovements' => $this->kegStockService->archivedStocksMovements()
-        ]);
-    }
-
-    public function createProduction()
-    {
         $recipes = Recipe::query()
-            ->orderByDesc('id')
-            ->whereDoesntHave('kegMovements')
+            ->notArchived()
+            ->whereNotNull('finished_at')
+            ->orderByDesc('finished_at')
             ->get();
 
-        return view('kegs.admin.production', [
+        return view('kegs.admin.index', [
+            'stocks' => $stocks,
             'recipes' => $recipes,
+            'summary' => $summary,
+            'stocksMovements' => $this->kegStockService->stocksMovements(),
+            'archivedStocksMovements' => $this->kegStockService->archivedStocksMovements(),
+            'recentConnections' => $this->kegStockService->currentTapConnections(),
         ]);
-    }
-
-    public function production(Request $request)
-    {
-        $data = $request->validate([
-            'recipe_id' => ['required', 'exists:recipes,id'],
-            'quantity' => ['required', 'integer', 'min:1', 'max:20'],
-            'note' => ['nullable', 'string', 'max:1000'],
-        ]);
-
-        try {
-            $recipe = Recipe::findOrFail($data['recipe_id']);
-
-            $this->kegStockService->produce(
-                $recipe,
-                $data['quantity'],
-                $data['note'] ?? null
-            );
-
-            return redirect()
-                ->route('kegs.admin.index')
-                ->with('success', 'Rozlew został zapisany.');
-        } catch (Throwable $e) {
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'quantity' => $e->getMessage(),
-                ]);
-        }
     }
 
     public function issue(Request $request)
     {
         $data = $request->validate([
-            'recipe_id' => ['required', 'exists:recipes,id'],
+            'recipe_id' => [
+                'required',
+                Rule::exists('recipes', 'id'),
+            ],
             'quantity' => ['required', 'integer', 'min:1', 'max:20'],
+            'tap_number' => ['required', 'integer', 'between:1,' . KegStockService::TAPS_COUNT],
             'note' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -87,6 +59,7 @@ class KegStockController extends Controller
             $this->kegStockService->issue(
                 $recipe,
                 $data['quantity'],
+                $data['tap_number'],
                 $data['note'] ?? null
             );
 
@@ -117,7 +90,12 @@ class KegStockController extends Controller
     public function pool(Request $request)
     {
         $data = $request->validate([
-            'recipe_id' => ['required', 'exists:recipes,id'],
+            'recipe_id' => [
+                'required',
+                Rule::exists('recipes', 'id')
+                    ->whereNotNull('finished_at')
+                    ->where('is_archived', false),
+            ],
             'quantity' => ['required', 'integer', 'min:1', 'max:20'],
             'note' => ['nullable', 'string', 'max:1000'],
         ]);
