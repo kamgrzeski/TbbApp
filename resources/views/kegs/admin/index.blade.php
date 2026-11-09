@@ -272,11 +272,7 @@
 																	value="{{ $stock->recipe_id }}"
 															>
 															
-															<input
-																	type="hidden"
-																	name="quantity"
-																	value="1"
-															>
+															<input type="hidden" name="quantity" value="1">
 															
 															<button
 																	type="submit"
@@ -321,62 +317,75 @@
 														
 														</form>
                                                         
-														{{-- Dodaj keg do puli --}}
-														<form
-																method="POST"
-																action="{{ route('kegs.admin.pool.store') }}"
-																onsubmit="return confirm('Czy na pewno chcesz dodać keg do puli?')"
-																class="inline-block"
-														>
-															@csrf
-															<input
-																	type="hidden"
-																	name="recipe_id"
-																	value="{{ $stock->recipe_id }}"
-															>
-															<input
-																	type="hidden"
-																	name="quantity"
-																	value="1"
-															>
-															<button
-																	type="submit"
-																	@disabled($stock->full_kegs <= 0)
-																	class="inline-flex items-center gap-2
-                    px-4 py-2.5
-                    rounded-lg
-                    bg-green-600 text-white
-                    border border-green-600
-                    text-sm font-bold
-                    shadow-sm
-                    hover:bg-green-700
-                    hover:border-green-700
-                    active:scale-[0.98]
-                    transition-all duration-150
-                    disabled:bg-gray-100
-                    disabled:text-gray-400
-                    disabled:border-gray-200
-                    disabled:shadow-none
-                    disabled:cursor-not-allowed"
-																	title="{{ $stock->full_kegs > 0 ? 'Dodaj 1 keg do puli' : 'Brak pełnych kegów' }}"
-															>
-                                                                
-																<svg class="w-4 h-4"
-																	 fill="none"
-																	 stroke="currentColor"
-																	 stroke-width="2"
-																	 viewBox="0 0 24 24">
-																	<path
-																			stroke-linecap="round"
-																			stroke-linejoin="round"
-																			d="M12 5v14M5 12h14"/>
-																</svg>
-                                                                
-																Dodaj kega
-															</button>
-														</form>
+														{{-- Dodaj keg do puli (modal) --}}
+<div x-data="{ open: false, qty: 1 }" class="inline-block">
+	<button
+			type="button"
+			@click="open = true"
+			@disabled($stock->full_kegs <= 0)
+			class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-600 text-white border border-green-600 text-sm font-bold shadow-sm hover:bg-green-700 hover:border-green-700 active:scale-[0.98] transition-all duration-150 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:shadow-none disabled:cursor-not-allowed"
+			title="{{ $stock->full_kegs > 0 ? 'Dodaj kegi do puli' : 'Brak pełnych kegów' }}"
+	>
+		<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
+		</svg>
+		Dodaj kega
+	</button>
 
-														{{-- Usuń keg z puli --}}
+	<template x-teleport="body">
+		<div x-show="open" x-transition.opacity
+			 style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 9999; align-items: center; justify-content: center; padding: 16px; background: rgba(0, 0, 0, 0.5);"
+			 class="flex"
+		>
+			<div @click="open = false" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;"></div>
+
+			<div @click.stop
+				 style="position: relative; width: 100%; max-width: 26rem; box-sizing: border-box; padding: 24px; border-radius: 12px; background: #ffffff; box-shadow: 0 20px 25px -5px rgba(0,0,0,.2), 0 8px 10px -6px rgba(0,0,0,.2); color: #1f2937;"
+			>
+				<h3 style="margin: 0 0 12px; font-size: 1.125rem; font-weight: 700; color: #1f2937;">Dodaj kegi do puli</h3>
+
+				<div style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #f9fafb; border: 1px solid #e5e7eb; font-size: 0.875rem; line-height: 1.6; color: #374151;">
+					<div><span style="color: #6b7280;">Receptura:</span> <strong>{{ $stock->recipe->name }} #{{ $stock->recipe->number }}</strong></div>
+					<div><span style="color: #6b7280;">Pełne kegi w chłodni:</span> <strong>{{ $stock->full_kegs }}</strong> ({{ $stock->full_kegs * 50 }} L)</div>
+					<div><span style="color: #6b7280;">Puste kegi w chłodni:</span> <strong>{{ $summary['empty'] }}</strong></div>
+				</div>
+
+				<form method="POST" action="{{ route('kegs.admin.pool.store') }}">
+					@csrf
+					<input type="hidden" name="recipe_id" value="{{ $stock->recipe_id }}">
+
+					<label style="display: block; margin-bottom: 4px; font-size: 0.875rem; font-weight: 600; color: #374151;">Ilość kegów (50 L każdy)</label>
+					<input
+							type="number"
+							name="quantity"
+							x-model.number="qty"
+							min="1"
+							max="{{ max(1, min(20, $stock->full_kegs)) }}"
+							style="display: block; width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem;"
+					>
+
+					<div style="margin-top: 12px; font-size: 0.875rem; line-height: 1.6; color: #374151;">
+						<div>Dodasz: <strong x-text="Number(qty) || 0"></strong> kega = <strong x-text="(Number(qty) || 0) * 50"></strong> L</div>
+						<div>Pełne kegi po dodaniu: <strong x-text="{{ $stock->full_kegs }} + (Number(qty) || 0)"></strong></div>
+					</div>
+
+					<div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+						<button type="button" @click="open = false"
+								style="padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 8px; background: #ffffff; color: #374151; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+							Anuluj
+						</button>
+						<button type="submit"
+								style="padding: 8px 16px; border: 0; border-radius: 8px; background: #16a34a; color: #ffffff; font-size: 0.875rem; font-weight: 700; cursor: pointer;">
+							Dodaj <span x-text="Number(qty) || 0"></span>
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</template>
+</div>
+
+{{-- Usuń keg z puli --}}
 														<form
 																method="POST"
 																action="{{ route('kegs.admin.remove.store') }}"
@@ -532,14 +541,90 @@
 
 										{{-- Akcja --}}
 										<td class="px-4 py-3 text-right whitespace-nowrap">
-											<form method="POST" action="{{ route('kegs.admin.movements.update', $movement) }}" class="inline-flex gap-2">
-												@csrf
-												@method('PATCH')
-												<input type="number" name="capacity" value="{{ $movement->capacity }}" class="w-24 px-2 py-1 text-xs border rounded text-right">
-												<button type="submit" class="px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded hover:bg-blue-700 transition-colors">
-													Zapisz
-												</button>
-											</form>
+											<div x-data="{ open: false, ml: {{ (int) $movement->capacity }}, take: 1, sub(litres) { this.ml = Math.max(0, this.ml - Math.round((Number(litres) || 0) * 1000)); } }" class="inline-block">
+	<button
+			type="button"
+			@click="open = true"
+			class="px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded hover:bg-blue-700 transition-colors"
+	>
+		Zmień ml
+	</button>
+
+	<template x-teleport="body">
+		<div x-show="open" x-transition.opacity
+			 style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 9999; align-items: center; justify-content: center; padding: 16px; background: rgba(0, 0, 0, 0.5);"
+			 class="flex"
+		>
+			<div @click="open = false" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;"></div>
+
+			<div @click.stop
+				 style="position: relative; width: 100%; max-width: 26rem; box-sizing: border-box; padding: 24px; border-radius: 12px; background: #ffffff; box-shadow: 0 20px 25px -5px rgba(0,0,0,.2), 0 8px 10px -6px rgba(0,0,0,.2); color: #1f2937;"
+			>
+				<h3 style="margin: 0 0 12px; font-size: 1.125rem; font-weight: 700; color: #1f2937;">Zmień ilość piwa w kegu</h3>
+
+				<div style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #f9fafb; border: 1px solid #e5e7eb; font-size: 0.875rem; line-height: 1.6; color: #374151;">
+					<div><span style="color: #6b7280;">Piwo:</span> <strong>{{ $movement->recipe->name }} #{{ $movement->recipe->number }}</strong></div>
+					<div><span style="color: #6b7280;">Podłączono:</span> {{ $movement->created_at->format('d.m.Y H:i') }}</div>
+					<div><span style="color: #6b7280;">Obecnie:</span> <strong>{{ number_format($movement->capacity, 0, ',', ' ') }} ml</strong></div>
+				</div>
+
+				<div style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #eff6ff; border: 1px solid #bfdbfe;">
+					<div style="margin-bottom: 8px; font-size: 0.8rem; font-weight: 700; color: #1e40af;">Odejmij pobraną ilość</div>
+					<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+						<template x-for="l in [0.25, 0.5, 1, 2, 3]" :key="l">
+							<button type="button" @click="sub(l)"
+									style="padding: 6px 10px; border: 1px solid #93c5fd; border-radius: 6px; background: #ffffff; color: #1e40af; font-size: 0.8rem; font-weight: 700; cursor: pointer;">
+								−<span x-text="l"></span> l
+							</button>
+						</template>
+					</div>
+					<div style="display: flex; gap: 8px; align-items: center;">
+						<input type="number" x-model.number="take" min="0" step="0.05"
+							   style="flex: 1; min-width: 0; box-sizing: border-box; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.85rem;">
+						<span style="font-size: 0.85rem; color: #374151;">l</span>
+						<button type="button" @click="sub(take)"
+								style="padding: 6px 12px; border: 0; border-radius: 6px; background: #1d4ed8; color: #ffffff; font-size: 0.8rem; font-weight: 700; cursor: pointer;">
+							Odejmij
+						</button>
+					</div>
+				</div>
+
+				<form method="POST" action="{{ route('kegs.admin.movements.update', $movement) }}">
+					@csrf
+					@method('PATCH')
+
+					<label style="display: block; margin-bottom: 4px; font-size: 0.875rem; font-weight: 600; color: #374151;">Ilość w kegu (ml), maks. 47 000</label>
+					<input
+							type="number"
+							name="capacity"
+							x-model.number="ml"
+							min="0"
+							max="47000"
+							style="display: block; width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem;"
+					>
+
+					<div style="margin-top: 12px; font-size: 0.875rem; line-height: 1.6; color: #374151;">
+						<div>Po zapisie: <strong x-text="(Number(ml) || 0).toLocaleString('pl-PL')"></strong> ml
+							(<strong x-text="Math.min(100, Math.max(0, Math.round(((Number(ml) || 0) / 47000) * 100)))"></strong>%)</div>
+					</div>
+
+					<div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+						<button type="button" @click="open = false"
+								style="padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 8px; background: #ffffff; color: #374151; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+							Anuluj
+						</button>
+						<button type="submit"
+								style="padding: 8px 16px; border: 0; border-radius: 8px; background: #2563eb; color: #ffffff; font-size: 0.875rem; font-weight: 700; cursor: pointer;">
+							Zapisz
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</template>
+</div>
+
+
 										</td>
 									</tr>
 								@empty
