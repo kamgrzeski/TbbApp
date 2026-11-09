@@ -122,14 +122,22 @@
                                         <tr>
                                             <th class="text-start">Nazwa słodu</th>
                                             <th style="width: 180px;">Kg</th>
-                                            <th style="width: 140px;">Udział aktywnych (%)</th>
+                                            <th style="width: 140px;">(%)</th>
                                             <th style="width: 50px;"></th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        @foreach($malts as $idx => $malt)
-                                            @if($malt['batch_number'] == $batchIdx)
-                                                <tr wire:key="malt-row-{{ $idx }}">
+                                        @php
+                                            // Aktywne enzymatycznie na górze; nieaktywne na dole, posortowane po wadze malejąco
+                                            $batchMalts = collect($malts)->filter(fn($m) => $m['batch_number'] == $batchIdx);
+                                            $isActiveEnz = fn($m) => !empty($m['malt_stock_id']) && !empty($m['is_active']);
+                                            // union() zachowuje oryginalne klucze (używane w wire:model i removeMalt)
+                                            $rows = $batchMalts->filter($isActiveEnz)
+                                                ->union($batchMalts->reject($isActiveEnz)->sortByDesc(fn($m) => (float)$m['kg']));
+                                        @endphp
+                                        @foreach($rows as $idx => $malt)
+                                            @php $isInactiveEnzymatic = !empty($malt['malt_stock_id']) && empty($malt['is_active']); @endphp
+                                                <tr wire:key="malt-row-{{ $idx }}" class="{{ $isInactiveEnzymatic ? 'table-warning' : '' }}">
                                                     <td data-label="Nazwa słodu">
                                                         <div class="d-flex align-items-center gap-2">
                                                             <div class="flex-grow-1 position-relative">
@@ -158,6 +166,9 @@
                                                         </div>
                                                     </td>
                                                     <td data-label="Kg">
+                                                        @error("malts.{$idx}.kg")
+                                                            <div class="text-danger small mb-1">{{ $message }}</div>
+                                                        @enderror
                                                         <div class="input-group">
                                                             <input type="number" step="0.01" wire:model.live="malts.{{ $idx }}.kg" class="form-control">
                                                             <span class="input-group-text small">
@@ -170,7 +181,7 @@
                                                             <input type="text" class="form-control text-center bg-light" value="{{ $this->enzymaticShares[$idx] }}%" readonly>
                                                         @else
                                                             @if(!empty($malt['malt_stock_id']))
-                                                                <span class="badge bg-secondary">nieaktywny enzymatycznie</span>
+                                                                <span class="badge bg-secondary" title="Nieaktywny enzymatycznie">nieakt. enz.</span>
                                                             @else
                                                                 <span class="text-muted small">—</span>
                                                             @endif
@@ -178,7 +189,6 @@
                                                     </td>
                                                     <td class="td-action"><button type="button" wire:click="removeMalt({{ $idx }})" class="btn btn-outline-danger btn-sm">X</button></td>
                                                 </tr>
-                                            @endif
                                         @endforeach
                                         </tbody>
                                     </table>

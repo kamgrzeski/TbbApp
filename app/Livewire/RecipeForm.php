@@ -216,6 +216,41 @@ class RecipeForm extends Component
         return $shares;
     }
 
+    /**
+     * Sprawdza, czy suma kg każdego słodu z magazynu we wszystkich wierszach
+     * nie przekracza dostępnego stanu. Błędy dodaje do pól kg konkretnych wierszy.
+     */
+    private function maltStockIsEnough(): bool
+    {
+        $ids = collect($this->malts)->pluck('malt_stock_id')->filter()->unique()->values();
+        $stockKg = MaltStock::whereIn('id', $ids)->pluck('kg', 'id');
+
+        $requested = [];
+        foreach ($this->malts as $m) {
+            if (empty($m['malt_stock_id'])) continue;
+            $requested[$m['malt_stock_id']] = ($requested[$m['malt_stock_id']] ?? 0) + (float)$m['kg'];
+        }
+
+        $ok = true;
+        foreach ($this->malts as $idx => $m) {
+            if (empty($m['malt_stock_id'])) continue;
+
+            $id = $m['malt_stock_id'];
+            $available = (float)($stockKg[$id] ?? 0);
+
+            if ($requested[$id] > $available + 0.0001) {
+                $this->addError("malts.$idx.kg", sprintf(
+                    'Za mało na stanie: dostępne %s kg, w recepturze łącznie %s kg.',
+                    number_format($available, 2, ',', ' '),
+                    number_format($requested[$id], 2, ',', ' ')
+                ));
+                $ok = false;
+            }
+        }
+
+        return $ok;
+    }
+
     public function save()
     {
         // 1. Walidacja danych
@@ -226,6 +261,15 @@ class RecipeForm extends Component
             'akcpa_blg' => 'nullable|numeric|min:0',
             'gopos_item_ids' => 'nullable|string'
         ]);
+
+        // Ilość słodu nie może przekraczać stanu magazynowego (dla receptur bez zadanych drożdży –
+        // po zadaniu drożdży stan jest już pomniejszony o zużycie)
+        $yeastPitched = $this->recipeId && !$this->isClone
+            && Recipe::whereKey($this->recipeId)->whereNotNull('yeast_pitched_at')->exists();
+
+        if (!$yeastPitched && !$this->maltStockIsEnough()) {
+            return;
+        }
 
         $goposArray = array_values(array_filter(
             array_map('trim', explode(',', $this->gopos_item_ids)),
