@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Beerwall;
-use App\Models\BeerwallSetting;
+use App\Services\FirebaseService;
 use Illuminate\Http\Request;
 
 class BeerwallController extends Controller
@@ -12,21 +12,18 @@ class BeerwallController extends Controller
     {
         return view('beerwall.index')->with([
             'beerwall' => Beerwall::orderBy('position')->get(),
-            'settings' => BeerwallSetting::first()
         ]);
     }
     public function indexHalloween()
     {
         return view('beerwall.index_halloween')->with([
             'beerwall' => Beerwall::orderBy('position')->get(),
-            'settings' => BeerwallSetting::first()
         ]);
     }
     public function indexChristmas()
     {
         return view('beerwall.index_christmas')->with([
             'beerwall' => Beerwall::orderBy('position')->get(),
-            'settings' => BeerwallSetting::first()
         ]);
     }
     public function index()
@@ -36,30 +33,28 @@ class BeerwallController extends Controller
         return view('beerwall.admin.index', compact('beers', 'drafts'));
     }
 
-    public function editSettings()
+    public function editSettings(FirebaseService $firebase)
     {
-        $settings = BeerwallSetting::first();
+        $settings = $firebase->getSettings();
         return view('beerwall.admin.settings', compact('settings'));
     }
 
-    public function updateSettings(Request $request)
+    public function updateSettings(Request $request, FirebaseService $firebase)
     {
         $data = $request->validate([
-            'monday_close_time' => 'nullable',
-            'tuesday_close_time' => 'nullable',
-            'wednesday_close_time' => 'nullable',
-            'thursday_close_time' => 'nullable',
-            'friday_close_time' => 'nullable',
-            'saturday_close_time' => 'nullable',
-            'sunday_close_time' => 'nullable',
+            'monday_close_time' => 'nullable|date_format:H:i',
+            'tuesday_close_time' => 'nullable|date_format:H:i',
+            'wednesday_close_time' => 'nullable|date_format:H:i',
+            'thursday_close_time' => 'nullable|date_format:H:i',
+            'friday_close_time' => 'nullable|date_format:H:i',
+            'saturday_close_time' => 'nullable|date_format:H:i',
+            'sunday_close_time' => 'nullable|date_format:H:i',
         ]);
 
-        $settings = BeerwallSetting::firstOrCreate(
-            ['id' => 1],
-            $data
-        );
-
-        $settings->update($data);
+        if (! $firebase->setSettings($data)) {
+            return redirect()->route('beerwall.admin.settings.edit')
+                ->with('error', 'Nie udało się zapisać ustawień w Firebase. Sprawdź log aplikacji.');
+        }
 
         return redirect()->route('beerwall.admin.settings.edit')->with('success', 'Ustawienia godzin zamknięcia zostały zapisane!');
     }

@@ -19,6 +19,30 @@
     const db = getDatabase(app);
     const beerRef = ref(db, 'beers');
 
+    // Godziny zamknięcia z Firebase - aktualizacja na żywo
+    let closingSettings = null;
+
+    const applyClosing = () => {
+        if (!closingSettings) return;
+
+        const daysMap = { 0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday' };
+        const now = new Date();
+        const closeTimeStr = closingSettings[daysMap[now.getDay()] + '_close_time'];
+        if (!closeTimeStr) return;
+
+        const currentTimeStr = now.toTimeString().substring(0, 5);
+        document.getElementById('closed-overlay').style.display =
+            currentTimeStr >= closeTimeStr.substring(0, 5) ? 'flex' : 'none';
+    };
+
+    onValue(ref(db, 'settings'), (snapshot) => {
+        closingSettings = snapshot.val();
+        applyClosing();
+    });
+
+    // Sam upływ czasu nie zmienia bazy, więc sprawdzamy też co 30 s
+    setInterval(applyClosing, 30000);
+
     // Funkcja renderująca piwa na żywo
     onValue(beerRef, (snapshot) => {
         const data = snapshot.val();
@@ -98,50 +122,6 @@
 </script>
 
 <script>
-    let cachedSettings = null;
-
-    async function checkClosingTime() {
-        try {
-            const response = await fetch('/api/beerwall/settings');
-            const settings = await response.json();
-
-            if (!settings) {
-                console.log("No settings found in database");
-                return;
-            }
-
-            const daysMap = {
-                0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday'
-            };
-
-            const now = new Date();
-            const dayKey = daysMap[now.getDay()];
-            const closeTimeStr = settings[dayKey + '_close_time'];
-
-            if (closeTimeStr) {
-                const formattedCloseTime = closeTimeStr.substring(0, 5);
-
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const currentTimeStr = `${hours}:${minutes}`;
-
-                console.log(`API Check - Close: ${formattedCloseTime} | Now: ${currentTimeStr}`);
-
-                if (currentTimeStr >= formattedCloseTime) {
-                    document.getElementById('closed-overlay').style.display = 'flex';
-                } else {
-                    document.getElementById('closed-overlay').style.display = 'none';
-                }
-            }
-        } catch (error) {
-            console.error("Error fetching settings:", error);
-        }
-    }
-
-    checkClosingTime();
-
-    setInterval(checkClosingTime, 30000);
-
     function tick() {
         const d = new Date();
         document.getElementById('time').textContent = d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });

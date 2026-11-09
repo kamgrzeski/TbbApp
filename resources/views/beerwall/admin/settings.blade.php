@@ -24,6 +24,12 @@
                 </div>
             @endif
 
+            @if(session('error'))
+                <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded shadow-sm">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <div class="max-w-3xl mx-auto">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100">
                     <div class="p-6">
@@ -53,7 +59,7 @@
                                             <input type="time"
                                                    id="{{ $key }}_close_time"
                                                    name="{{ $key }}_close_time"
-                                                   value="{{ $settings ? $settings->{$key . '_close_time'} : '' }}"
+                                                   value="{{ $settings[$key . '_close_time'] ?? '' }}"
                                                    class="text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                         </div>
                                     </div>

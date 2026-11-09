@@ -94,6 +94,3 @@ Route::get('/bw-halloween', [BeerWallController::class, 'indexHalloween'])->name
 Route::get('/bw-christmas', [BeerWallController::class, 'indexChristmas'])->name('beerwall.index-christmas');
 Route::any('/gopos/webhook', [GoPosController::class, 'webhook']);
 
-Route::get('/api/beerwall/settings', function() {
-    return response()->json(\App\Models\BeerwallSetting::first());
-})->middleware(['auth']);

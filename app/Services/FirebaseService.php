@@ -7,6 +7,8 @@ use App\Models\Beerwall;
 
 class FirebaseService
 {
+    public const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
     public function syncBeers()
     {
         $url = config('services.firebase.url') . 'beers.json';
@@ -34,6 +36,53 @@ class FirebaseService
 
         // Wyślij dane
         $response = Http::put($url . '?auth=' . $secret, $beers);
+
+        return $response->successful();
+    }
+
+    /**
+     * Godziny zamknięcia sprzedaży (HH:MM lub null) dla każdego dnia tygodnia.
+     */
+    public function getSettings(): array
+    {
+        $url = config('services.firebase.url') . 'settings.json';
+        $secret = config('services.firebase.secret');
+
+        $response = Http::get($url . '?auth=' . $secret);
+
+        $data = $response->successful() && is_array($response->json()) ? $response->json() : [];
+
+        $settings = [];
+        foreach (self::DAYS as $day) {
+            $settings[$day . '_close_time'] = $data[$day . '_close_time'] ?? null;
+        }
+
+        return $settings;
+    }
+
+    /**
+     * Zapisuje godziny zamknięcia w Firebase. Zwraca true, gdy zapis się udał.
+     */
+    public function setSettings(array $input): bool
+    {
+        $url = config('services.firebase.url') . 'settings.json';
+        $secret = config('services.firebase.secret');
+
+        $payload = [];
+        foreach (self::DAYS as $day) {
+            $value = $input[$day . '_close_time'] ?? null;
+            // Zapisujemy jako HH:MM (lub null gdy brak godziny zamknięcia)
+            $payload[$day . '_close_time'] = $value ? substr($value, 0, 5) : null;
+        }
+
+        $response = Http::put($url . '?auth=' . $secret, $payload);
+
+        if ($response->failed()) {
+            \Log::error('Firebase setSettings failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+        }
 
         return $response->successful();
     }
