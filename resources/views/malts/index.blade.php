@@ -17,12 +17,36 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                    <div class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Wszystkie słody</div>
+                    <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $stats['total'] }}</div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                    <div class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Aktywne enzymatycznie</div>
+                    <div class="mt-1 text-2xl font-semibold text-green-600 dark:text-green-400">{{ $stats['active'] }}</div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                    <div class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Nieaktywne enzymatycznie</div>
+                    <div class="mt-1 text-2xl font-semibold text-gray-600 dark:text-gray-300">{{ $stats['inactive'] }}</div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                    <div class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Brak na stanie</div>
+                    <div class="mt-1 text-2xl font-semibold text-red-600 dark:text-red-400">{{ $stats['empty'] }}</div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                    <div class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Łącznie kg</div>
+                    <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ number_format($stats['total_kg'], 2) }}</div>
+                </div>
+            </div>
+
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700">
                 <div class="p-0 text-gray-900 dark:text-gray-100">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nazwa słodu</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Enzymatycznie</th>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ilość w magazynie</th>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ekstrakt</th>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Faktura</th>
@@ -33,6 +57,13 @@
                             @foreach($malts as $maltStock)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap font-medium">{{ $maltStock->name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($maltStock->is_enzymatic_active)
+                                            <span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">Aktywny enzymatycznie</span>
+                                        @else
+                                            <span class="px-2 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300">Nieaktywny enzymatycznie</span>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $maltStock->kg <= 0 ? 'bg-red-600 text-white animate-pulse' : ($maltStock->kg < 50 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300') }}">
                                             {{ $maltStock->kg <= 0 ? number_format($maltStock->kg, 2) . ' kg' : number_format($maltStock->kg, 2) . ' kg' }}

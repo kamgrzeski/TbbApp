@@ -33,7 +33,7 @@ class RecipeForm extends Component
     public function availableMalts()
     {
         return MaltStock::orderBy('name')
-            ->get(['id', 'name', 'extract', 'kg', 'is_active']);
+            ->get(['id', 'name', 'extract', 'kg', 'is_enzymatic_active']);
     }
 
     public function mount($recipe = null, $isClone = false)
@@ -62,7 +62,7 @@ class RecipeForm extends Component
                 'malt_stock_id' => $m->malt_stock_id,
                 'name' => $m->name,
                 'kg' => $m->kg,
-                'is_active' => $m->maltStock ? (bool)$m->maltStock->is_active : false,
+                'is_active' => $m->maltStock ? (bool)$m->maltStock->is_enzymatic_active : false,
             ])->toArray();
 
             // Mapowanie chmieli z bazy
@@ -103,7 +103,7 @@ class RecipeForm extends Component
             $this->malts[$index]['malt_stock_id'] = $maltId;
             $this->malts[$index]['name'] = $malt->name;
             $this->malts[$index]['extract'] = (float)$malt->extract;
-            $this->malts[$index]['is_active'] = (bool)$malt->is_active;
+            $this->malts[$index]['is_active'] = (bool)$malt->is_enzymatic_active;
         }
     }
 
@@ -185,7 +185,7 @@ class RecipeForm extends Component
         ];
     }
 
-    // Udział procentowy słodów aktywnych enzymatycznie (malt_stocks.is_active = 1)
+    // Udział procentowy słodów aktywnych enzymatycznie (malt_stocks.is_enzymatic_active = 1)
     // w kg aktywnych słodów tej samej warki. Zwraca [indeks wiersza => procent].
     #[Computed]
     public function enzymaticShares()
@@ -202,7 +202,7 @@ class RecipeForm extends Component
                 }
 
                 $stock = $stocks->get($m['malt_stock_id']);
-                if ($stock && $stock->is_active) {
+                if ($stock && $stock->is_enzymatic_active) {
                     $activeKg[$idx] = (float)$m['kg'];
                 }
             }

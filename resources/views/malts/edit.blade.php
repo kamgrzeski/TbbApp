@@ -28,6 +28,12 @@
                             <x-input-label for="invoice_number" value="Numer faktury" />
                             <x-text-input id="invoice_number" name="invoice_number" type="text" class="mt-1 block w-full" value="{{ old('invoice_number', $maltStock->invoice_number) }}" />
                         </div>
+                        <div class="mb-4">
+                            <label for="is_enzymatic_active" class="inline-flex items-center">
+                                <input id="is_enzymatic_active" name="is_enzymatic_active" type="checkbox" value="1" class="rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('is_enzymatic_active', $maltStock->is_enzymatic_active) ? 'checked' : '' }}>
+                                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Aktywny enzymatycznie</span>
+                            </label>
+                        </div>
                         <div class="flex items-center justify-end mt-4">
                             <a href="{{ route('malts.admin.index') }}" class="text-gray-600 dark:text-gray-400 underline mr-4">Anuluj</a>
                             <x-primary-button>

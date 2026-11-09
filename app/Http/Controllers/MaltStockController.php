@@ -12,7 +12,16 @@ class MaltStockController extends Controller
     public function index(): View
     {
         $malts = MaltStock::orderBy('kg', 'desc')->get();
-        return view('malts.index', compact('malts'));
+
+        $stats = [
+            'total' => $malts->count(),
+            'active' => $malts->where('is_enzymatic_active', true)->count(),
+            'inactive' => $malts->where('is_enzymatic_active', false)->count(),
+            'empty' => $malts->where('kg', '<=', 0)->count(),
+            'total_kg' => $malts->sum('kg'),
+        ];
+
+        return view('malts.index', compact('malts', 'stats'));
     }
 
     public function create(): View
@@ -47,6 +56,8 @@ class MaltStockController extends Controller
             'extract' => 'nullable|numeric',
             'invoice_number' => 'nullable|string|max:255',
         ]);
+
+        $validated['is_enzymatic_active'] = $request->boolean('is_enzymatic_active');
 
         $maltStock->update($validated);
 

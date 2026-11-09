@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MaltStock extends Model
 {
-    protected $fillable = ['name', 'kg', 'extract', 'invoice_number', 'is_active'];
+    protected $fillable = ['name', 'kg', 'extract', 'invoice_number', 'is_enzymatic_active'];
 
     protected $casts = [
         'extract' => 'float',
