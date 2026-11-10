@@ -59,6 +59,10 @@ class KegStockService
 
             $stock->increment('full_kegs', $quantity);
 
+            if ($stock->is_archived) {
+                $stock->update(['is_archived' => false]);
+            }
+
             KegMovement::create([
                 'recipe_id' => $recipe->id,
                 'keg_stock_id' => $stock->id,
@@ -196,11 +200,6 @@ class KegStockService
         return KegMovement::with(['recipe', 'stock'])->where('is_current', 1)->where('type', 'issue')->orderByDesc('id')->get();
     }
 
-    public function archivedStocksMovements()
-    {
-        return KegMovement::with(['recipe', 'stock'])->where('is_current', 0)->where('type', 'issue')->orderByDesc('id')->get();
-    }
-
     /**
      * Keg podłączone obecnie do kranów (is_current = 1).
      */
@@ -253,6 +252,11 @@ class KegStockService
             }
 
             $stock->increment('full_kegs', $quantity);
+
+            // Piwo z pełnymi kegami nie może pozostać w archiwum, inaczej nie da się go podłączyć.
+            if ($stock->is_archived) {
+                $stock->update(['is_archived' => false]);
+            }
 
             KegMovement::create([
                 'recipe_id' => $recipe->id,

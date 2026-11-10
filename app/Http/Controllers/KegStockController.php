@@ -36,7 +36,6 @@ class KegStockController extends Controller
             'recipes' => $recipes,
             'summary' => $summary,
             'stocksMovements' => $this->kegStockService->stocksMovements(),
-            'archivedStocksMovements' => $this->kegStockService->archivedStocksMovements(),
             'recentConnections' => $this->kegStockService->currentTapConnections(),
         ]);
     }
