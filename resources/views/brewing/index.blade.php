@@ -37,19 +37,22 @@
 				</div>
 			@else
 				@php
-					// Rozdzielenie na wersje robocze (bez daty zadania drożdży) oraz warki z datą
-					[$draftRecipes, $pitchedRecipes] = $recipes->partition(fn($recipe) => is_null($recipe->yeast_pitched_at));
+					// Wersje robocze: warki bez wykonanego zasypu (oraz bez zadania drożdży)
+					// Warki z datą zadania drożdży trafiają do sekcji miesięcznej
+					// Data warki: zadanie drożdży, a gdy go jeszcze nie ma – wykonany zasyp
+					$recipes->each(fn($recipe) => $recipe->planned_at = $recipe->yeast_pitched_at ?? $recipe->mashed_at);
+					[$draftRecipes, $pitchedRecipes] = $recipes->partition(fn($recipe) => is_null($recipe->planned_at));
 					
 					// Zgrupowanie warek według formatu ROK-MIESIĄC (np. "2024-10")
-					$groupedPitched = $pitchedRecipes->groupBy(fn($recipe) => $recipe->yeast_pitched_at->format('Y-m'));
+					$groupedPitched = $pitchedRecipes->groupBy(fn($recipe) => $recipe->planned_at->format('Y-m'));
 					
 					// Ustalenie zakresu miesięcy: od najstarszej warki (lub początku bieżącego roku) do bieżącego miesiąca
-					$startDate = $pitchedRecipes->min('yeast_pitched_at')?->copy()->startOfMonth() ?? now()->startOfYear();
+					$startDate = $pitchedRecipes->min('planned_at')?->copy()->startOfMonth() ?? now()->startOfYear();
 					$endDate = now()->startOfMonth();
 					
 					// Jeśli są warki zaplanowane w przyszłości, uwzględnij najdalszy miesiąc
-					if ($pitchedRecipes->isNotEmpty() && $pitchedRecipes->max('yeast_pitched_at')->startOfMonth()->gt($endDate)) {
-						$endDate = $pitchedRecipes->max('yeast_pitched_at')->copy()->startOfMonth();
+					if ($pitchedRecipes->isNotEmpty() && $pitchedRecipes->max('planned_at')->startOfMonth()->gt($endDate)) {
+						$endDate = $pitchedRecipes->max('planned_at')->copy()->startOfMonth();
 					}
 					
 					// Generujemy listę miesięcy malejąco (od najnowszego do najstarszego)
@@ -345,13 +348,13 @@
 											{{-- Data --}}
 											<td class="px-6 py-4 whitespace-nowrap">
 												<div class="text-sm font-medium text-gray-700">
-													{{ $recipe->yeast_pitched_at->format('d.m.Y') }}
+													{{ $recipe->planned_at->format('d.m.Y') }}
 												</div>
 											</td>
 											
 											{{-- Akcje --}}
 											<td class="px-6 py-4 whitespace-nowrap text-right">
-												@if($recipe->yeast_pitched_at->isPast())
+												@if($recipe->planned_at->isPast())
 													{{-- Zablokowane usuwanie dla warek z przeszłości --}}
 													<span
 															title="Nie można usunąć zrealizowanej warki z przeszłości"
