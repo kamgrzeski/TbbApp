@@ -34,13 +34,13 @@
             {{ $isClone ? 'Klonowanie: '.$recipe_name : ($recipeId ? 'Edycja: '.$recipe_name : 'Nowa receptura') }}
         </h2>
     </x-slot>
-    
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                 <!-- Bootstrap CSS dla tabel i siatki -->
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-                
+
                 <form wire:submit="save">
                     <div class="row mb-4 g-3">
                         <div class="col-md-3">
@@ -74,9 +74,9 @@
                             <input type="number" wire:model.live="efficiency" class="form-control border-gray-300 shadow-sm">
                         </div>
                     </div>
-                    
+
                     <div class="row mb-4 g-3">
-                        
+
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Temperatura zadania drożdży</label>
                             <input
@@ -114,12 +114,12 @@
                             >
                         </div>
                     </div>
-                    
+
                     @foreach([1, 2] as $batchIdx)
                         @if($batch_count >= $batchIdx)
                             <div class="mb-5 p-4 border rounded bg-light shadow-sm {{ $batchIdx == 1 ? 'border-primary' : 'border-success' }}" wire:key="batch-{{ $batchIdx }}">
                                 <h4 class="fw-bold {{ $batchIdx == 1 ? 'text-primary' : 'text-success' }} mb-3">WARKA {{ $batchIdx }}</h4>
-                                
+
                                 <div class="table-responsive mb-3">
                                     <table class="stack-mobile table table-bordered align-middle bg-white">
                                         <thead class="{{ $batchIdx == 1 ? 'table-primary' : 'table-success' }} text-center">
@@ -145,12 +145,12 @@
                                                     <td data-label="Nazwa słodu">
                                                         <div class="d-flex align-items-center gap-2">
                                                             <div class="flex-grow-1 position-relative">
-                                                                <select wire:model.live="malts.{{ $idx }}.malt_stock_id" 
-                                                                        wire:change="updateMaltExtract({{ $idx }}, $event.target.value)" 
+                                                                <select wire:model.live="malts.{{ $idx }}.malt_stock_id"
+                                                                        wire:change="updateMaltExtract({{ $idx }}, $event.target.value)"
                                                                         class="form-select shadow-sm">
                                                                     <option value="">Wybierz słód...</option>
                                                                     @foreach($this->availableMalts as $availableMalt)
-                                                                        <option value="{{ $availableMalt->id }}" 
+                                                                        <option value="{{ $availableMalt->id }}"
                                                                             {{ $malt['malt_stock_id'] == $availableMalt->id ? 'selected' : '' }}>
                                                                             {{ $availableMalt->name }}
                                                                         </option>
@@ -176,7 +176,13 @@
                                                         <div class="input-group">
                                                             <input type="number" step="0.01" wire:model.live="malts.{{ $idx }}.kg" class="form-control">
                                                             <span class="input-group-text small">
-                                                                    {{ $this->stats['w'.$batchIdx]['kg'] > 0 ? round(($malt['kg'] / $this->stats['w'.$batchIdx]['kg']) * 100, 1) : 0 }}%
+                                                                {{ (float)($this->stats['w'.$batchIdx]['kg'] ?? 0) > 0
+    ? round(
+        ((float)($malt['kg'] ?? 0) / (float)$this->stats['w'.$batchIdx]['kg']) * 100,
+        1
+    )
+    : 0
+}}%
                                                                 </span>
                                                         </div>
                                                     </td>
@@ -198,7 +204,7 @@
                                     </table>
                                 </div>
                                 <button type="button" wire:click="addMalt({{ $batchIdx }})" class="btn btn-sm btn-{{ $batchIdx == 1 ? 'primary' : 'success' }}">+ Dodaj słód</button>
-                                
+
                                 <h5 class="fw-bold mt-4 mb-3">Chmielenie</h5>
                                 <div class="table-responsive">
                                     <table class="stack-mobile table table-bordered align-middle bg-white text-center">
@@ -232,7 +238,7 @@
                             </div>
                         @endif
                     @endforeach
-                    
+
                     <!-- PODSUMOWANIE (Przyklejone na dole lub w ramce) -->
                     <div class="p-4 rounded bg-dark text-white shadow mb-4">
                         <div class="row align-items-center">
@@ -257,7 +263,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="d-flex justify-content-end gap-3">
                         <a href="{{ route('brewing.index') }}" class="btn btn-outline-secondary px-4 py-2">Anuluj</a>
                         <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">
