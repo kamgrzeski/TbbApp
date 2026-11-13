@@ -43,9 +43,13 @@
                 
                 <form wire:submit="save">
                     <div class="row mb-4 g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label fw-bold">Nazwa receptury</label>
                             <input type="text" wire:model="recipe_name" class="form-control border-gray-300 shadow-sm">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">Styl</label>
+                            <input type="text" wire:model="style" maxlength="100" placeholder="np. Hefeweizen" class="form-control border-gray-300 shadow-sm">
                         </div>
                         <div class="col-md-1">
                             <label class="form-label fw-bold">Tank</label>

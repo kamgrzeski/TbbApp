@@ -17,6 +17,7 @@ class RecipeForm extends Component
 
     // Pola modelu
     public $recipe_name = '';
+    public $style = '';
     public $tank_number = 2;
     public $batch_count = 2;
     public $efficiency = 75;
@@ -43,6 +44,7 @@ class RecipeForm extends Component
         if ($recipe) {
             $this->recipeId = $isClone ? null : $recipe->id;
             $this->recipe_name = $isClone ? $recipe->name . ' (Kopia)' : $recipe->name;
+            $this->style = (string) ($recipe->style ?? '');
             $this->tank_number = $recipe->tank_number;
             $this->batch_count = $recipe->batch_count;
             $this->yeast_pitch_temperature = $recipe->yeast_pitch_temperature;
@@ -256,6 +258,7 @@ class RecipeForm extends Component
         // 1. Walidacja danych
         $this->validate([
             'recipe_name' => 'required|string|max:255',
+            'style' => 'nullable|string|max:100',
             'efficiency' => 'required|numeric|between:0,100',
             'malts' => 'required|array|min:1',
             'akcpa_blg' => 'nullable|numeric|min:0',
@@ -281,6 +284,7 @@ class RecipeForm extends Component
             $recipeData = [
                 'tank_number' => $this->tank_number,
                 'name'        => $this->recipe_name,
+                'style'       => trim((string) $this->style) ?: null,
                 'volume'      => $this->batch_count * 500, // lub $this->stats['volume']
                 'efficiency'  => $this->efficiency,
                 'blg'         => round($this->stats['total_blg'], 1),

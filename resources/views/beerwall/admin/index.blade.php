@@ -71,7 +71,7 @@
 									<th class="px-6 py-3 text-left font-bold tracking-wider">Piwo / Styl</th>
 									<th class="px-6 py-3 text-left font-bold tracking-wider text-center">Ceny (S/M/L)</th>
 									<th class="px-6 py-3 text-left font-bold tracking-wider text-center">Status / pozycja</th>
-									<th class="px-6 py-3 text-right font-bold tracking-wider w-40">Akcje</th>
+									<th class="px-6 py-3 text-right font-bold tracking-wider w-16">Akcje</th>
 								</tr>
 								</thead>
 								<tbody class="bg-white divide-y divide-gray-200">
@@ -148,47 +148,41 @@
 										</td>
 										
 										{{-- Kolumna 4: Akcje --}}
-										<td class="px-6 py-4 whitespace-nowrap text-right">
-											<div class="flex justify-end items-center gap-1.5">
-												{{-- Kopiuj --}}
-												<form action="{{ route('beerwall.admin.duplicate', $beer) }}" method="POST" class="inline">
+									<td class="px-6 py-4 whitespace-nowrap text-right">
+										{{-- Menu akcji --}}
+										<div x-data="{ open: false, top: 0, left: 0 }" @click.outside="open = false" @scroll.window="open = false" class="inline-flex justify-end">
+											<button type="button" aria-label="Akcje"
+											        @click="const r = $el.getBoundingClientRect(); top = r.bottom + 6; left = r.right - 192; open = !open"
+											        class="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition">
+												<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+											</button>
+
+											<div x-show="open" x-transition x-cloak :style="`top: ${top}px; left: ${left}px`"
+											     class="fixed z-50 w-48 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden divide-y divide-gray-100 text-left">
+												<form action="{{ route('beerwall.admin.duplicate', $beer) }}" method="POST">
 													@csrf
-													<button type="submit"
-															title="Duplikuj piwo"
-															class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold hover:bg-indigo-600 hover:text-white transition-all duration-150">
-														<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-															<path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-														</svg>
+													<button type="submit" title="Duplikuj piwo"
+													        class="w-full text-left px-4 py-3 text-sm font-medium text-indigo-700 hover:bg-indigo-50">
 														Kopiuj
 													</button>
 												</form>
-												
-												{{-- Edytuj --}}
-												<a href="{{ route('beerwall.admin.edit', $beer) }}"
-												   title="Edytuj piwo"
-												   class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold hover:bg-blue-600 hover:text-white transition-all duration-150">
-													<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-														<path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"/>
-														<path stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-													</svg>
+
+												<a href="{{ route('beerwall.admin.edit', $beer) }}" title="Edytuj piwo"
+												   class="block px-4 py-3 text-sm font-medium text-blue-700 hover:bg-blue-50">
 													Edytuj
 												</a>
-												
-												{{-- Usuń --}}
-												<form action="{{ route('beerwall.admin.destroy', $beer) }}" method="POST" onsubmit="return confirm('Czy na pewno chcesz usunąć {{ $beer->beer_name }} z karty?');" class="inline">
+
+												<form action="{{ route('beerwall.admin.destroy', $beer) }}" method="POST" onsubmit="return confirm('Czy na pewno chcesz usunąć {{ $beer->beer_name }} z karty?');">
 													@csrf
 													@method('DELETE')
-													<button type="submit"
-															title="Usuń piwo"
-															class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 text-red-700 border border-red-200 text-xs font-semibold hover:bg-red-600 hover:text-white transition-all duration-150">
-														<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-															<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0h10"/>
-														</svg>
+													<button type="submit" title="Usuń piwo"
+													        class="w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50">
 														Usuń
 													</button>
 												</form>
 											</div>
-										</td>
+										</div>
+									</td>
 									</tr>
 								@endforeach
 								</tbody>
@@ -223,7 +217,7 @@
 									<th class="px-6 py-3 text-left font-bold tracking-wider">Piwo / Styl</th>
 									<th class="px-6 py-3 text-left font-bold tracking-wider text-center">Ceny (S/M/L)</th>
 									<th class="px-6 py-3 text-left font-bold tracking-wider text-center">Status / pozycja</th>
-									<th class="px-6 py-3 text-right font-bold tracking-wider w-40">Akcje</th>
+									<th class="px-6 py-3 text-right font-bold tracking-wider w-16">Akcje</th>
 								</tr>
 								</thead>
 								<tbody class="bg-white divide-y divide-gray-200">
@@ -285,47 +279,41 @@
 										</td>
 										
 										{{-- Kolumna 4: Akcje --}}
-										<td class="px-6 py-4 whitespace-nowrap text-right">
-											<div class="flex justify-end items-center gap-1.5">
-												{{-- Kopiuj --}}
-												<form action="{{ route('beerwall.admin.duplicate', $beer) }}" method="POST" class="inline">
+									<td class="px-6 py-4 whitespace-nowrap text-right">
+										{{-- Menu akcji --}}
+										<div x-data="{ open: false, top: 0, left: 0 }" @click.outside="open = false" @scroll.window="open = false" class="inline-flex justify-end">
+											<button type="button" aria-label="Akcje"
+											        @click="const r = $el.getBoundingClientRect(); top = r.bottom + 6; left = r.right - 192; open = !open"
+											        class="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition">
+												<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+											</button>
+
+											<div x-show="open" x-transition x-cloak :style="`top: ${top}px; left: ${left}px`"
+											     class="fixed z-50 w-48 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden divide-y divide-gray-100 text-left">
+												<form action="{{ route('beerwall.admin.duplicate', $beer) }}" method="POST">
 													@csrf
-													<button type="submit"
-															title="Duplikuj szkic"
-															class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold hover:bg-indigo-600 hover:text-white transition-all duration-150">
-														<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-															<path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-														</svg>
+													<button type="submit" title="Duplikuj szkic"
+													        class="w-full text-left px-4 py-3 text-sm font-medium text-indigo-700 hover:bg-indigo-50">
 														Kopiuj
 													</button>
 												</form>
-												
-												{{-- Edytuj / Wdróż --}}
-												<a href="{{ route('beerwall.admin.edit', $beer) }}"
-												   title="Edytuj szkic"
-												   class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold hover:bg-blue-600 hover:text-white transition-all duration-150">
-													<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-														<path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"/>
-														<path stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-													</svg>
+
+												<a href="{{ route('beerwall.admin.edit', $beer) }}" title="Edytuj szkic"
+												   class="block px-4 py-3 text-sm font-medium text-blue-700 hover:bg-blue-50">
 													Edytuj
 												</a>
-												
-												{{-- Usuń --}}
-												<form action="{{ route('beerwall.admin.destroy', $beer) }}" method="POST" onsubmit="return confirm('Czy na pewno chcesz usunąć szkic {{ $beer->beer_name }}?');" class="inline">
+
+												<form action="{{ route('beerwall.admin.destroy', $beer) }}" method="POST" onsubmit="return confirm('Czy na pewno chcesz usunąć szkic {{ $beer->beer_name }}?');">
 													@csrf
 													@method('DELETE')
-													<button type="submit"
-															title="Usuń szkic"
-															class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 text-red-700 border border-red-200 text-xs font-semibold hover:bg-red-600 hover:text-white transition-all duration-150">
-														<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-															<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0h10"/>
-														</svg>
+													<button type="submit" title="Usuń szkic"
+													        class="w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50">
 														Usuń
 													</button>
 												</form>
 											</div>
-										</td>
+										</div>
+									</td>
 									</tr>
 								@endforeach
 								</tbody>

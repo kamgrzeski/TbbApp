@@ -138,13 +138,48 @@
 											<div @click="open = false" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;"></div>
 
 											<div @click.stop
-												 style="position: relative; width: 100%; max-width: 26rem; box-sizing: border-box; padding: 24px; border-radius: 12px; background: #ffffff; box-shadow: 0 20px 25px -5px rgba(0,0,0,.2), 0 8px 10px -6px rgba(0,0,0,.2); color: #1f2937;"
+												 style="position: relative; width: 100%; max-width: 42rem; box-sizing: border-box; padding: 24px; border-radius: 12px; background: #ffffff; box-shadow: 0 20px 25px -5px rgba(0,0,0,.2), 0 8px 10px -6px rgba(0,0,0,.2); color: #1f2937;"
 											>
 												<h3 style="margin: 0 0 12px; font-size: 1.125rem; font-weight: 700; color: #1f2937;">Dodaj kegi do puli</h3>
 
 												<div style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #f9fafb; border: 1px solid #e5e7eb; font-size: 0.875rem; line-height: 1.6; color: #374151;">
 													<div><span style="color: #6b7280;">Dostępne do napełnienia (bez 4 kranów):</span> <strong>{{ $summary['available_empty'] }}</strong></div>
 												</div>
+													<div style="margin-bottom: 16px;">
+														<div style="font-size: 0.75rem; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;">
+															Stan w chłodni &middot; pełne: {{ $summary['full'] }} &middot; puste: {{ $summary['empty'] }}
+														</div>
+														<div style="max-height: 240px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px;">
+															<table style="width: 100%; border-collapse: collapse; font-size: 0.875rem; color: #1f2937;">
+																<thead style="position: sticky; top: 0; background: #f9fafb;">
+																	<tr style="color: #6b7280; text-align: left;">
+																		<th style="padding: 8px 10px; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Receptura</th>
+																		<th style="padding: 8px 10px; font-weight: 600; text-align: right; border-bottom: 1px solid #e5e7eb;">Pełne</th>
+																		<th style="padding: 8px 10px; font-weight: 600; text-align: right; border-bottom: 1px solid #e5e7eb;">Litry</th>
+																		<th style="padding: 8px 10px; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Kran</th>
+																	</tr>
+																</thead>
+																<tbody>
+																	@forelse($coolerStocks as $coolerStock)
+																		@php
+																			$coolerTaps = $stocksMovements->where('recipe_id', $coolerStock->recipe_id)->pluck('tap_number')->sort()->implode(', ');
+																			$coolerEmpty = $coolerStock->full_kegs <= 0;
+																		@endphp
+																		<tr style="border-bottom: 1px solid #f3f4f6;">
+																			<td style="padding: 8px 10px;">{{ $coolerStock->recipe->name }} #{{ $coolerStock->recipe->number }}</td>
+																			<td style="padding: 8px 10px; text-align: right; font-weight: 700; color: {{ $coolerEmpty ? '#dc2626' : '#111827' }};">{{ $coolerStock->full_kegs }}</td>
+																			<td style="padding: 8px 10px; text-align: right; color: #374151;">{{ number_format($coolerStock->full_kegs * \App\Services\KegStockService::KEG_CAPACITY_LITERS, 0, ',', ' ') }} L</td>
+																			<td style="padding: 8px 10px; color: #374151;">{{ $coolerTaps !== '' ? $coolerTaps : '—' }}</td>
+																		</tr>
+																	@empty
+																		<tr>
+																			<td colspan="4" style="padding: 12px 10px; text-align: center; color: #6b7280;">Brak kegów w chłodni.</td>
+																		</tr>
+																	@endforelse
+																</tbody>
+															</table>
+														</div>
+													</div>
 
 												<form method="POST" action="{{ route('kegs.admin.pool.store') }}">
 													@csrf
@@ -208,9 +243,33 @@
 								@for ($tap = 0; $tap < \App\Services\KegStockService::TAPS_COUNT; $tap++)
 									@php $connected = $connectedTaps->get($tap + 1); @endphp
 
-									<div class="rounded-xl p-5 flex flex-col {{ $connected ? 'bg-white border-2 border-blue-200 shadow-sm' : 'bg-gray-50 border-2 border-dashed border-gray-300' }}">
+									<div class="rounded-xl p-5 flex flex-col relative {{ $connected ? 'bg-white border-2 border-blue-200 shadow-sm' : 'bg-gray-50 border-2 border-dashed border-gray-300' }}">
 
-										<div class="flex justify-between items-center">
+											@if($connected)
+												<div class="absolute top-3 right-3" x-data="{ open: false }" @click.outside="open = false">
+													<button type="button" @click="open = !open" aria-label="Akcje kranu {{ $tap + 1 }}"
+													        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition">
+														<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+													</button>
+
+													<div x-show="open" x-transition x-cloak
+													     class="absolute right-0 mt-1 w-48 z-20 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden divide-y divide-gray-100">
+														<form method="POST" action="{{ route('kegs.admin.remove.store') }}"
+														      onsubmit="return confirm('Odjąć 1 keg z tego piwa w chłodni?')">
+															@csrf
+															<input type="hidden" name="recipe_id" value="{{ $connected->recipe_id }}">
+															<input type="hidden" name="quantity" value="1">
+															<button type="submit"
+															        @disabled(($connected->stock?->full_kegs ?? 0) <= 0)
+															        class="w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 disabled:text-gray-400 disabled:hover:bg-white disabled:cursor-not-allowed"
+															        title="{{ ($connected->stock?->full_kegs ?? 0) > 0 ? 'Odejmij 1 keg' : 'Brak pełnych kegów' }}">
+																Odejmij 1 keg
+															</button>
+														</form>
+													</div>
+												</div>
+											@endif
+										<div class="flex justify-between items-center pr-10">
 											<span class="text-xs font-extrabold text-gray-500 uppercase tracking-wider">
 												Kran {{ $tap + 1 }}
 											</span>
@@ -253,25 +312,6 @@
 												</div>
 											</div>
 
-											<form
-													method="POST"
-													action="{{ route('kegs.admin.remove.store') }}"
-													onsubmit="return confirm('Odjąć 1 keg z tego piwa w chłodni?')"
-													class="mt-auto pt-4"
-											>
-												@csrf
-												<input type="hidden" name="recipe_id" value="{{ $connected->recipe_id }}">
-												<input type="hidden" name="quantity" value="1">
-
-												<button
-														type="submit"
-														@disabled(($connected->stock?->full_kegs ?? 0) <= 0)
-														class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white text-red-600 border border-red-200 text-sm font-bold hover:bg-red-50 transition-all duration-150 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed"
-														title="{{ ($connected->stock?->full_kegs ?? 0) > 0 ? 'Odejmij 1 keg' : 'Brak pełnych kegów' }}"
-												>
-													Odejmij 1 keg
-												</button>
-											</form>
 											@else
 												<div class="mt-3 text-sm text-gray-500">
 													Brak podłączonego kega.

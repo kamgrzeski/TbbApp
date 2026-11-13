@@ -36,6 +36,11 @@ class KegStockController extends Controller
             'recipes' => $recipes,
             'summary' => $summary,
             'stocksMovements' => $this->kegStockService->stocksMovements(),
+            'coolerStocks' => KegStock::query()
+                ->with('recipe')
+                ->where('is_archived', 0)
+                ->orderByDesc('full_kegs')
+                ->get(),
             'recentConnections' => $this->kegStockService->currentTapConnections(),
         ]);
     }

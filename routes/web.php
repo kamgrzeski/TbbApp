@@ -7,6 +7,7 @@ use App\Http\Controllers\GoPosController;
 use App\Http\Controllers\KegStockController;
 use App\Http\Controllers\MaltStockController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SocialPostController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -84,6 +85,18 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/{maltStock}', [MaltStockController::class, 'update'])->name('malts.admin.update');
             Route::post('/{maltStock}/subtract-bag', [MaltStockController::class, 'subtractBag'])->name('malts.admin.subtract-bag');
             Route::delete('/{maltStock}', [MaltStockController::class, 'destroy'])->name('malts.admin.destroy');
+        });
+
+    Route::prefix('admin/social-posts')
+        ->group(function () {
+            Route::get('/', [SocialPostController::class, 'index'])->name('social-posts.index');
+            Route::get('/create', [SocialPostController::class, 'create'])->name('social-posts.create');
+            Route::post('/', [SocialPostController::class, 'store'])->name('social-posts.store');
+            Route::get('/{socialPost}', [SocialPostController::class, 'show'])->name('social-posts.show');
+            Route::put('/{socialPost}', [SocialPostController::class, 'update'])->name('social-posts.update');
+            Route::post('/{socialPost}/regenerate', [SocialPostController::class, 'regenerate'])->name('social-posts.regenerate');
+            Route::patch('/{socialPost}/status', [SocialPostController::class, 'updateStatus'])->name('social-posts.status');
+            Route::delete('/{socialPost}', [SocialPostController::class, 'destroy'])->name('social-posts.destroy');
         });
 
 });

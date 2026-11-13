@@ -21,10 +21,10 @@ class GoPosApiService
 
     public function __construct()
     {
-        $this->baseUrl = 'https://app.gopos.io';
-        $this->clientId = '428bc2bd-c3cb-46f4-97e2-164b00510f73';
-        $this->clientSecret = '4447dafe-28d8-4f52-a1f2-7e241b246254';
-        $this->organizationId = '15066';
+        $this->baseUrl = config('services.gopos.base_url');
+        $this->clientId = (string) config('services.gopos.client_id');
+        $this->clientSecret = (string) config('services.gopos.client_secret');
+        $this->organizationId = (string) config('services.gopos.organization_id');
     }
 
     public function generateAccessToken(): array

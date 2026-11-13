@@ -41,7 +41,7 @@
 	</style>
 	
 	<x-slot name="header">
-		<div class="flex no-print justify-between items-center">
+		<div class="flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-center no-print">
 			<div>
 				<nav class="text-sm font-medium text-gray-500 mb-1 no-print">
 					<a href="{{ route('brewing.index') }}" class="hover:text-blue-600 transition">Receptury</a> / Detale
@@ -50,7 +50,53 @@
 					{{ $recipe->name }}
 				</h2>
 			</div>
-			<div class="flex space-x-3 no-print">
+			<div class="lg:hidden no-print" x-data="{ open: false }">
+					<button type="button" @click="open = !open"
+					        class="w-full inline-flex justify-between items-center px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 shadow-sm active:bg-gray-50">
+						<span>Akcje warki</span>
+						<svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+						</svg>
+					</button>
+
+					<div x-show="open" x-transition @click.outside="open = false"
+					     class="mt-2 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden divide-y divide-gray-100">
+						<form action="{{ route('brewing.archive', $recipe) }}" method="POST">
+							@csrf
+							<button type="submit"
+							        class="w-full text-left px-4 py-3 text-sm font-medium hover:bg-gray-50 {{ $recipe->is_archived ? 'text-amber-600' : 'text-gray-600' }}">
+								{{ $recipe->is_archived ? 'Przywróć' : 'Archiwizuj' }}
+							</button>
+						</form>
+
+						<a href="{{ route('brewing.clone', $recipe) }}"
+						   class="block px-4 py-3 text-sm font-medium text-emerald-700 hover:bg-gray-50">
+							Klonuj recepturę
+						</a>
+
+						<a href="{{ route('brewing.edit', $recipe) }}"
+						   class="block px-4 py-3 text-sm font-medium text-blue-700 hover:bg-gray-50">
+							Edytuj recepturę
+						</a>
+
+						<a href="{{ route('brewing.print', $recipe) }}" target="_blank"
+						   class="block px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50">
+							Drukuj (widok A4)
+						</a>
+
+						<a href="{{ route('brewing.excise-email', $recipe) }}"
+						   class="block px-4 py-3 text-sm font-medium text-purple-700 hover:bg-gray-50">
+							Generuj e-mail akcyzowy
+						</a>
+
+						<a href="{{ route('brewing.index') }}"
+						   class="block px-4 py-3 text-sm font-medium text-gray-500 hover:bg-gray-50">
+							Powrót
+						</a>
+					</div>
+				</div>
+
+				<div class="hidden lg:flex lg:space-x-3 no-print">
 				<form action="{{ route('brewing.archive', $recipe) }}" method="POST" class="flex">
 					@csrf
 					<button type="submit"
@@ -126,9 +172,24 @@
 					@endif
 				</div>
 				<div class="p-6">
-					<div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-center">
+					<div class="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6 text-center">
 						
-						<div class="p-4 border rounded-xl {{ $recipe->yeast_pitched_at ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-dashed' }}">
+						<div class="p-4 border rounded-xl {{ $recipe->mashed_at ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-dashed' }}">
+								<p class="text-[12px] font-bold text-gray-400 uppercase mb-2">Zasyp</p>
+								@if($recipe->mashed_at)
+									<p class="text-orange-700 font-black text-lg leading-none">{{ $recipe->mashed_at->format('d.m.Y H:i') }}</p>
+								@elseif($recipe->yeast_pitched_at)
+									<p class="text-gray-400 text-[12px] font-bold uppercase">Brak daty zasypu</p>
+								@else
+									<form action="{{ route('brewing.status', $recipe) }}" method="POST">
+										@csrf
+										<input type="hidden" name="type" value="mash">
+										<button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white text-[12px] font-bold py-2 px-3 rounded-lg transition uppercase">Wykonano zasyp</button>
+									</form>
+								@endif
+							</div>
+
+							<div class="p-4 border rounded-xl {{ $recipe->yeast_pitched_at ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-dashed' }}">
 							<p class="text-[12px] font-bold text-gray-400 uppercase mb-2">Zadanie drożdży</p>
 							@if($recipe->yeast_pitched_at)
 								<p class="text-amber-700 font-black text-lg leading-none">{{ $recipe->yeast_pitched_at->format('d.m.Y H:i') }}</p>
@@ -136,7 +197,7 @@
 								<form action="{{ route('brewing.status', $recipe) }}" method="POST">
 									@csrf
 									<input type="hidden" name="type" value="yeast">
-									<button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white text-[12px] font-bold py-2 px-3 rounded-lg transition uppercase">Zadaj drożdże</button>
+									<button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white text-[12px] font-bold py-2 px-3 rounded-lg transition uppercase {{ !$recipe->mashed_at ? 'opacity-40' : '' }}" {{ !$recipe->mashed_at ? 'disabled' : '' }}>Zadaj drożdże</button>
 								</form>
 							@endif
 						</div>

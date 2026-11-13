@@ -79,27 +79,31 @@
                                         {{ $maltStock->invoice_number ?? '—' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div class="flex justify-end gap-2">
-                                            <a href="{{ route('malts.admin.edit', $maltStock->id) }}" 
-                                               class="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-md text-xs font-medium hover:bg-indigo-100 transition-colors dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800 dark:hover:bg-indigo-900/30">
-                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                </svg>
-                                                Edytuj
-                                            </a>
-                                            <form action="{{ route('malts.admin.destroy', $maltStock->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-md text-xs font-medium hover:bg-red-100 transition-colors dark:bg-red-900/20 dark:text-red-300 dark:border-red-800 dark:hover:bg-red-900/30"
-                                                    onclick="return confirm('Czy na pewno chcesz usunąć ten słód?')"
-                                                >
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                    </svg>
-                                                    Usuń
-                                                </button>
-                                            </form>
+                                        {{-- Menu akcji --}}
+                                        <div x-data="{ open: false, top: 0, left: 0 }" @click.outside="open = false" @scroll.window="open = false" class="inline-flex justify-end">
+                                            <button type="button" aria-label="Akcje"
+                                                    @click="const r = $el.getBoundingClientRect(); top = r.bottom + 6; left = r.right - 192; open = !open"
+                                                    class="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition dark:hover:bg-gray-700 dark:hover:text-gray-200">
+                                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+                                            </button>
+
+                                            <div x-show="open" x-transition x-cloak :style="`top: ${top}px; left: ${left}px`"
+                                                 class="fixed z-50 w-48 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden divide-y divide-gray-100 dark:divide-gray-700 text-left">
+                                                <a href="{{ route('malts.admin.edit', $maltStock->id) }}"
+                                                   class="block px-4 py-3 text-sm font-medium text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
+                                                    Edytuj
+                                                </a>
+
+                                                <form action="{{ route('malts.admin.destroy', $maltStock->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                            onclick="return confirm('Czy na pewno chcesz usunąć ten słód?')"
+                                                            class="w-full text-left px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30">
+                                                        Usuń
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

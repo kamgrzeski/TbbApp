@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MaltStock;
 use App\Models\Recipe;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BrewingController extends Controller
 {
@@ -59,16 +60,28 @@ class BrewingController extends Controller
     {
         $type = $request->input('type');
 
+        // Wykonano zasyp – dopiero tutaj odejmujemy słody z magazynu (tylko raz)
+        if ($type === 'mash') {
+            if (!$recipe->mashed_at && !$recipe->yeast_pitched_at) {
+                DB::transaction(function () use ($recipe) {
+                    foreach ($recipe->malts as $malt) {
+                        if (!empty($malt->malt_stock_id)) {
+                            MaltStock::where('id', $malt->malt_stock_id)->decrement('kg', $malt->kg);
+                        }
+                    }
+                    $recipe->mashed_at = now();
+                });
+            }
+        }
+
+        // Drożdże można zadać dopiero po zasypie
+        if ($type === 'yeast' && !$recipe->mashed_at && !$recipe->yeast_pitched_at) {
+            return back()->with('error', 'Najpierw wykonaj zasyp.');
+        }
+
         if ($type === 'yeast') {
             $recipe->yeast_pitched_at = now();
             $recipe->created_at = now();
-
-            // Odejmowanie słodów z magazynu przy zadawaniu drożdży
-            foreach ($recipe->malts as $malt) {
-                if (!empty($malt->malt_stock_id)) {
-                    \App\Models\MaltStock::where('id', $malt->malt_stock_id)->decrement('kg', $malt->kg);
-                }
-            }
         }
 
         if ($type === 'primary') $recipe->primary_fermentation_start = now();
