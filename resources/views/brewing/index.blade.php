@@ -71,7 +71,7 @@
 						<div class="bg-amber-50/40 overflow-hidden shadow-sm sm:rounded-xl border border-amber-200">
 							
 							{{-- Górny pasek wersji roboczych --}}
-							<div class="bg-gradient-to-r from-amber-50 to-amber-100/70 px-6 py-4 border-b border-amber-200 flex justify-between items-center">
+							<div class="bg-gradient-to-r from-amber-50 to-amber-100/70 px-4 sm:px-6 py-4 border-b border-amber-200 flex flex-wrap sm:flex-nowrap gap-2 sm:gap-0 justify-between items-center">
 								<div class="flex items-center gap-2">
 									<svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -83,14 +83,59 @@
 										{{ $draftRecipes->count() }} {{ $draftRecipes->count() === 1 ? 'warka' : 'warek' }}
 									</span>
 								</div>
-								<span class="text-xs font-medium text-amber-700 bg-amber-100/80 px-2.5 py-1 rounded-md border border-amber-200">
-									Brak daty zadania drożdży
-								</span>
 							</div>
 							
-							{{-- Tabela wersji roboczych --}}
+							{{-- Karty wersji roboczych (mobile) --}}
+								<div class="md:hidden divide-y divide-amber-100 bg-white">
+									@foreach($draftRecipes as $recipe)
+										<div
+												onclick="window.location='{{ route('brewing.show', $recipe) }}'"
+												class="p-4 cursor-pointer active:bg-amber-50/60"
+										>
+											<div class="flex justify-between items-start gap-3">
+												<div class="min-w-0">
+													<div class="font-bold text-gray-900 break-words">
+														{{ $recipe->name }}@if($recipe->number !== null) #{{ $recipe->number }}@endif
+													</div>
+													<div class="mt-1.5 flex flex-wrap gap-1.5">
+														@forelse($recipe->batches as $batch)
+															<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 border border-gray-200 text-xs font-bold font-mono">
+																#{{ $batch->batch_number }}
+															</span>
+														@empty
+															<span class="text-xs text-gray-400 italic">Brak numerów warek</span>
+														@endforelse
+													</div>
+												</div>
+												<div class="shrink-0 flex items-center gap-2"><span class="shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+													Szkic
+												</span>
+               @include('brewing.partials.recipe-actions', ['recipe' => $recipe, 'locked' => false])</div>
+											</div>
+
+											<div class="mt-3 flex flex-wrap items-center gap-2">
+												<span class="text-sm font-semibold text-gray-700">
+													{{ $recipe->volume ?? '—' }}@if($recipe->volume) L @endif
+												</span>
+												@if($recipe->akcpa_blg)
+													<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 text-sm font-bold">
+														BLG {{ $recipe->akcpa_blg }}°
+													</span>
+												@endif
+												@if($recipe->akcpa_value)
+													<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 text-sm font-bold">
+														AKC-PA {{ $recipe->akcpa_value }}
+													</span>
+												@endif
+											</div>
+
+										</div>
+									@endforeach
+								</div>
+
+								{{-- Tabela wersji roboczych (desktop) --}}
 							<div class="overflow-x-auto">
-								<table class="min-w-full divide-y divide-amber-200/60">
+								<table class="hidden md:table min-w-full divide-y divide-amber-200/60">
 									<thead class="bg-amber-50/75">
 									<tr>
 										<th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
@@ -121,7 +166,7 @@
 									@foreach($draftRecipes as $recipe)
 										<tr
 												onclick="window.location='{{ route('brewing.show', $recipe) }}'"
-												class="group cursor-pointer transition-colors duration-150 hover:bg-amber-50/50"
+												class="group cursor-pointer transition-colors duration-150 hover:bg-amber-50/50 {{ $loop->even ? 'bg-gray-50' : 'bg-white' }}"
 										>
 											{{-- Numer --}}
 											<td class="px-6 py-4 align-top">
@@ -195,32 +240,7 @@
 											
 											{{-- Akcje --}}
 											<td class="px-6 py-4 whitespace-nowrap text-right">
-												<form
-														action="{{ route('brewing.destroy', $recipe) }}"
-														method="POST"
-														onclick="event.stopPropagation()"
-														onsubmit="return confirm('Czy na pewno chcesz usunąć recepturę: {{ $recipe->name }}?');"
-														class="inline-block"
-												>
-													@csrf
-													@method('DELETE')
-													
-													<button
-															type="submit"
-															class="inline-flex items-center gap-1.5 px-3 py-1.5
-															   rounded-lg
-															   bg-red-50 text-red-700
-															   border border-red-200
-															   text-sm font-semibold
-															   hover:bg-red-600 hover:text-white hover:border-red-600
-															   transition-all duration-150"
-													>
-														<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-															<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4v3m-7 0h10"/>
-														</svg>
-														Usuń
-													</button>
-												</form>
+                                                    @include('brewing.partials.recipe-actions', ['recipe' => $recipe, 'locked' => false])
 											</td>
 										</tr>
 									@endforeach
@@ -240,7 +260,7 @@
 						<div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-xl border border-gray-200">
 							
 							{{-- Górny pasek miesiąca z podsumowaniem --}}
-							<div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+							<div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 sm:px-6 py-4 border-b border-gray-200 flex flex-wrap sm:flex-nowrap gap-2 sm:gap-0 justify-between items-center">
 								<div class="flex items-center gap-2">
 									<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -259,9 +279,57 @@
 								</div>
 							</div>
 							
-							{{-- Tabela warek danego miesiąca --}}
+							{{-- Karty warek danego miesiąca (mobile) --}}
+								<div class="md:hidden divide-y divide-gray-100 bg-white">
+									@forelse($monthRecipes as $recipe)
+										<div
+												onclick="window.location='{{ route('brewing.show', $recipe) }}'"
+												class="p-4 cursor-pointer active:bg-blue-50/60"
+										>
+											<div class="flex justify-between items-start gap-3">
+												<div class="min-w-0">
+													<div class="font-bold text-gray-900 break-words">
+														{{ $recipe->name }}@if($recipe->number !== null) #{{ $recipe->number }}@endif
+													</div>
+													<div class="mt-1.5 flex flex-wrap gap-1.5">
+														@forelse($recipe->batches as $batch)
+															<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 border border-gray-200 text-xs font-bold font-mono">
+																#{{ $batch->batch_number }}
+															</span>
+														@empty
+															<span class="text-xs text-gray-400 italic">Brak numerów warek</span>
+														@endforelse
+													</div>
+												</div>
+												<div class="shrink-0 flex items-center gap-2"><div class="text-sm font-medium text-gray-700">
+													{{ ($recipe->mashed_at ?? $recipe->yeast_pitched_at)->format('d.m.Y') }}
+												</div>
+               @include('brewing.partials.recipe-actions', ['recipe' => $recipe, 'locked' => $recipe->planned_at->isPast()])</div>
+											</div>
+
+											<div class="mt-3 flex flex-wrap items-center gap-2">
+												<span class="text-sm font-semibold text-gray-700">
+													{{ $recipe->volume }} <span class="text-xs text-gray-400">L</span>
+												</span>
+												<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 text-sm font-bold">
+													BLG {{ $recipe->akcpa_blg }}°
+												</span>
+												<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 text-sm font-bold">
+													AKC-PA {{ $recipe->akcpa_value }}
+												</span>
+											</div>
+
+										</div>
+									@empty
+										<div class="px-4 py-8 text-center text-sm text-gray-400 italic bg-gray-50/30">
+											Brak warek w tym miesiącu
+										</div>
+									@endforelse
+								</div>
+
+								{{-- Tabela warek danego miesiąca (desktop) --}}
 							<div class="overflow-x-auto">
-								<table class="min-w-full divide-y divide-gray-200">
+								<table class="hidden md:table min-w-full divide-y divide-gray-200">
 									<thead class="bg-gray-50/75">
 									<tr>
 										<th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
@@ -292,7 +360,7 @@
 									@forelse($monthRecipes as $recipe)
 										<tr
 												onclick="window.location='{{ route('brewing.show', $recipe) }}'"
-												class="group cursor-pointer transition-colors duration-150 hover:bg-blue-50/60"
+												class="group cursor-pointer transition-colors duration-150 hover:bg-blue-50/60 {{ $loop->even ? 'bg-gray-50' : 'bg-white' }}"
 										>
 											{{-- Numer --}}
 											<td class="px-6 py-4 whitespace-nowrap">
@@ -348,54 +416,13 @@
 											{{-- Data --}}
 											<td class="px-6 py-4 whitespace-nowrap">
 												<div class="text-sm font-medium text-gray-700">
-													{{ $recipe->planned_at->format('d.m.Y') }}
+													{{ ($recipe->mashed_at ?? $recipe->yeast_pitched_at)->format('d.m.Y') }}
 												</div>
 											</td>
 											
 											{{-- Akcje --}}
 											<td class="px-6 py-4 whitespace-nowrap text-right">
-												@if($recipe->planned_at->isPast())
-													{{-- Zablokowane usuwanie dla warek z przeszłości --}}
-													<span
-															title="Nie można usunąć zrealizowanej warki z przeszłości"
-															class="inline-flex items-center gap-1.5 px-3 py-1.5
-                   rounded-lg bg-gray-100 text-gray-400 border border-gray-200
-                   text-sm font-semibold cursor-not-allowed select-none"
-													>
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-            </svg>
-            Zablokowana
-        </span>
-												@else
-													{{-- Normalny przycisk usuwania dla przyszłych warek --}}
-													<form
-															action="{{ route('brewing.destroy', $recipe) }}"
-															method="POST"
-															onclick="event.stopPropagation()"
-															onsubmit="return confirm('Czy na pewno chcesz usunąć recepturę: {{ $recipe->name }}?');"
-															class="inline-block"
-													>
-														@csrf
-														@method('DELETE')
-														
-														<button
-																type="submit"
-																class="inline-flex items-center gap-1.5 px-3 py-1.5
-                       rounded-lg
-                       bg-red-50 text-red-700
-                       border border-red-200
-                       text-sm font-semibold
-                       hover:bg-red-600 hover:text-white hover:border-red-600
-                       transition-all duration-150"
-														>
-															<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-																<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4v3m-7 0h10"/>
-															</svg>
-															Usuń
-														</button>
-													</form>
-												@endif
+                                                    @include('brewing.partials.recipe-actions', ['recipe' => $recipe, 'locked' => $recipe->planned_at->isPast()])
 											</td>
 										</tr>
 									@empty
