@@ -144,7 +144,7 @@
 											{{-- Nazwa --}}
 											<td class="px-6 py-4">
 												<div class="font-bold text-gray-900 group-hover:text-amber-800 transition-colors">
-													{{ $recipe->name }} #{{ $recipe->number }}
+													{{ $recipe->name }}@if($recipe->number !== null) #{{ $recipe->number }}@endif
 												</div>
 											</td>
 											
@@ -313,7 +313,7 @@
 											{{-- Nazwa --}}
 											<td class="px-6 py-4">
 												<div class="font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
-													{{ $recipe->name }} #{{ $recipe->number }}
+													{{ $recipe->name }}@if($recipe->number !== null) #{{ $recipe->number }}@endif
 												</div>
 											</td>
 											

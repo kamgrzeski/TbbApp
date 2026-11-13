@@ -316,8 +316,7 @@ class RecipeForm extends Component
 
                 $recipeData['user_id'] = Auth::id();
 
-                // Numer produkcji/receptury
-                $recipeData['number'] = Auth::user()->recipes()->count() + 1;
+                // Numer receptury nadawany dopiero przy wykonaniu zasypu (wersja robocza nie ma numeru)
 
                 $recipe = Recipe::create($recipeData);
 
@@ -325,18 +324,8 @@ class RecipeForm extends Component
                 // TWORZENIE WAREK
                 // ==========================================
 
-                // Pobieramy ostatni globalny numer warki.
-                $lastBatchNumber = RecipeBatches::max('batch_number') ?? 0;
-
-                // batch_count:
-                // 1 = 500 L = jedna warka
-                // 2 = 1000 L = dwie warki
-
-                for ($i = 1; $i <= $this->batch_count; $i++) {
-                    $recipe->batches()->create([
-                        'batch_number' => $lastBatchNumber + $i,
-                    ]);
-                }
+                // Numery warek (globalne) nadawane są dopiero przy wykonaniu zasypu
+                // (BrewingController::updateStatus), a nie przy zapisie receptury.
             }
 
             // 3. Zapis Słodów

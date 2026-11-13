@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MaltStock;
 use App\Models\Recipe;
+use App\Models\RecipeBatches;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -69,6 +70,22 @@ class BrewingController extends Controller
                             MaltStock::where('id', $malt->malt_stock_id)->decrement('kg', $malt->kg);
                         }
                     }
+
+                    // Numery warek nadajemy przy zasypie, kolejno po ostatniej uwarzonej warce
+                    if ($recipe->batches()->doesntExist()) {
+                        $lastBatchNumber = RecipeBatches::max('batch_number') ?? 0;
+                        for ($i = 1; $i <= ($recipe->batch_count ?: 1); $i++) {
+                            $recipe->batches()->create([
+                                'batch_number' => $lastBatchNumber + $i,
+                            ]);
+                        }
+                    }
+
+                    // Numer receptury również przy zasypie – kolejny po ostatniej uwarzonej
+                    if ($recipe->number === null) {
+                        $recipe->number = (Recipe::where('user_id', $recipe->user_id)->max('number') ?? 0) + 1;
+                    }
+
                     $recipe->mashed_at = now();
                 });
             }
