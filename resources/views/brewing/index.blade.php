@@ -44,7 +44,10 @@
 					[$draftRecipes, $pitchedRecipes] = $recipes->partition(fn($recipe) => is_null($recipe->planned_at));
 					
 					// Zgrupowanie warek według formatu ROK-MIESIĄC (np. "2024-10")
-					$groupedPitched = $pitchedRecipes->groupBy(fn($recipe) => $recipe->planned_at->format('Y-m'));
+					// Sortowanie po numerze warki (najniższy numer warki receptury), potem zgrupowanie po miesiącu
+					$groupedPitched = $pitchedRecipes
+						->sortByDesc(fn($recipe) => $recipe->batches->max('batch_number') ?? 0)
+						->groupBy(fn($recipe) => $recipe->planned_at->format('Y-m'));
 					
 					// Ustalenie zakresu miesięcy: od najstarszej warki (lub początku bieżącego roku) do bieżącego miesiąca
 					$startDate = $pitchedRecipes->min('planned_at')?->copy()->startOfMonth() ?? now()->startOfYear();

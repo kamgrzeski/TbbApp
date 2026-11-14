@@ -74,10 +74,12 @@
 							Klonuj recepturę
 						</a>
 
+@unless($recipe->mashed_at)
 						<a href="{{ route('brewing.edit', $recipe) }}"
 						   class="block px-4 py-3 text-sm font-medium text-blue-700 hover:bg-gray-50">
 							Edytuj recepturę
 						</a>
+@endunless
 
 						<a href="{{ route('brewing.print', $recipe) }}" target="_blank"
 						   class="block px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50">
@@ -110,10 +112,12 @@
 					Klonuj Recepturę
 				</a>
 				
+@unless($recipe->mashed_at)
 				<a href="{{ route('brewing.edit', $recipe) }}"
 				   class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 shadow-md transition">
 					Edytuj Recepturę
 				</a>
+@endunless
 				
 				<a href="{{ route('brewing.print', $recipe) }}" target="_blank"
 				   class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 shadow-md transition">
@@ -437,7 +441,7 @@
 			</div>
 			@endif
 			<!-- SEKCJA: CHMIELENIE (PODZIAŁ NA WARKI) -->
-			@foreach($recipe->hops->groupBy('batch_number') as $batch => $hops)
+			@foreach($recipe->hops->groupBy('batch_number')->filter(fn($hops, $batch) => $batch <= ($recipe->batch_count ?: 1)) as $batch => $hops)
 				<div class="bg-white shadow-md sm:rounded-xl overflow-hidden border border-gray-100 mb-6">
 					<div class="bg-amber-600 border-b border-amber-700 px-6 py-3 flex justify-between items-center text-white">
 						<h3 class="font-bold uppercase tracking-widest text-xs">Chmielenie - Warka {{ $batch }}</h3>

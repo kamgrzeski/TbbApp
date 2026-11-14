@@ -14,6 +14,8 @@ class RecipeForm extends Component
 {
     public $recipeId = null;
     public $isClone = false;
+    // Receptura z wykonanym zasypem nie może być edytowana
+    public bool $locked = false;
 
     // Pola modelu
     public $recipe_name = '';
@@ -43,6 +45,7 @@ class RecipeForm extends Component
 
         if ($recipe) {
             $this->recipeId = $isClone ? null : $recipe->id;
+            $this->locked = !$isClone && !is_null($recipe->mashed_at);
             $this->recipe_name = $isClone ? $recipe->name . ' (Kopia)' : $recipe->name;
             $this->style = (string) ($recipe->style ?? '');
             $this->tank_number = $recipe->tank_number;
@@ -255,6 +258,14 @@ class RecipeForm extends Component
 
     public function save()
     {
+        // Blokada edycji po zasypie – sprawdzane też w bazie, nie tylko na podstawie stanu komponentu
+        if ($this->recipeId && !$this->isClone
+            && Recipe::whereKey($this->recipeId)->whereNotNull('mashed_at')->exists()) {
+            $this->locked = true;
+            session()->flash('error', 'Receptura ma wykonany zasyp – nie można jej edytować.');
+            return;
+        }
+
         // 1. Walidacja danych
         $this->validate([
             'recipe_name' => 'required|string|max:255',
@@ -348,6 +359,8 @@ class RecipeForm extends Component
             // 4. Zapis Chmieli
             foreach ($this->hops as $hopData) {
                 if (empty($hopData['name']) && empty($hopData['amount'])) continue;
+                // Chmiele z warki spoza zakresu batch_count (np. warka 2 przy jednej warce) nie są zapisywane
+                if ((int)$hopData['batch_number'] > max(1, (int)$this->batch_count)) continue;
 
                 $recipe->hops()->create([
                     'name'         => $hopData['name'] ?: 'Chmiel',

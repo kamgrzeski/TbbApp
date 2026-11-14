@@ -1,5 +1,10 @@
 <div>
     <style>
+        /* Bootstrap (ładowany na tym widoku) podkreśla wszystkie linki – nawigacja ma zostać bez podkreśleń */
+        nav a { text-decoration: none; }
+        /* Bootstrap dodaje h2 margines dolny – nagłówek strony ma wyglądać jak w pozostałych widokach */
+        header h2 { margin: 0; }
+
         @media (max-width: 767.98px) {
             .stack-mobile thead { display: none; }
             .stack-mobile,
@@ -29,19 +34,18 @@
             .stack-mobile td.td-action { text-align: right !important; }
         }
     </style>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ $isClone ? 'Klonowanie: '.$recipe_name : ($recipeId ? 'Edycja: '.$recipe_name : 'Nowa receptura') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                 <!-- Bootstrap CSS dla tabel i siatki -->
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
+                @if($locked)
+                    <div class="alert alert-warning fw-bold">Receptura ma wykonany zasyp – nie można jej edytować.</div>
+                @endif
+
                 <form wire:submit="save">
+                    <fieldset @disabled($locked)>
                     <div class="row mb-4 g-3">
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Nazwa receptury</label>
@@ -118,7 +122,7 @@
                     @foreach([1, 2] as $batchIdx)
                         @if($batch_count >= $batchIdx)
                             <div class="mb-5 p-4 border rounded bg-light shadow-sm {{ $batchIdx == 1 ? 'border-primary' : 'border-success' }}" wire:key="batch-{{ $batchIdx }}">
-                                <h4 class="fw-bold {{ $batchIdx == 1 ? 'text-primary' : 'text-success' }} mb-3">WARKA {{ $batchIdx }}</h4>
+                                <h4 class="fw-bold {{ $batchIdx == 1 ? 'text-primary' : 'text-success' }} mb-3">Zasyp Warka {{ $batchIdx }} (500L)</h4>
 
                                 <div class="table-responsive mb-3">
                                     <table class="stack-mobile table table-bordered align-middle bg-white">
@@ -201,18 +205,25 @@
                                                 </tr>
                                         @endforeach
                                         </tbody>
+                                        <tfoot class="table-light">
+                                        <tr>
+                                            <td class="text-end fw-bold text-uppercase small">Suma Warka {{ $batchIdx }}:</td>
+                                            <td class="text-center fw-bold">{{ number_format($this->stats['w'.$batchIdx]['kg'] ?? 0, 2) }} kg</td>
+                                            <td colspan="3" class="text-primary fw-bold fst-italic">Łącznie worków: {{ ceil(($this->stats['w'.$batchIdx]['kg'] ?? 0) / 25) }} szt.</td>
+                                        </tr>
+                                        </tfoot>
                                     </table>
                                 </div>
                                 <button type="button" wire:click="addMalt({{ $batchIdx }})" class="btn btn-sm btn-{{ $batchIdx == 1 ? 'primary' : 'success' }}">+ Dodaj słód</button>
 
-                                <h5 class="fw-bold mt-4 mb-3">Chmielenie</h5>
+                                <h5 class="fw-bold mt-4 mb-3">Chmielenie - Warka {{ $batchIdx }} <span class="badge bg-warning text-dark ms-2">{{ collect($hops)->where('batch_number', $batchIdx)->sum('amount') }} g</span></h5>
                                 <div class="table-responsive">
                                     <table class="stack-mobile table table-bordered align-middle bg-white text-center">
                                         <thead class="table-dark">
                                         <tr>
                                             <th class="text-start">Chmiel</th>
-                                            <th style="width: 120px;">Gramy</th>
-                                            <th style="width: 120px;">Alfa %</th>
+                                            <th style="width: 120px;">Ilość (g)</th>
+                                            <th style="width: 120px;">Alfa-kwasy</th>
                                             <th style="width: 120px;">Czas</th>
                                             <th style="width: 80px;">Akt.</th>
                                             <th style="width: 50px;"></th>
@@ -221,7 +232,7 @@
                                         <tbody>
                                         @foreach($hops as $idx => $hop)
                                             @if($hop['batch_number'] == $batchIdx)
-                                                <tr wire:key="hop-row-{{ $idx }}">
+                                                <tr wire:key="hop-row-{{ $idx }}" class="{{ empty($hop['is_active']) ? 'opacity-50 grayscale' : '' }}">
                                                     <td data-label="Chmiel"><input type="text" wire:model="hops.{{ $idx }}.name" class="form-control text-start"></td>
                                                     <td data-label="Gramy"><input type="number" step="0.1" wire:model="hops.{{ $idx }}.amount" class="form-control"></td>
                                                     <td data-label="Alfa %"><input type="number" step="0.1" wire:model="hops.{{ $idx }}.alpha_acids" class="form-control"></td>
@@ -270,6 +281,7 @@
                             {{ $isClone ? 'Utwórz kopię' : ($recipeId ? 'Zaktualizuj' : 'Zapisz') }}
                         </button>
                     </div>
+                    </fieldset>
                 </form>
             </div>
         </div>

@@ -73,12 +73,7 @@ class BrewingController extends Controller
 
                     // Numery warek nadajemy przy zasypie, kolejno po ostatniej uwarzonej warce
                     if ($recipe->batches()->doesntExist()) {
-                        $lastBatchNumber = RecipeBatches::max('batch_number') ?? 0;
-                        for ($i = 1; $i <= ($recipe->batch_count ?: 1); $i++) {
-                            $recipe->batches()->create([
-                                'batch_number' => $lastBatchNumber + $i,
-                            ]);
-                        }
+                        $this->createBatchesWithNextNumbers($recipe);
                     }
 
                     // Numer receptury również przy zasypie – kolejny po ostatniej uwarzonej
@@ -128,6 +123,11 @@ class BrewingController extends Controller
 
     public function update(Request $request, Recipe $recipe)
     {
+        // Receptura z wykonanym zasypem nie może być edytowana
+        if ($recipe->mashed_at) {
+            return back()->with('error', 'Receptura ma wykonany zasyp – nie można jej edytować.');
+        }
+
         $recipe->update([
             'name' => $request->recipe_name,
             'tank_number' => $request->tank_number,
@@ -153,6 +153,9 @@ class BrewingController extends Controller
 
         if ($request->has('hops')) {
             foreach ($request->hops as $hopData) {
+                // Chmiele z warki spoza zakresu batch_count nie są zapisywane
+                if ((int)$hopData['batch_number'] > max(1, (int)$recipe->batch_count)) continue;
+
                 $recipe->hops()->create([
                     'batch_number' => $hopData['batch_number'],
                     'name' => $hopData['name'] ?? 'Chmiel',
@@ -175,6 +178,15 @@ class BrewingController extends Controller
         $newRecipe->name = $recipe->name . ' (Kopia)';
         $newRecipe->created_at = now();
         $newRecipe->updated_at = now();
+
+        // Klon to nowa receptura: bez numeru, zasypu, drożdży i fermentacji
+        $newRecipe->number = null;
+        $newRecipe->mashed_at = null;
+        $newRecipe->yeast_pitched_at = null;
+        $newRecipe->finished_at = null;
+        $newRecipe->primary_fermentation_start = null;
+        $newRecipe->secondary_fermentation_start = null;
+        $newRecipe->is_archived = false;
 
         $newRecipe->save();
 
@@ -209,17 +221,19 @@ class BrewingController extends Controller
 
     public function edit(Recipe $recipe)
     {
-        $recipe->load(['malts', 'hops']);
+        $recipe->load(['malts', 'hops', 'comments.user']);
         return view('brewing.create', [
-            'recipe' => $recipe
+            'recipe' => $recipe,
+            'comments' => $recipe->comments,
         ]);
     }
     public function clone(Recipe $recipe)
     {
-        $recipe->load(['malts', 'hops']);
+        $recipe->load(['malts', 'hops', 'comments.user']);
         return view('brewing.create', [
             'recipe' => $recipe,
             'isClone' => true,
+            'comments' => $recipe->comments,
         ]);
     }
 
@@ -238,5 +252,35 @@ class BrewingController extends Controller
             'recipe',
             'totalMalt'
         ));
+    }
+
+    /**
+     * Tworzy warki receptury z numerami kolejnymi po ostatnim numerze w bazie.
+     * Unikalny indeks na batch_number wykrywa kolizję przy równoległym zasypie,
+     * wtedy numer jest liczony ponownie z nowego maksimum.
+     */
+    private function createBatchesWithNextNumbers(Recipe $recipe): void
+    {
+        $count = $recipe->batch_count ?: 1;
+
+        for ($attempt = 1; ; $attempt++) {
+            try {
+                // Zagnieżdżona transakcja = savepoint, więc po błędzie zewnętrzna transakcja zostaje ważna
+                DB::transaction(function () use ($recipe, $count) {
+                    $next = (RecipeBatches::max('batch_number') ?? 0) + 1;
+
+                    for ($i = 0; $i < $count; $i++) {
+                        $recipe->batches()->create(['batch_number' => $next + $i]);
+                    }
+                });
+
+                return;
+            } catch (\Illuminate\Database\QueryException $e) {
+                // 23000 = naruszenie ograniczenia unikalności
+                if ($e->getCode() !== '23000' || $attempt >= 5) {
+                    throw $e;
+                }
+            }
+        }
     }
 }
