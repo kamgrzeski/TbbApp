@@ -78,7 +78,7 @@
         .row {
             position: relative;
             display: grid;
-            grid-template-columns: 6vh 2fr 10vw 28vw;
+            grid-template-columns: 6vh 2fr 12vw auto; /* ostatnia kolumna = szerokość cen, bez pustego miejsca */
             align-items: center;
             gap: 2vw;
             padding: 1.5vh 2vw;
@@ -115,12 +115,19 @@
         .beer-desc { font-size: 2.3vh; color: var(--text-muted); margin-top: 0.5vh; }
 
         .stats {
-            display: grid; grid-template-columns: 1fr 1fr;
-            # border-left: 1px solid var(--border);# border-right: 1px solid var(--border);
+            display: grid; grid-template-columns: 1fr 1fr; column-gap: 2vw;
+            /* border-left: 1px solid var(--border); border-right: 1px solid var(--border); */
         }
         .stat { text-align: center; }
+        /* Pionowy pasek między Blg a Alk. (w środku odstępu column-gap) */
+        .stats .stat:first-child { position: relative; }
+        .stats .stat:first-child::after {
+            content: ""; position: absolute; top: 2%; bottom: 2%;
+            right: -1vw; width: 2px; margin-right: -1px;
+            background: rgba(255,255,255,.35);
+        }
         .stat .val { font-size: 4.0vh; font-weight: bold; }
-        .stat .lbl { font-size: 2vh; color: var(--text-dim); text-transform: uppercase; }
+        .stat .lbl { font-size: 2vh; color: var(--text-muted); text-transform: uppercase; }
 
         .prices { display: flex; gap: 1vw; justify-content: flex-end; }
         .price {
@@ -131,7 +138,7 @@
         .price .amt { font-size: 6.9vh; font-weight: bold; color: var(--gold); }
 
         /* Snacks */
-        .snacks-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5vw; }
+        .snacks-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5vw; }
         .snack-card {
             background: rgba(255,255,255,0.04); border: 1px solid var(--border);
             border-radius: 1vh; padding: 0.5vh; display: flex; justify-content: space-between; align-items: center;
@@ -202,6 +209,7 @@
             width: auto;
             margin-bottom: 4vh;
             filter: drop-shadow(0 0 20px rgba(199,161,58,0.3)); /* Delikatna poświata wokół logo */
+        }
 	
 	
 	</style>

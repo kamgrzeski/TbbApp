@@ -42,6 +42,10 @@
         box-shadow: 0 0 12px rgba(255, 100, 0, 0.6) !important;
     }
 
+    /* Blg / Alk. bliżej kafelków z cenami (nadpisuje inline margin z partials/scripts) */
+    .row .stats { margin-right: 0 !important; justify-self: end; }
+    .row .stats .stat:last-child { margin-left: 0 !important; }
+
     /* Kafelki z cenami */
     .price {
         background: rgba(255, 117, 24, 0.08) !important;
@@ -134,27 +138,32 @@
     }
 
     /* Płynący duch */
+    /* Ruch przez transform (GPU) zamiast left/top (przeliczanie layoutu) */
     .hw-ghost {
         position: absolute;
+        top: 0;
+        left: 0;
         width: 90px;
         height: 100px;
         opacity: 0;
+        will-change: transform, opacity;
         filter: drop-shadow(0 0 25px rgba(100, 255, 218, 0.85));
         animation: ghost-float 24s ease-in-out infinite;
     }
     @keyframes ghost-float {
-        0%   { left: -120px; top: 65vh; opacity: 0; transform: scale(0.6) rotate(10deg); }
+        0%   { transform: translate(-120px, 65vh) scale(0.6) rotate(10deg); opacity: 0; }
         15%  { opacity: 0.7; }
-        50%  { top: 40vh; transform: scale(1.05) rotate(-10deg); }
+        50%  { transform: translate(calc(52.5vw - 60px), 40vh) scale(1.05) rotate(-10deg); }
         85%  { opacity: 0.7; }
-        100% { left: 105vw; top: 55vh; opacity: 0; transform: scale(0.7) rotate(15deg); }
+        100% { transform: translate(105vw, 55vh) scale(0.7) rotate(15deg); opacity: 0; }
     }
 
     /* Chmara nietoperzy */
     .hw-bats {
         position: absolute;
-        top: 15vh;
-        left: -150px;
+        top: 0;
+        left: 0;
+        will-change: transform, opacity;
         animation: bats-fly 18s linear infinite;
     }
     .hw-bat-single {
@@ -166,11 +175,17 @@
         margin-right: 10px;
     }
     @keyframes bats-fly {
-        0%   { left: -160px; top: 25vh; transform: scale(0.6) rotate(10deg); opacity: 0; }
+        0%   { transform: translate(-160px, 25vh) scale(0.6) rotate(10deg); opacity: 0; }
         10%  { opacity: 0.9; }
-        50%  { top: 12vh; transform: scale(0.9) rotate(-15deg); }
+        50%  { transform: translate(calc(52.5vw - 80px), 12vh) scale(0.9) rotate(-15deg); }
         90%  { opacity: 0.9; }
-        100% { left: 105vw; top: 8vh; transform: scale(0.7) rotate(10deg); opacity: 0; }
+        100% { transform: translate(105vw, 8vh) scale(0.7) rotate(10deg); opacity: 0; }
+    }
+
+    /* Szanuj ustawienie "ogranicz animacje" w systemie / przeglądarce (np. na TV) */
+    @media (prefers-reduced-motion: reduce) {
+        .hw-bg-pumpkin, .hw-ghost, .hw-bats, .hw-spider-wrap { animation: none !important; }
+        .hw-ghost, .hw-bats { opacity: 0 !important; }
     }
 </style>
 

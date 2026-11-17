@@ -46,9 +46,7 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nazwa słodu</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Enzymatycznie</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ilość w magazynie</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ekstrakt</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ilość KG</th>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Faktura</th>
                                 <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Zarządzanie</th>
                             </tr>
@@ -58,22 +56,9 @@
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap font-medium">{{ $maltStock->name }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($maltStock->is_enzymatic_active)
-                                            <span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">Aktywny enzymatycznie</span>
-                                        @else
-                                            <span class="px-2 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300">Nieaktywny enzymatycznie</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $maltStock->kg <= 0 ? 'bg-red-600 text-white animate-pulse' : ($maltStock->kg < 50 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300') }}">
                                             {{ $maltStock->kg <= 0 ? number_format($maltStock->kg, 2) . ' kg' : number_format($maltStock->kg, 2) . ' kg' }}
                                         </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <span class="text-sm">{{ number_format($maltStock->extract, 2) }}</span>
-                                            <span class="ml-1 text-xs text-gray-400">%</span>
-                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                         {{ $maltStock->invoice_number ?? '—' }}

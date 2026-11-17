@@ -89,12 +89,12 @@
                     <div class="beer-desc">${beer.beer_description || ''}</div>
                 </div>
                 
-                <div class="stats" style="margin-right:35px">
+                <div class="stats">
                     <div class="stat">
                         <div class="val">${beer.beer_blg}°</div>
                         <div class="lbl">Blg</div>
                     </div>
-                    <div class="stat" style="margin-left:15px">
+                    <div class="stat">
                         <div class="val">${beer.beer_alc}%</div>
                         <div class="lbl">Alk.</div>
                     </div>
