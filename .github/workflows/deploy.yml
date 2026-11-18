@@ -1,0 +1,55 @@
+name: Deploy Laravel to core.twinbrothersbrewery.com
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Budowanie assetów (Vite / Tailwind / JS) po stronie GitHuba
+      # Jeśli nie używasz npm/Vite w projekcie, usuń te 3 kroki (Setup Node, Build, Upload build)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build frontend assets
+        run: |
+          npm ci
+          npm run build
+          tar -czf build.tar.gz public/build
+
+      - name: Upload built assets
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "build.tar.gz"
+          target: "/home/twinbrot/core-app"
+
+      - name: Deploy on DirectAdmin server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /home/twinbrot/core-app
+            /opt/alt/php83/usr/bin/php artisan down || true
+            git pull origin main
+            rm -rf public/build
+            tar -xzf build.tar.gz && rm -f build.tar.gz
+            /opt/alt/php83/usr/bin/php /home/twinbrot/composer.phar install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+            /opt/alt/php83/usr/bin/php artisan migrate --force
+            /opt/alt/php83/usr/bin/php artisan optimize:clear
+            /opt/alt/php83/usr/bin/php artisan optimize
+            /opt/alt/php83/usr/bin/php artisan up
