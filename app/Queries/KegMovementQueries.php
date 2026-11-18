@@ -3,42 +3,38 @@
 namespace App\Queries;
 
 use App\Models\KegMovement;
+use App\Queries\Contracts\KegMovementQueriesInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class KegMovementQueries
+class KegMovementQueries implements KegMovementQueriesInterface
 {
-
-    public static function currentIssues(): Builder
+    public function queryCurrentIssues(): Builder
     {
         return KegMovement::query()
             ->where('type', 'issue')
             ->where('is_current', true);
     }
 
-
-    public static function currentIssuesForRecipeOnOtherTap(int $recipeId, int $tapNumber): Builder
+    public function queryCurrentIssuesOfRecipeOnOtherTap(int $recipeId, int $tapNumber): Builder
     {
-        return self::currentIssues()
+        return $this->queryCurrentIssues()
             ->where('recipe_id', $recipeId)
             ->where('tap_number', '!=', $tapNumber);
     }
 
-
-    public static function currentIssuesOnTap(int $tapNumber): Builder
+    public function queryCurrentIssuesOnTap(int $tapNumber): Builder
     {
-        return self::currentIssues()->where('tap_number', $tapNumber);
+        return $this->queryCurrentIssues()->where('tap_number', $tapNumber);
     }
 
-
-    public static function isCurrent(): Builder
+    public function queryCurrent(): Builder
     {
         return KegMovement::query()->where('is_current', 1);
     }
 
-
-    public static function currentIssuesWithRecipeAndStock(): Collection
+    public function findCurrentIssuesWithRecipeAndStock(): Collection
     {
         return KegMovement::with(['recipe', 'stock'])
             ->where('is_current', 1)
@@ -47,17 +43,15 @@ class KegMovementQueries
             ->get();
     }
 
-
-    public static function currentTapConnections(): Collection
+    public function findCurrentTapConnections(): Collection
     {
-        return self::currentIssues()
+        return $this->queryCurrentIssues()
             ->with('recipe')
             ->orderByDesc('id')
             ->get();
     }
 
-
-    public static function paginatedWithRecipe(int $perPage = 30): LengthAwarePaginator
+    public function paginateWithRecipe(int $perPage = 30): LengthAwarePaginator
     {
         return KegMovement::query()
             ->with('recipe')

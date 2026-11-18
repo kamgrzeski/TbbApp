@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Queries\MaltStockQueries;
+use App\Queries\Contracts\MaltStockQueriesInterface;
 use App\Http\Requests\StoreMaltStockRequest;
 use App\Http\Requests\UpdateMaltStockRequest;
 use App\Models\MaltStock;
@@ -12,9 +12,13 @@ use Illuminate\View\View;
 
 class MaltStockController extends Controller
 {
+    public function __construct(
+        private readonly MaltStockQueriesInterface $maltStockQueries,
+    ) {}
+
     public function index(): View
     {
-        $malts = MaltStockQueries::orderedByKgDesc();
+        $malts = $this->maltStockQueries->findAllOrderedByKgDesc();
 
         $stats = [
             'total' => $malts->count(),

@@ -3,30 +3,29 @@
 namespace App\Queries;
 
 use App\Models\Recipe;
+use App\Queries\Contracts\RecipeQueriesInterface;
 use Illuminate\Database\Eloquent\Collection;
 
-class RecipeQueries
+class RecipeQueries implements RecipeQueriesInterface
 {
-    public static function find(int|string $id): ?Recipe
+    public function findById(int|string $id): ?Recipe
     {
         return Recipe::find($id);
     }
 
-    public static function findOrFail(int|string $id): Recipe
+    public function findByIdOrFail(int|string $id): Recipe
     {
         return Recipe::findOrFail($id);
     }
 
-
-    public static function listing(): Collection
+    public function findAllWithBatchesNewestFirst(): Collection
     {
         return Recipe::with('batches')
             ->orderByDesc('recipes.id')
             ->get();
     }
 
-
-    public static function brewedAndActive(): Collection
+    public function findActiveFinishedNewestFirst(): Collection
     {
         return Recipe::query()
             ->notArchived()
@@ -35,19 +34,17 @@ class RecipeQueries
             ->get();
     }
 
-
-    public static function isMashed(int $recipeId): bool
+    public function existsMashed(int $recipeId): bool
     {
         return Recipe::whereKey($recipeId)->whereNotNull('mashed_at')->exists();
     }
 
-
-    public static function isYeastPitched(int $recipeId): bool
+    public function existsYeastPitched(int $recipeId): bool
     {
         return Recipe::whereKey($recipeId)->whereNotNull('yeast_pitched_at')->exists();
     }
 
-    public static function maxNumberForUser(int $userId): int
+    public function findMaxNumberForUser(int $userId): int
     {
         return (int) (Recipe::where('user_id', $userId)->max('number') ?? 0);
     }

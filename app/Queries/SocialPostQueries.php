@@ -3,20 +3,20 @@
 namespace App\Queries;
 
 use App\Models\SocialPost;
+use App\Queries\Contracts\SocialPostQueriesInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class SocialPostQueries
+class SocialPostQueries implements SocialPostQueriesInterface
 {
-    
-    public static function paginatedWithRecipe(int $perPage = 20): LengthAwarePaginator
+    public function paginateWithRecipeNewestFirst(int $perPage = 20): LengthAwarePaginator
     {
         return SocialPost::with('recipe:id,name')
             ->latest()
             ->paginate($perPage);
     }
 
-    
-    public static function totals(): array
+    public function findUsageTotals(): array
     {
         return [
             'posts' => SocialPost::count(),
@@ -26,8 +26,7 @@ class SocialPostQueries
         ];
     }
 
-    
-    public static function publishedContentSamples(int $limit): \Illuminate\Support\Collection
+    public function findRecentPublishedContent(int $limit): Collection
     {
         return SocialPost::query()
             ->where('status', SocialPost::STATUS_PUBLISHED)

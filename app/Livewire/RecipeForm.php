@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use App\Queries\RecipeQueries;
-use App\Queries\MaltStockQueries;
+use App\Queries\Contracts\MaltStockQueriesInterface;
+use App\Queries\Contracts\RecipeQueriesInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -12,6 +12,15 @@ use App\Models\Recipe;
 
 class RecipeForm extends Component
 {
+    protected RecipeQueriesInterface $recipeQueries;
+    protected MaltStockQueriesInterface $maltStockQueries;
+
+    public function boot(RecipeQueriesInterface $recipeQueries, MaltStockQueriesInterface $maltStockQueries): void
+    {
+        $this->recipeQueries = $recipeQueries;
+        $this->maltStockQueries = $maltStockQueries;
+    }
+
     public $recipeId = null;
     public $isClone = false;
     public bool $locked = false;
@@ -33,7 +42,7 @@ class RecipeForm extends Component
     #[Computed]
     public function availableMalts()
     {
-        return MaltStockQueries::orderedByName(['id', 'name', 'extract', 'kg', 'is_enzymatic_active']);
+        return $this->maltStockQueries->findAllOrderedByName(['id', 'name', 'extract', 'kg', 'is_enzymatic_active']);
     }
 
     public function mount($recipe = null, $isClone = false)
@@ -96,7 +105,7 @@ class RecipeForm extends Component
 
     public function updateMaltExtract($index, $maltId)
     {
-        $malt = MaltStockQueries::find($maltId);
+        $malt = $this->maltStockQueries->findById($maltId);
         if ($malt) {
             $this->malts[$index]['malt_stock_id'] = $maltId;
             $this->malts[$index]['name'] = $malt->name;
@@ -153,7 +162,7 @@ class RecipeForm extends Component
 
             $extract = 80;
             if (!empty($m['malt_stock_id'])) {
-                $stockMalt = MaltStockQueries::find($m['malt_stock_id']);
+                $stockMalt = $this->maltStockQueries->findById($m['malt_stock_id']);
                 $extract = $stockMalt ? (float)$stockMalt->extract : 80;
             } elseif (isset($m['extract'])) {
                 $extract = (float)$m['extract'];
@@ -213,7 +222,7 @@ class RecipeForm extends Component
     private function maltStockIsEnough(): bool
     {
         $ids = collect($this->malts)->pluck('malt_stock_id')->filter()->unique()->values();
-        $stockKg = MaltStockQueries::kgByIds($ids);
+        $stockKg = $this->maltStockQueries->pluckKgById($ids);
 
         $requested = [];
         foreach ($this->malts as $m) {
@@ -244,7 +253,7 @@ class RecipeForm extends Component
     public function save()
     {
         if ($this->recipeId && !$this->isClone
-            && RecipeQueries::isMashed($this->recipeId)) {
+            && $this->recipeQueries->existsMashed($this->recipeId)) {
             $this->locked = true;
             session()->flash('error', 'Receptura ma wykonany zasyp – nie można jej edytować.');
             return;
@@ -260,7 +269,7 @@ class RecipeForm extends Component
         ]);
 
         $yeastPitched = $this->recipeId && !$this->isClone
-            && RecipeQueries::isYeastPitched($this->recipeId);
+            && $this->recipeQueries->existsYeastPitched($this->recipeId);
 
         if (!$yeastPitched && !$this->maltStockIsEnough()) {
             return;
@@ -291,7 +300,7 @@ class RecipeForm extends Component
                 // ==========================================
                 // ==========================================
 
-                $recipe = RecipeQueries::findOrFail($this->recipeId);
+                $recipe = $this->recipeQueries->findByIdOrFail($this->recipeId);
 
                 $recipe->update($recipeData);
 
@@ -317,7 +326,7 @@ class RecipeForm extends Component
 
                 $stockMalt = null;
                 if (!empty($maltData['malt_stock_id'])) {
-                    $stockMalt = MaltStockQueries::find($maltData['malt_stock_id']);
+                    $stockMalt = $this->maltStockQueries->findById($maltData['malt_stock_id']);
                 }
 
                 $recipe->malts()->create([

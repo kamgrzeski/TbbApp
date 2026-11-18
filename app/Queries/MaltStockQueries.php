@@ -3,29 +3,27 @@
 namespace App\Queries;
 
 use App\Models\MaltStock;
+use App\Queries\Contracts\MaltStockQueriesInterface;
 use Illuminate\Database\Eloquent\Collection;
 
-class MaltStockQueries
+class MaltStockQueries implements MaltStockQueriesInterface
 {
-    
-    public static function orderedByName(array $columns = ['*']): Collection
+    public function findAllOrderedByName(array $columns = ['*']): Collection
     {
         return MaltStock::orderBy('name')->get($columns);
     }
 
-    
-    public static function orderedByKgDesc(): Collection
+    public function findAllOrderedByKgDesc(): Collection
     {
         return MaltStock::orderBy('kg', 'desc')->get();
     }
 
-    public static function find(int|string $id): ?MaltStock
+    public function findById(int|string $id): ?MaltStock
     {
         return MaltStock::find($id);
     }
 
-    
-    public static function kgByIds(array $ids): Collection
+    public function pluckKgById(array $ids): Collection
     {
         return MaltStock::whereIn('id', $ids)->pluck('kg', 'id');
     }

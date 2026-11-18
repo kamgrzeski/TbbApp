@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Queries\RecipeQueries;
-use App\Queries\RecipeBatchesQueries;
+use App\Queries\Contracts\RecipeBatchesQueriesInterface;
+use App\Queries\Contracts\RecipeQueriesInterface;
 use App\Models\MaltStock;
 use App\Models\Recipe;
 use App\Http\Requests\StoreGravityReadingRequest;
@@ -13,9 +13,14 @@ use Illuminate\Support\Facades\DB;
 
 class RecipeController extends Controller
 {
+    public function __construct(
+        private readonly RecipeQueriesInterface $recipeQueries,
+        private readonly RecipeBatchesQueriesInterface $recipeBatchesQueries,
+    ) {}
+
     public function index()
     {
-        $recipes = RecipeQueries::listing();
+        $recipes = $this->recipeQueries->findAllWithBatchesNewestFirst();
 
         return view('brewing.index', compact('recipes'));
     }
@@ -74,7 +79,7 @@ class RecipeController extends Controller
                     }
 
                     if ($recipe->number === null) {
-                        $recipe->number = RecipeQueries::maxNumberForUser($recipe->user_id) + 1;
+                        $recipe->number = $this->recipeQueries->findMaxNumberForUser($recipe->user_id) + 1;
                     }
 
                     $recipe->mashed_at = now();
@@ -250,7 +255,7 @@ class RecipeController extends Controller
         for ($attempt = 1; ; $attempt++) {
             try {
                 DB::transaction(function () use ($recipe, $count) {
-                    $next = RecipeBatchesQueries::maxBatchNumber() + 1;
+                    $next = $this->recipeBatchesQueries->findMaxBatchNumber() + 1;
 
                     for ($i = 0; $i < $count; $i++) {
                         $recipe->batches()->create(['batch_number' => $next + $i]);

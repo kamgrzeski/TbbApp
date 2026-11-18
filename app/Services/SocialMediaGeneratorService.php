@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Queries\SocialPostQueries;
+use App\Queries\Contracts\SocialPostQueriesInterface;
 use App\Models\Recipe;
 use App\Models\SocialPost;
 use Carbon\CarbonInterface;
@@ -14,6 +14,10 @@ use Illuminate\Support\Str;
 
 class SocialMediaGeneratorService
 {
+    public function __construct(
+        private readonly SocialPostQueriesInterface $socialPostQueries,
+    ) {}
+
     private const ENDPOINT = '/v1/messages';
 
     private int $inputTokens = 0;
@@ -373,7 +377,7 @@ PROMPT;
             return '';
         }
 
-        $posts = SocialPostQueries::publishedContentSamples($count * 4)
+        $posts = $this->socialPostQueries->findRecentPublishedContent($count * 4)
             ->reject(fn ($text) => $this->violations((string) $text) !== [])
             ->take($count);
 

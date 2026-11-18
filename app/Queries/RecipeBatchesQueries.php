@@ -3,11 +3,11 @@
 namespace App\Queries;
 
 use App\Models\RecipeBatches;
+use App\Queries\Contracts\RecipeBatchesQueriesInterface;
 
-class RecipeBatchesQueries
+class RecipeBatchesQueries implements RecipeBatchesQueriesInterface
 {
-    
-    public static function maxBatchNumber(): int
+    public function findMaxBatchNumber(): int
     {
         return (int) (RecipeBatches::max('batch_number') ?? 0);
     }

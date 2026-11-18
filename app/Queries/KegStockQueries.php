@@ -3,19 +3,18 @@
 namespace App\Queries;
 
 use App\Models\KegStock;
+use App\Queries\Contracts\KegStockQueriesInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
-class KegStockQueries
+class KegStockQueries implements KegStockQueriesInterface
 {
-    
-    public static function forRecipe(int $recipeId): Builder
+    public function queryForRecipe(int $recipeId): Builder
     {
         return KegStock::query()->where('recipe_id', $recipeId);
     }
 
-    
-    public static function topByFullKegs(int $limit = 10): Collection
+    public function findTopByFullKegs(int $limit = 10): Collection
     {
         return KegStock::query()
             ->with(['recipe', 'movements'])
@@ -24,8 +23,7 @@ class KegStockQueries
             ->get();
     }
 
-    
-    public static function coolerStocks(): Collection
+    public function findNotArchivedOrderedByFullKegs(): Collection
     {
         return KegStock::query()
             ->with('recipe')
@@ -34,14 +32,12 @@ class KegStockQueries
             ->get();
     }
 
-    
-    public static function totalFullKegs()
+    public function sumFullKegs()
     {
         return KegStock::query()->sum('full_kegs');
     }
 
-    
-    public static function anyFullKegsForRecipes(array $recipeIds): bool
+    public function existsFullKegsForRecipes(array $recipeIds): bool
     {
         return KegStock::query()
             ->whereIn('recipe_id', $recipeIds)

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Queries\RecipeQueries;
-use App\Queries\KegStockQueries;
-use App\Queries\KegMovementQueries;
+use App\Queries\Contracts\RecipeQueriesInterface;
+use App\Queries\Contracts\KegMovementQueriesInterface;
+use App\Queries\Contracts\KegStockQueriesInterface;
 use App\Models\KegMovement;
 use App\Services\KegStockService;
 use App\Http\Requests\IssueKegRequest;
@@ -15,24 +15,28 @@ use Throwable;
 
 class KegStockController extends Controller
 {
-    public function __construct(private readonly KegStockService $kegStockService)
-    {
+    public function __construct(
+        private readonly KegStockService $kegStockService,
+        private readonly KegStockQueriesInterface $kegStockQueries,
+        private readonly KegMovementQueriesInterface $kegMovementQueries,
+        private readonly RecipeQueriesInterface $recipeQueries,
+    ) {
     }
 
     public function index()
     {
-        $stocks = KegStockQueries::topByFullKegs(10);
+        $stocks = $this->kegStockQueries->findTopByFullKegs(10);
 
         $summary = $this->kegStockService->summary();
 
-        $recipes = RecipeQueries::brewedAndActive();
+        $recipes = $this->recipeQueries->findActiveFinishedNewestFirst();
 
         return view('kegs.admin.index', [
             'stocks' => $stocks,
             'recipes' => $recipes,
             'summary' => $summary,
             'stocksMovements' => $this->kegStockService->stocksMovements(),
-            'coolerStocks' => KegStockQueries::coolerStocks(),
+            'coolerStocks' => $this->kegStockQueries->findNotArchivedOrderedByFullKegs(),
             'recentConnections' => $this->kegStockService->currentTapConnections(),
         ]);
     }
@@ -42,7 +46,7 @@ class KegStockController extends Controller
         $data = $request->validated();
 
         try {
-            $recipe = RecipeQueries::findOrFail($data['recipe_id']);
+            $recipe = $this->recipeQueries->findByIdOrFail($data['recipe_id']);
 
             $this->kegStockService->issue(
                 $recipe,
@@ -65,7 +69,7 @@ class KegStockController extends Controller
 
     public function movements()
     {
-        $movements = KegMovementQueries::paginatedWithRecipe(30);
+        $movements = $this->kegMovementQueries->paginateWithRecipe(30);
 
         return view('kegs.admin.movements', [
             'movements' => $movements,
@@ -77,7 +81,7 @@ class KegStockController extends Controller
         $data = $request->validated();
 
         try {
-            $recipe = RecipeQueries::findOrFail($data['recipe_id']);
+            $recipe = $this->recipeQueries->findByIdOrFail($data['recipe_id']);
 
             $this->kegStockService->pool(
                 $recipe,
@@ -102,7 +106,7 @@ class KegStockController extends Controller
         $data = $request->validated();
 
         try {
-            $recipe = RecipeQueries::findOrFail($data['recipe_id']);
+            $recipe = $this->recipeQueries->findByIdOrFail($data['recipe_id']);
 
             $this->kegStockService->remove(
                 $recipe,

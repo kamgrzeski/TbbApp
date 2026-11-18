@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Queries\SocialPostQueries;
-use App\Queries\RecipeQueries;
+use App\Queries\Contracts\RecipeQueriesInterface;
+use App\Queries\Contracts\SocialPostQueriesInterface;
 use App\Models\Recipe;
 use App\Models\SocialPost;
 use App\Services\SocialMediaGenerationException;
@@ -17,15 +17,18 @@ use Illuminate\View\View;
 
 class SocialPostController extends Controller
 {
-    public function __construct(private SocialMediaGeneratorService $generator)
-    {
+    public function __construct(
+        private SocialMediaGeneratorService $generator,
+        private readonly SocialPostQueriesInterface $socialPostQueries,
+        private readonly RecipeQueriesInterface $recipeQueries,
+    ) {
     }
 
     public function index(): View
     {
-        $posts = SocialPostQueries::paginatedWithRecipe(20);
+        $posts = $this->socialPostQueries->paginateWithRecipeNewestFirst(20);
 
-        $totals = SocialPostQueries::totals();
+        $totals = $this->socialPostQueries->findUsageTotals();
 
         return view('social-posts.index', compact('posts', 'totals'));
     }
@@ -44,7 +47,7 @@ class SocialPostController extends Controller
     {
         $data = $request->validated();
 
-        $recipe = !empty($data['recipe_id']) ? RecipeQueries::find($data['recipe_id']) : null;
+        $recipe = !empty($data['recipe_id']) ? $this->recipeQueries->findById($data['recipe_id']) : null;
         $eventAt = !empty($data['event_at']) ? CarbonImmutable::parse($data['event_at']) : null;
 
         try {
@@ -104,7 +107,7 @@ class SocialPostController extends Controller
 
     public function regenerate(SocialPost $socialPost): RedirectResponse
     {
-        $recipe = $socialPost->recipe_id ? RecipeQueries::find($socialPost->recipe_id) : null;
+        $recipe = $socialPost->recipe_id ? $this->recipeQueries->findById($socialPost->recipe_id) : null;
 
         try {
             $result = $this->generator->generate(

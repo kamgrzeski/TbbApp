@@ -2,18 +2,25 @@
 
 namespace App\Services;
 
+use App\Queries\Contracts\GoPosItemsQueriesInterface;
+use App\Queries\Contracts\KegStockQueriesInterface;
+use App\Queries\Contracts\KegMovementQueriesInterface;
+use App\Queries\Contracts\KegInventoryQueriesInterface;
 use App\Models\KegMovement;
 use App\Models\KegStock;
 use App\Models\Recipe;
-use App\Queries\GoPosItemsQueries;
-use App\Queries\KegInventoryQueries;
-use App\Queries\KegMovementQueries;
-use App\Queries\KegStockQueries;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class KegStockService
 {
+    public function __construct(
+        private readonly KegInventoryQueriesInterface $inventoryQueries,
+        private readonly KegMovementQueriesInterface $kegMovementQueries,
+        private readonly KegStockQueriesInterface $kegStockQueries,
+        private readonly GoPosItemsQueriesInterface $goPosItemsQueries,
+    ) {}
+
     public const TOTAL_KEGS = 20;
     public const KEG_CAPACITY_LITERS = 50;
     public const KEG_MAX_ML = 47000;
@@ -24,7 +31,7 @@ class KegStockService
     {
         DB::transaction(function () use ($recipe, $quantity, $note) {
 
-            $inventory = KegInventoryQueries::singleton(lock: true);
+            $inventory = $this->inventoryQueries->findOrCreateSingleton(lock: true);
 
             if ($inventory->empty_kegs < $quantity) {
                 throw new \RuntimeException(
@@ -32,7 +39,7 @@ class KegStockService
                 );
             }
 
-            $stock = KegStockQueries::forRecipe($recipe->id)
+            $stock = $this->kegStockQueries->queryForRecipe($recipe->id)
                 ->lockForUpdate()
                 ->first();
 
@@ -73,11 +80,11 @@ class KegStockService
 
         return DB::transaction(function () use ($recipe, $quantity, $tapNumber, $note) {
 
-            $stock = KegStockQueries::forRecipe($recipe->id)
+            $stock = $this->kegStockQueries->queryForRecipe($recipe->id)
                 ->lockForUpdate()
                 ->first();
 
-            $goPosItems = GoPosItemsQueries::all();
+            $goPosItems = $this->goPosItemsQueries->findAll();
 
             if (!$stock || $stock->full_kegs < $quantity) {
                 $available = $stock?->full_kegs ?? 0;
@@ -88,7 +95,7 @@ class KegStockService
                 );
             }
 
-            $onOtherTap = KegMovementQueries::currentIssuesForRecipeOnOtherTap($recipe->id, $tapNumber)
+            $onOtherTap = $this->kegMovementQueries->queryCurrentIssuesOfRecipeOnOtherTap($recipe->id, $tapNumber)
                 ->lockForUpdate()
                 ->first();
 
@@ -96,7 +103,7 @@ class KegStockService
                 throw new RuntimeException("Piwo {$recipe->name} jest już podłączone do kranu {$onOtherTap->tap_number}.");
             }
 
-            $tapCurrent = KegMovementQueries::currentIssuesOnTap($tapNumber)
+            $tapCurrent = $this->kegMovementQueries->queryCurrentIssuesOnTap($tapNumber)
                 ->lockForUpdate()
                 ->get();
 
@@ -106,7 +113,7 @@ class KegStockService
                     ->reject(fn ($id) => $id === $recipe->id);
 
                 if ($otherRecipeIds->isNotEmpty()) {
-                    $stillInCooler = KegStockQueries::anyFullKegsForRecipes($otherRecipeIds->all());
+                    $stillInCooler = $this->kegStockQueries->existsFullKegsForRecipes($otherRecipeIds->all());
 
                     if ($stillInCooler) {
                         throw new RuntimeException("Kran {$tapNumber} ma podłączone inne piwo z pełnymi kegami w chłodni.");
@@ -131,7 +138,7 @@ class KegStockService
                 'capacity' => self::KEG_MAX_ML,
             ]);
 
-            $inventory = KegInventoryQueries::lockedFirstOrFail();
+            $inventory = $this->inventoryQueries->findLockedOrFail();
 
             $stock->refresh();
 
@@ -148,9 +155,9 @@ class KegStockService
 
     public function summary(): array
     {
-        $inventory = KegInventoryQueries::singleton();
+        $inventory = $this->inventoryQueries->findOrCreateSingleton();
 
-        $full = KegStockQueries::totalFullKegs();
+        $full = $this->kegStockQueries->sumFullKegs();
         $empty = $inventory->empty_kegs;
 
         return [
@@ -164,12 +171,12 @@ class KegStockService
 
     public function stocksMovements()
     {
-        return KegMovementQueries::currentIssuesWithRecipeAndStock();
+        return $this->kegMovementQueries->findCurrentIssuesWithRecipeAndStock();
     }
 
     public function currentTapConnections()
     {
-        return KegMovementQueries::currentTapConnections();
+        return $this->kegMovementQueries->findCurrentTapConnections();
     }
 
     public function pool(Recipe $recipe, int $quantity, ?string $note = null): KegStock
@@ -180,7 +187,7 @@ class KegStockService
 
         return DB::transaction(function () use ($recipe, $quantity, $note) {
 
-            $stock = KegStockQueries::forRecipe($recipe->id)
+            $stock = $this->kegStockQueries->queryForRecipe($recipe->id)
                 ->lockForUpdate()
                 ->first();
 
@@ -191,7 +198,7 @@ class KegStockService
                 ]);
             }
 
-            $inventory = KegInventoryQueries::singleton(lock: true);
+            $inventory = $this->inventoryQueries->findOrCreateSingleton(lock: true);
 
             $available = max(0, $inventory->empty_kegs - self::TAPS_COUNT);
 
@@ -231,7 +238,7 @@ class KegStockService
         }
 
         DB::transaction(function () use ($recipe, $quantity, $note) {
-            $stock = KegStockQueries::forRecipe($recipe->id)
+            $stock = $this->kegStockQueries->queryForRecipe($recipe->id)
                 ->lockForUpdate()
                 ->first();
 
@@ -253,7 +260,7 @@ class KegStockService
                 'note' => $note,
             ]);
 
-            $inventory = KegInventoryQueries::singleton(lock: true);
+            $inventory = $this->inventoryQueries->findOrCreateSingleton(lock: true);
 
             $inventory->increment('empty_kegs', $quantity);
 

@@ -3,11 +3,12 @@
 namespace App\Queries;
 
 use App\Models\GoPosItems;
+use App\Queries\Contracts\GoPosItemsQueriesInterface;
 use Illuminate\Database\Eloquent\Collection;
 
-class GoPosItemsQueries
+class GoPosItemsQueries implements GoPosItemsQueriesInterface
 {
-    public static function all(): Collection
+    public function findAll(): Collection
     {
         return GoPosItems::query()->get();
     }

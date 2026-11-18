@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Queries\BeerwallQueries;
+use App\Queries\Contracts\BeerwallQueriesInterface;
 use App\Http\Requests\BeerwallSettingsRequest;
 use App\Http\Requests\StoreBeerwallBeerRequest;
 use App\Http\Requests\UpdateBeerwallBeerRequest;
@@ -12,28 +12,32 @@ use Illuminate\Http\Request;
 
 class BeerwallController extends Controller
 {
+    public function __construct(
+        private readonly BeerwallQueriesInterface $beerwallQueries,
+    ) {}
+
     public function indexFront()
     {
         return view('beerwall.index')->with([
-            'beerwall' => BeerwallQueries::ordered(),
+            'beerwall' => $this->beerwallQueries->findAllOrderedByPosition(),
         ]);
     }
     public function indexHalloween()
     {
         return view('beerwall.index_halloween')->with([
-            'beerwall' => BeerwallQueries::ordered(),
+            'beerwall' => $this->beerwallQueries->findAllOrderedByPosition(),
         ]);
     }
     public function indexChristmas()
     {
         return view('beerwall.index_christmas')->with([
-            'beerwall' => BeerwallQueries::ordered(),
+            'beerwall' => $this->beerwallQueries->findAllOrderedByPosition(),
         ]);
     }
     public function index()
     {
-        $beers = BeerwallQueries::ordered();
-        $drafts = BeerwallQueries::drafts();
+        $beers = $this->beerwallQueries->findAllOrderedByPosition();
+        $drafts = $this->beerwallQueries->findDrafts();
         return view('beerwall.admin.index', compact('beers', 'drafts'));
     }
 

@@ -2,11 +2,15 @@
 
 namespace App\Services;
 
-use App\Queries\BeerwallQueries;
+use App\Queries\Contracts\BeerwallQueriesInterface;
 use Illuminate\Support\Facades\Http;
 
 class FirebaseService
 {
+    public function __construct(
+        private readonly BeerwallQueriesInterface $beerwallQueries,
+    ) {}
+
     public const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
     public function syncBeers()
@@ -14,7 +18,7 @@ class FirebaseService
         $url = config('services.firebase.url') . 'beers.json';
         $secret = config('services.firebase.secret');
 
-        $beers = BeerwallQueries::published()->map(function ($beer) {
+        $beers = $this->beerwallQueries->findPublishedOrderedByPosition()->map(function ($beer) {
             return [
                 'beer_name'         => (string)$beer->beer_name,
                 'beer_style'        => (string)$beer->beer_style,

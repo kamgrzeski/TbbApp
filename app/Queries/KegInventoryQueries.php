@@ -3,12 +3,12 @@
 namespace App\Queries;
 
 use App\Models\KegInventories;
+use App\Queries\Contracts\KegInventoryQueriesInterface;
 use App\Services\KegStockService;
 
-class KegInventoryQueries
+class KegInventoryQueries implements KegInventoryQueriesInterface
 {
-
-    public static function singleton(bool $lock = false): KegInventories
+    public function findOrCreateSingleton(bool $lock = false): KegInventories
     {
         $query = KegInventories::query();
 
@@ -25,8 +25,7 @@ class KegInventoryQueries
         );
     }
 
-
-    public static function lockedFirstOrFail(): KegInventories
+    public function findLockedOrFail(): KegInventories
     {
         return KegInventories::query()->lockForUpdate()->firstOrFail();
     }

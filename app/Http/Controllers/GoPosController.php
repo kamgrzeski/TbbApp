@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Queries\KegMovementQueries;
-use App\Queries\GoPosItemsQueries;
+use App\Queries\Contracts\KegMovementQueriesInterface;
+use App\Queries\Contracts\GoPosItemsQueriesInterface;
 use App\Models\GoPosItems;
 use App\Models\KegMovement;
 use App\Models\WebhookHistory;
@@ -11,13 +11,16 @@ use App\Services\GoPosApiService;
 
 class GoPosController extends Controller
 {
-    public function __construct(private readonly GoPosApiService $goPosApiService)
-    {
+    public function __construct(
+        private readonly GoPosApiService $goPosApiService,
+        private readonly GoPosItemsQueriesInterface $goPosItemsQueries,
+        private readonly KegMovementQueriesInterface $kegMovementQueries,
+    ) {
     }
 
     public function index()
     {
-        $items = GoPosItemsQueries::all();
+        $items = $this->goPosItemsQueries->findAll();
 
         return view('gopos.index', [
             'items' => $items
@@ -117,7 +120,7 @@ class GoPosController extends Controller
                     continue;
                 }
 
-                $kegMovement = KegMovementQueries::isCurrent()
+                $kegMovement = $this->kegMovementQueries->queryCurrent()
                     ->whereHas('recipe', function ($query) use ($item) {
                         $query->whereJsonContains(
                             'gopos_item_ids',

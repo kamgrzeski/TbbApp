@@ -3,24 +3,22 @@
 namespace App\Queries;
 
 use App\Models\Beerwall;
+use App\Queries\Contracts\BeerwallQueriesInterface;
 use Illuminate\Database\Eloquent\Collection;
 
-class BeerwallQueries
+class BeerwallQueries implements BeerwallQueriesInterface
 {
-
-    public static function ordered(): Collection
+    public function findAllOrderedByPosition(): Collection
     {
         return Beerwall::orderBy('position')->get();
     }
 
-
-    public static function drafts(): Collection
+    public function findDrafts(): Collection
     {
         return Beerwall::where('is_draft', true)->orderBy('created_at', 'desc')->get();
     }
 
-
-    public static function published(): Collection
+    public function findPublishedOrderedByPosition(): Collection
     {
         return Beerwall::where('is_draft', 0)->orderBy('position')->get();
     }
