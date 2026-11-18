@@ -10,7 +10,6 @@ class BeerReportController extends Controller
     {
         return view('beer-report', ['report' => null]);
     }
-
     public function upload(Request $request)
     {
         $request->validate([
