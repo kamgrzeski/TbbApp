@@ -9,7 +9,7 @@
 					Wszystkie dostępne piwa na beer wallu oraz zapisane wersje robocze
 				</p>
 			</div>
-			
+
 			<div class="flex gap-2">
 				<a href="{{ route('beerwall.admin.create') }}"
 				   class="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150 shadow-sm">
@@ -21,17 +21,17 @@
 			</div>
 		</div>
 	</x-slot>
-	
+
 	<div class="py-12">
 		<div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
-			
+
 			@if(session('success'))
 				<div class="p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded shadow-sm flex items-center justify-between">
 					<span>{{ session('success') }}</span>
 				</div>
 			@endif
-			
-			{{-- Ustawienia globalne --}}
+
+
 			<div class="flex justify-end">
 				<a href="{{ route('beerwall.admin.settings.edit') }}"
 				   class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50 active:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition ease-in-out duration-150">
@@ -42,7 +42,7 @@
 					Ustawienia globalne
 				</a>
 			</div>
-			
+
 			{{-- TABELA 1: KARTA PIW (AKTYWNE) --}}
 			<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200">
 				<div class="p-6 text-gray-900">
@@ -55,7 +55,7 @@
 							</span>
 						</div>
 					</div>
-					
+
 					@if($beers->where('is_draft', false)->isEmpty())
 						<div class="text-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">
 							<p class="text-gray-500 font-medium">Karta piw jest obecnie pusta.</p>
@@ -83,13 +83,13 @@
 												<div class="text-base font-bold text-gray-900 leading-tight">
 													{{ $beer->beer_name }}
 												</div>
-												
+
 												<div>
 													<span class="inline-flex items-center px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold uppercase tracking-wide">
 														{{ $beer->beer_style }}
 													</span>
 												</div>
-												
+
 												<div class="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
 													<span class="inline-flex items-center gap-1">
 														<span class="font-semibold text-gray-700">{{ $beer->beer_blg ?? '-' }}°</span> BLG
@@ -101,7 +101,7 @@
 												</div>
 											</div>
 										</td>
-										
+
 										{{-- Kolumna 2: Ceny --}}
 										<td class="px-6 py-4 whitespace-nowrap text-center">
 											<div class="flex items-center justify-center gap-2">
@@ -119,7 +119,7 @@
 												</div>
 											</div>
 										</td>
-										
+
 										{{-- Kolumna 3: Status / Pozycja --}}
 										<td class="px-6 py-4 whitespace-nowrap text-center">
 											<div class="flex flex-col items-center gap-1.5">
@@ -128,25 +128,25 @@
 														🔥 Premiera
 													</span>
 												@endif
-												
+
 												@if($beer->is_coming_soon)
 													<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase bg-amber-100 text-amber-800 border border-amber-200">
 														⏳ Wkrótce
 													</span>
 												@endif
-												
+
 												@if($beer->is_ended)
 													<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase bg-gray-200 text-gray-800 border border-gray-300">
 														✕ Wyprzedane
 													</span>
 												@endif
-												
+
 												<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-slate-800 text-white shadow-sm">
 													Pozycja&nbsp;#{{ $beer->position }}
 												</span>
 											</div>
 										</td>
-										
+
 										{{-- Kolumna 4: Akcje --}}
 									<td class="px-6 py-4 whitespace-nowrap text-right">
 										{{-- Menu akcji --}}
@@ -191,8 +191,8 @@
 					@endif
 				</div>
 			</div>
-			
-			{{-- TABELA 2: SZKICE PIW --}}
+
+
 			<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200">
 				<div class="p-6 text-gray-900">
 					<div class="flex items-center justify-between mb-6">
@@ -204,7 +204,7 @@
 							</span>
 						</div>
 					</div>
-					
+
 					@if($beers->where('is_draft', true)->isEmpty())
 						<div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
 							<p class="text-gray-500 font-medium">Brak zapisanych szkiców.</p>
@@ -229,13 +229,13 @@
 												<div class="text-base font-bold text-gray-900 leading-tight">
 													{{ $beer->beer_name }}
 												</div>
-												
+
 												<div>
 													<span class="inline-flex items-center px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold uppercase tracking-wide">
 														{{ $beer->beer_style }}
 													</span>
 												</div>
-												
+
 												<div class="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
 													<span class="inline-flex items-center gap-1">
 														<span class="font-semibold text-gray-700">{{ $beer->beer_blg ?? '-' }}°</span> BLG
@@ -247,7 +247,7 @@
 												</div>
 											</div>
 										</td>
-										
+
 										{{-- Kolumna 2: Ceny --}}
 										<td class="px-6 py-4 whitespace-nowrap text-center">
 											<div class="flex items-center justify-center gap-2">
@@ -265,7 +265,7 @@
 												</div>
 											</div>
 										</td>
-										
+
 										{{-- Kolumna 3: Status / Pozycja --}}
 										<td class="px-6 py-4 whitespace-nowrap text-center">
 											<div class="flex flex-col items-center gap-1.5">
@@ -277,7 +277,7 @@
 												</span>
 											</div>
 										</td>
-										
+
 										{{-- Kolumna 4: Akcje --}}
 									<td class="px-6 py-4 whitespace-nowrap text-right">
 										{{-- Menu akcji --}}
@@ -322,7 +322,7 @@
 					@endif
 				</div>
 			</div>
-		
+
 		</div>
 	</div>
 </x-app-layout>

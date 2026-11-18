@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Queries\BeerwallQueries;
 use Illuminate\Support\Facades\Http;
-use App\Models\Beerwall;
 
 class FirebaseService
 {
@@ -14,8 +14,7 @@ class FirebaseService
         $url = config('services.firebase.url') . 'beers.json';
         $secret = config('services.firebase.secret');
 
-        // Pobieramy wszystkie piwa i mapujemy je na format JSON dla Firebase
-        $beers = Beerwall::where('is_draft', 0)->orderBy('position')->get()->map(function ($beer) {
+        $beers = BeerwallQueries::published()->map(function ($beer) {
             return [
                 'beer_name'         => (string)$beer->beer_name,
                 'beer_style'        => (string)$beer->beer_style,
@@ -31,18 +30,14 @@ class FirebaseService
             ];
         })->toArray();
 
-        // Debugowanie: Odkomentuj poniższą linię, aby zobaczyć w logach co wysyłasz
         // \Log::info('Syncing to Firebase:', $beers);
 
-        // Wyślij dane
         $response = Http::put($url . '?auth=' . $secret, $beers);
 
         return $response->successful();
     }
 
-    /**
-     * Godziny zamknięcia sprzedaży (HH:MM lub null) dla każdego dnia tygodnia.
-     */
+
     public function getSettings(): array
     {
         $url = config('services.firebase.url') . 'settings.json';
@@ -60,9 +55,7 @@ class FirebaseService
         return $settings;
     }
 
-    /**
-     * Zapisuje godziny zamknięcia w Firebase. Zwraca true, gdy zapis się udał.
-     */
+
     public function setSettings(array $input): bool
     {
         $url = config('services.firebase.url') . 'settings.json';
@@ -71,7 +64,6 @@ class FirebaseService
         $payload = [];
         foreach (self::DAYS as $day) {
             $value = $input[$day . '_close_time'] ?? null;
-            // Zapisujemy jako HH:MM (lub null gdy brak godziny zamknięcia)
             $payload[$day . '_close_time'] = $value ? substr($value, 0, 5) : null;
         }
 

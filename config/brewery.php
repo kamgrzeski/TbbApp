@@ -2,43 +2,19 @@
 
 return [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Dane browaru używane domyślnie w module postów social media
-    |--------------------------------------------------------------------------
-    */
 
     'name' => env('BREWERY_NAME', 'Twin Brothers Brewery'),
     'city' => env('BREWERY_CITY', 'Lublin'),
     'address' => env('BREWERY_ADDRESS', 'ul. Staszica 3A, Lublin'),
     'opening_hours' => env('BREWERY_OPENING_HOURS', ''),
 
-    /*
-    | Ile ostatnich opublikowanych postów (status „published”) trafia do promptu jako przykłady stylu. 0 = wyłączone.
-    */
     'style_examples_count' => (int) env('BREWERY_STYLE_EXAMPLES', 5),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Fakty, które model może podawać jako pewne
-    |--------------------------------------------------------------------------
-    | Wszystko poza tą listą (oraz danymi piwa, wytycznymi i logistyką) model
-    | ma traktować jako nieznane i nie może o tym pisać. Rozszerzaj tę listę,
-    | gdy browar ma nowe, potwierdzone informacje.
-    */
     'facts' => [
         'Brewpub w Lublinie, ul. Staszica 3A.',
         'Piwo warzymy w browarze na miejscu.',
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Zakazane sformułowania
-    |--------------------------------------------------------------------------
-    | 'pattern' – wyrażenie regularne (case-insensitive, UTF-8) sprawdzane w wygenerowanym tekście.
-    | 'label'   – jak nazwać zakazane słowo w komunikacie dla użytkownika.
-    | 'use'     – czym je zastąpić (podpowiedź dla modelu).
-    */
     'forbidden_terms' => [
         [
             'pattern' => '/multitap\w*/iu',

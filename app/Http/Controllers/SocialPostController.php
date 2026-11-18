@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Queries\SocialPostQueries;
+use App\Queries\RecipeQueries;
 use App\Models\Recipe;
 use App\Models\SocialPost;
 use App\Services\SocialMediaGenerationException;
 use App\Services\SocialMediaGeneratorService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use App\Http\Requests\GenerateSocialPostRequest;
+use App\Http\Requests\UpdateSocialPostContentRequest;
+use App\Http\Requests\UpdateSocialPostStatusRequest;
 use Illuminate\View\View;
 
 class SocialPostController extends Controller
@@ -20,16 +23,9 @@ class SocialPostController extends Controller
 
     public function index(): View
     {
-        $posts = SocialPost::with('recipe:id,name')
-            ->latest()
-            ->paginate(20);
+        $posts = SocialPostQueries::paginatedWithRecipe(20);
 
-        $totals = [
-            'posts' => SocialPost::count(),
-            'input_tokens' => (int) SocialPost::sum('input_tokens'),
-            'output_tokens' => (int) SocialPost::sum('output_tokens'),
-            'cost_usd' => (float) SocialPost::sum('cost_usd'),
-        ];
+        $totals = SocialPostQueries::totals();
 
         return view('social-posts.index', compact('posts', 'totals'));
     }
@@ -44,19 +40,11 @@ class SocialPostController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(GenerateSocialPostRequest $request): RedirectResponse
     {
-        $data = $request->validate([
-            'topic_type' => ['required', Rule::in(array_keys(SocialPost::TOPICS))],
-            'recipe_id' => ['nullable', 'integer', 'exists:recipes,id'],
-            'custom_topic' => ['nullable', 'string', 'max:255', 'required_if:topic_type,' . SocialPost::TOPIC_CUSTOM],
-            'custom_guidelines' => ['nullable', 'string', 'max:1000'],
-            'platform' => ['required', Rule::in(array_keys(SocialPost::PLATFORMS))],
-            'event_at' => ['nullable', 'date'],
-            'address' => ['nullable', 'string', 'max:255'],
-        ]);
+        $data = $request->validated();
 
-        $recipe = !empty($data['recipe_id']) ? Recipe::find($data['recipe_id']) : null;
+        $recipe = !empty($data['recipe_id']) ? RecipeQueries::find($data['recipe_id']) : null;
         $eventAt = !empty($data['event_at']) ? CarbonImmutable::parse($data['event_at']) : null;
 
         try {
@@ -105,23 +93,18 @@ class SocialPostController extends Controller
         ]);
     }
 
-    public function update(Request $request, SocialPost $socialPost): RedirectResponse
+    public function update(UpdateSocialPostContentRequest $request, SocialPost $socialPost): RedirectResponse
     {
-        $data = $request->validate([
-            'generated_content' => ['required', 'string', 'max:5000'],
-        ]);
+        $data = $request->validated();
 
         $socialPost->update(['generated_content' => $data['generated_content']]);
 
         return redirect()->route('social-posts.show', $socialPost)->with('success', 'Zmiany zapisane.');
     }
 
-    /**
-     * Generuje nową wersję posta z tymi samymi danymi wejściowymi. Każda wersja trafia do historii.
-     */
     public function regenerate(SocialPost $socialPost): RedirectResponse
     {
-        $recipe = $socialPost->recipe_id ? Recipe::find($socialPost->recipe_id) : null;
+        $recipe = $socialPost->recipe_id ? RecipeQueries::find($socialPost->recipe_id) : null;
 
         try {
             $result = $this->generator->generate(
@@ -159,11 +142,9 @@ class SocialPostController extends Controller
         );
     }
 
-    public function updateStatus(Request $request, SocialPost $socialPost): RedirectResponse
+    public function updateStatus(UpdateSocialPostStatusRequest $request, SocialPost $socialPost): RedirectResponse
     {
-        $data = $request->validate([
-            'status' => ['required', Rule::in(array_keys(SocialPost::STATUSES))],
-        ]);
+        $data = $request->validated();
 
         $socialPost->update(['status' => $data['status']]);
 

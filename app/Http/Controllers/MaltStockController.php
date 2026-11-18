@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Queries\MaltStockQueries;
+use App\Http\Requests\StoreMaltStockRequest;
+use App\Http\Requests\UpdateMaltStockRequest;
 use App\Models\MaltStock;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -11,7 +14,7 @@ class MaltStockController extends Controller
 {
     public function index(): View
     {
-        $malts = MaltStock::orderBy('kg', 'desc')->get();
+        $malts = MaltStockQueries::orderedByKgDesc();
 
         $stats = [
             'total' => $malts->count(),
@@ -29,14 +32,9 @@ class MaltStockController extends Controller
         return view('malts.create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreMaltStockRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'kg' => 'required|numeric|min:0',
-            'extract' => 'nullable|numeric',
-            'invoice_number' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         MaltStock::create($validated);
 
@@ -48,14 +46,9 @@ class MaltStockController extends Controller
         return view('malts.edit', compact('maltStock'));
     }
 
-    public function update(Request $request, MaltStock $maltStock): RedirectResponse
+    public function update(UpdateMaltStockRequest $request, MaltStock $maltStock): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'kg' => 'required|numeric|min:0',
-            'extract' => 'nullable|numeric',
-            'invoice_number' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         $validated['is_enzymatic_active'] = $request->boolean('is_enzymatic_active');
 

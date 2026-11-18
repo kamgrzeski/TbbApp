@@ -10,7 +10,7 @@
             .no-print { display: none; }
             @page { size: A4; margin: 1cm; }
         }
-        /* Kompaktowanie tabel do druku */
+
         table { border-collapse: collapse; width: 100%; }
         th, td { border: 1px solid #e5e7eb; padding: 4px 8px; font-size: 11px; }
         th { background-color: #f9fafb; }
@@ -19,14 +19,12 @@
 <body class="bg-white text-gray-900 p-8" onload="window.print()">
 
 @php
-	// Obliczenia identyczne jak w Twoim kodzie
 	$w1TotalKg = $recipe->malts->where('batch_number', 1)->sum('kg');
 	$w2TotalKg = $recipe->malts->where('batch_number', 2)->sum('kg');
 	$totalExtractKg = $recipe->malts->where('is_active', true)->where('batch_number', 1)->sum(fn($m) => $m->kg * ($m->extract / 100));
 	$blg = $recipe->volume > 0 ? ($totalExtractKg / ($recipe->volume / 2) * 100 * (($recipe->efficiency) / 100)) : 0;
 @endphp
-		
-		<!-- Nagłówek -->
+
 <div class="flex justify-between items-center border-b-2 border-gray-800 pb-4 mb-6">
 	<div>
 		<h1 class="text-2xl font-black uppercase">{{ $recipe->name }}</h1>
@@ -38,7 +36,7 @@
 	</div>
 </div>
 
-<!-- Podsumowanie parametrów -->
+
 <div class="grid grid-cols-3 gap-4 mb-6">
 	<div class="border p-2 rounded text-center">
 		<p class="text-[10px] uppercase font-bold text-gray-500">Objętość</p>
@@ -54,7 +52,7 @@
 	</div>
 </div>
 
-<!-- Słody - Dwie kolumny (Warka 1 i Warka 2) -->
+
 <div class="grid grid-cols-2 gap-6 mb-6">
 	<div>
 		<h3 class="text-xs font-black uppercase bg-gray-100 p-2 mb-2 border">Zasyp Warka 1</h3>
@@ -76,7 +74,7 @@
 			</tfoot>
 		</table>
 	</div>
-	
+
 	@if($recipe->malts->where('batch_number', 2)->count() > 0)
 	<div>
 		<h3 class="text-xs font-black uppercase bg-gray-100 p-2 mb-2 border">Zasyp Warka 2</h3>
@@ -124,7 +122,7 @@
 	@endforeach
 </div>
 
-<!-- Miejsce na notatki dla piwowara -->
+
 <div class="mt-8 border-t pt-4">
 	<h4 class="text-[10px] font-bold uppercase text-gray-400 mb-4">Notatki piwowara:</h4>
 	<div class="border-b border-dashed border-gray-300 h-8"></div>

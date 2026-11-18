@@ -1,5 +1,4 @@
 <x-app-layout>
-	{{-- Nagłówek strony w layoucie (tak jak w pozostałych widokach), nie wewnątrz komponentu Livewire --}}
 	<x-slot name="header">
 		<h2 class="font-semibold text-xl text-gray-800 leading-tight">
 			@if(!empty($isClone) && isset($recipe))
@@ -14,7 +13,6 @@
 
 	@livewire('recipe-form', ['recipe' => $recipe ?? null, 'isClone' => $isClone ?? false])
 
-	{{-- Ściągawka: wszystkie wpisy z receptury (przy edycji i klonowaniu) --}}
 	@if(isset($comments) && $comments->isNotEmpty())
 		<div class="py-6">
 			<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">

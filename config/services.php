@@ -53,10 +53,8 @@ return [
         'base_url' => env('ANTHROPIC_BASE_URL', 'https://api.anthropic.com'),
         'version' => '2023-06-01',
         'timeout' => (int) env('ANTHROPIC_TIMEOUT', 60),
-        // Model może zużyć część limitu na wewnętrzne rozumowanie, więc zapas musi być duży.
         'max_tokens' => (int) env('ANTHROPIC_MAX_TOKENS', 4096),
 
-        // Cena w USD za milion tokenów (claude-sonnet-5-5: 2 / 10). Tokeny myślenia liczone są w output.
         'price_input_per_mtok' => (float) env('ANTHROPIC_PRICE_INPUT_PER_MTOK', 2.0),
         'price_output_per_mtok' => (float) env('ANTHROPIC_PRICE_OUTPUT_PER_MTOK', 10.0),
     ],

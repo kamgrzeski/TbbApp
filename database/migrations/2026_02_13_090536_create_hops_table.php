@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('recipe_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->float('amount'); // Ilość w gramach
+            $table->float('amount');
             $table->float('alpha_acids')->nullable(); // Alfa-kwasy %
             $table->integer('time'); // Czas gotowania/dodania w minutach
             $table->boolean('is_active')->default(true);

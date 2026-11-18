@@ -1,8 +1,4 @@
 <style>
-        /* ==================================================================
-           WSPÓLNE STYLE BEER WALL (index, index_christmas, index_halloween)
-           Sezonowe nadpisania trzymaj w seasonals/*.blade.php
-           ================================================================== */
         :root {
             --bg: #0B0B0B;
             --border: rgba(255,255,255,.12);
@@ -22,10 +18,9 @@
             font-family: sans-serif;
             width: 100vw;
             height: 100vh;
-            overflow: hidden; /* Brak pasków przewijania */
+            overflow: hidden; 
         }
 
-        /* Warstwa tła */
         body::before {
             content: ""; position: fixed; inset: 0;
             background: radial-gradient(circle at 15% -10%, rgba(199,161,58,0.1), transparent 50%);
@@ -34,7 +29,7 @@
 
         .page {
             position: relative;
-            padding: 0vh 1vw 1vh; /* Safe Area dla TV (chroni przed ucinaniem brzegów) */
+            padding: 0vh 1vw 1vh; 
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -72,10 +67,10 @@
         .row {
             position: relative;
             display: grid;
-            grid-template-columns: 6vh 2fr 12vw auto; /* ostatnia kolumna = szerokość cen, bez pustego miejsca */
+            grid-template-columns: 6vh 2fr 12vw auto; 
             align-items: center;
             gap: 2vw;
-            padding: 1.5vh 0.5vw 1.5vh 2vw; /* prawy margines minimalny - ceny przy samej krawędzi karty */
+            padding: 1.5vh 0.5vw 1.5vh 2vw; 
             background: rgba(255,255,255,0.04);
             border: 1px solid var(--border);
             border-radius: var(--radius);
@@ -83,7 +78,6 @@
 
         .row.is-end { opacity: 0.3; filter: grayscale(1); }
 
-        /* Styl dla WKRÓTCE - wyszarza wszystko oprócz badge'a */
         .row.is-coming > *:not(.coming-soon-badge) {
             opacity: 0.4;
             filter: grayscale(1);
@@ -112,7 +106,6 @@
             display: grid; grid-template-columns: 1fr 1fr; column-gap: 2vw;
         }
         .stat { text-align: center; }
-        /* Pionowy pasek między Blg a Alk. (w środku odstępu column-gap) */
         .stats .stat:first-child { position: relative; }
         .stats .stat:first-child::after {
             content: ""; position: absolute; top: 2%; bottom: 2%;
@@ -166,7 +159,6 @@
             z-index: 10;
         }
 
-        /* Overlay zamknięcia sprzedaży */
         .closed-overlay {
             position: fixed;
             inset: 0;
@@ -188,12 +180,11 @@
             text-transform: uppercase;
             margin-bottom: 3vh;
 
-            /* Złota ramka i dopasowanie */
-            border: 3px solid var(--gold);          /* Złota linia */
-            padding: 1.5vh 4vh;                     /* Odstęp tekstu od ramki */
-            border-radius: 12px;                    /* Delikatne zaokrąglenie rogów */
-            box-shadow: 0 0 20px rgba(199, 161, 58, 0.25); /* Złota poświata ramki */
-            display: inline-block;                  /* Sprawia, że ramka dopasowuje się do szerokości tekstu */
+            border: 3px solid var(--gold);          
+            padding: 1.5vh 4vh;                     
+            border-radius: 12px;                    
+            box-shadow: 0 0 20px rgba(199, 161, 58, 0.25); 
+            display: inline-block;                  
         }
         .closed-overlay p {
             font-size: 3.5vh;
@@ -201,9 +192,9 @@
         }
 
         .closed-logo {
-            height: 35vh; /* Dostosuj wysokość według uznania */
+            height: 35vh; 
             width: auto;
             margin-bottom: 4vh;
-            filter: drop-shadow(0 0 20px rgba(199,161,58,0.3)); /* Delikatna poświata wokół logo */
+            filter: drop-shadow(0 0 20px rgba(199,161,58,0.3)); 
         }
 </style>

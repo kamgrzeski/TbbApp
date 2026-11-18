@@ -2,13 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\GoPosItems;
 use App\Models\KegMovement;
 use App\Models\KegStock;
 use App\Models\Recipe;
+use App\Queries\GoPosItemsQueries;
+use App\Queries\KegInventoryQueries;
+use App\Queries\KegMovementQueries;
+use App\Queries\KegStockQueries;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
-use App\Models\KegInventories;
 
 class KegStockService
 {
@@ -16,25 +18,13 @@ class KegStockService
     public const KEG_CAPACITY_LITERS = 50;
     public const KEG_MAX_ML = 47000;
 
-    // Liczba kranów - ich kegi są zawsze podłączone, więc nie wchodzą do puli
     public const TAPS_COUNT = 4;
 
-    /**
-     * Rozlanie piwa do kegów.
-     */
     public function produce(Recipe $recipe, int $quantity, ?string $note = null): void
     {
         DB::transaction(function () use ($recipe, $quantity, $note) {
 
-            $inventory = KegInventories::query()
-                ->lockForUpdate()
-                ->firstOrCreate(
-                    [],
-                    [
-                        'total_kegs' => self::TOTAL_KEGS,
-                        'empty_kegs' => self::TOTAL_KEGS,
-                    ]
-                );
+            $inventory = KegInventoryQueries::singleton(lock: true);
 
             if ($inventory->empty_kegs < $quantity) {
                 throw new \RuntimeException(
@@ -42,8 +32,7 @@ class KegStockService
                 );
             }
 
-            $stock = KegStock::query()
-                ->where('recipe_id', $recipe->id)
+            $stock = KegStockQueries::forRecipe($recipe->id)
                 ->lockForUpdate()
                 ->first();
 
@@ -54,7 +43,6 @@ class KegStockService
                 ]);
             }
 
-            // Puste kegi -> pełne kegi danego piwa
             $inventory->decrement('empty_kegs', $quantity);
 
             $stock->increment('full_kegs', $quantity);
@@ -85,12 +73,11 @@ class KegStockService
 
         return DB::transaction(function () use ($recipe, $quantity, $tapNumber, $note) {
 
-            $stock = KegStock::query()
-                ->where('recipe_id', $recipe->id)
+            $stock = KegStockQueries::forRecipe($recipe->id)
                 ->lockForUpdate()
                 ->first();
 
-            $goPosItems = GoPosItems::get();
+            $goPosItems = GoPosItemsQueries::all();
 
             if (!$stock || $stock->full_kegs < $quantity) {
                 $available = $stock?->full_kegs ?? 0;
@@ -101,11 +88,7 @@ class KegStockService
                 );
             }
 
-            $onOtherTap = KegMovement::query()
-                ->where('type', 'issue')
-                ->where('is_current', true)
-                ->where('recipe_id', $recipe->id)
-                ->where('tap_number', '!=', $tapNumber)
+            $onOtherTap = KegMovementQueries::currentIssuesForRecipeOnOtherTap($recipe->id, $tapNumber)
                 ->lockForUpdate()
                 ->first();
 
@@ -113,31 +96,23 @@ class KegStockService
                 throw new RuntimeException("Piwo {$recipe->name} jest już podłączone do kranu {$onOtherTap->tap_number}.");
             }
 
-            $tapCurrent = KegMovement::query()
-                ->where('type', 'issue')
-                ->where('is_current', true)
-                ->where('tap_number', $tapNumber)
+            $tapCurrent = KegMovementQueries::currentIssuesOnTap($tapNumber)
                 ->lockForUpdate()
                 ->get();
 
             if ($tapCurrent->isNotEmpty()) {
-                // Inne piwo można podłączyć dopiero, gdy poprzednie skończyło się w chłodni.
                 $otherRecipeIds = $tapCurrent
                     ->pluck('recipe_id')
                     ->reject(fn ($id) => $id === $recipe->id);
 
                 if ($otherRecipeIds->isNotEmpty()) {
-                    $stillInCooler = KegStock::query()
-                        ->whereIn('recipe_id', $otherRecipeIds)
-                        ->where('full_kegs', '>', 0)
-                        ->exists();
+                    $stillInCooler = KegStockQueries::anyFullKegsForRecipes($otherRecipeIds->all());
 
                     if ($stillInCooler) {
                         throw new RuntimeException("Kran {$tapNumber} ma podłączone inne piwo z pełnymi kegami w chłodni.");
                     }
                 }
 
-                // Nowy keg zastępuje poprzedni w rejestrze podłączeń tego kranu.
                 KegMovement::query()
                     ->whereIn('id', $tapCurrent->pluck('id'))
                     ->update(['is_current' => false]);
@@ -156,9 +131,7 @@ class KegStockService
                 'capacity' => self::KEG_MAX_ML,
             ]);
 
-            $inventory = KegInventories::query()
-                ->lockForUpdate()
-                ->firstOrFail();
+            $inventory = KegInventoryQueries::lockedFirstOrFail();
 
             $stock->refresh();
 
@@ -175,15 +148,9 @@ class KegStockService
 
     public function summary(): array
     {
-        $inventory = KegInventories::query()->firstOrCreate(
-            [],
-            [
-                'total_kegs' => self::TOTAL_KEGS,
-                'empty_kegs' => self::TOTAL_KEGS,
-            ]
-        );
+        $inventory = KegInventoryQueries::singleton();
 
-        $full = KegStock::query()->sum('full_kegs');
+        $full = KegStockQueries::totalFullKegs();
         $empty = $inventory->empty_kegs;
 
         return [
@@ -197,19 +164,12 @@ class KegStockService
 
     public function stocksMovements()
     {
-        return KegMovement::with(['recipe', 'stock'])->where('is_current', 1)->where('type', 'issue')->orderByDesc('id')->get();
+        return KegMovementQueries::currentIssuesWithRecipeAndStock();
     }
 
-    /**
-     * Keg podłączone obecnie do kranów (is_current = 1).
-     */
     public function currentTapConnections()
     {
-        return KegMovement::with('recipe')
-            ->where('type', 'issue')
-            ->where('is_current', true)
-            ->orderByDesc('id')
-            ->get();
+        return KegMovementQueries::currentTapConnections();
     }
 
     public function pool(Recipe $recipe, int $quantity, ?string $note = null): KegStock
@@ -220,8 +180,7 @@ class KegStockService
 
         return DB::transaction(function () use ($recipe, $quantity, $note) {
 
-            $stock = KegStock::query()
-                ->where('recipe_id', $recipe->id)
+            $stock = KegStockQueries::forRecipe($recipe->id)
                 ->lockForUpdate()
                 ->first();
 
@@ -232,15 +191,7 @@ class KegStockService
                 ]);
             }
 
-            $inventory = KegInventories::query()
-                ->lockForUpdate()
-                ->firstOrCreate(
-                    [],
-                    [
-                        'total_kegs' => self::TOTAL_KEGS,
-                        'empty_kegs' => self::TOTAL_KEGS,
-                    ]
-                );
+            $inventory = KegInventoryQueries::singleton(lock: true);
 
             $available = max(0, $inventory->empty_kegs - self::TAPS_COUNT);
 
@@ -253,7 +204,6 @@ class KegStockService
 
             $stock->increment('full_kegs', $quantity);
 
-            // Piwo z pełnymi kegami nie może pozostać w archiwum, inaczej nie da się go podłączyć.
             if ($stock->is_archived) {
                 $stock->update(['is_archived' => false]);
             }
@@ -281,8 +231,7 @@ class KegStockService
         }
 
         DB::transaction(function () use ($recipe, $quantity, $note) {
-            $stock = KegStock::query()
-                ->where('recipe_id', $recipe->id)
+            $stock = KegStockQueries::forRecipe($recipe->id)
                 ->lockForUpdate()
                 ->first();
 
@@ -304,15 +253,7 @@ class KegStockService
                 'note' => $note,
             ]);
 
-            $inventory = KegInventories::query()
-                ->lockForUpdate()
-                ->firstOrCreate(
-                    [],
-                    [
-                        'total_kegs' => self::TOTAL_KEGS,
-                        'empty_kegs' => self::TOTAL_KEGS,
-                    ]
-                );
+            $inventory = KegInventoryQueries::singleton(lock: true);
 
             $inventory->increment('empty_kegs', $quantity);
 

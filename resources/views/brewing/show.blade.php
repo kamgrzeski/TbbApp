@@ -1,8 +1,8 @@
 <x-app-layout>
-	
+
 	<style>
         @media print {
-            /* Ukrywamy wszystko co nie jest słodami, chmielami i parametrami */
+
             .no-print,
             nav,
             button,
@@ -13,7 +13,7 @@
                 display: none !important;
             }
 
-            /* Reset marginesów dla strony A4 */
+
             @page {
                 size: A4;
                 margin: 0.5cm;
@@ -24,22 +24,22 @@
                 color: black !important;
             }
 
-            /* Wymuszamy, żeby wszystko było ciasno na jednej stronie */
+
             .py-12 { padding-top: 0 !important; padding-bottom: 0 !important; }
             .max-w-7xl { max-width: 100% !important; }
             .space-y-8 > * + * { margin-top: 0.5rem !important; }
 
-            /* Zmniejszenie czcionek tylko w druku */
+
             h2 { font-size: 1.5rem !important; }
             h3 { font-size: 1rem !important; }
             table { font-size: 9pt !important; }
             .p-4, .p-6 { padding: 0.25rem !important; }
 
-            /* Upewnienie się, że tła (kolory sekcji) się drukują */
+
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
 	</style>
-	
+
 	<x-slot name="header">
 		<div class="flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-center no-print">
 			<div>
@@ -111,24 +111,24 @@
 				   class="inline-flex items-center px-4 py-2 bg-emerald-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-emerald-700 shadow-md transition">
 					Klonuj Recepturę
 				</a>
-				
+
 @unless($recipe->mashed_at)
 				<a href="{{ route('brewing.edit', $recipe) }}"
 				   class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 shadow-md transition">
 					Edytuj Recepturę
 				</a>
 @endunless
-				
+
 				<a href="{{ route('brewing.print', $recipe) }}" target="_blank"
 				   class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 shadow-md transition">
 					Drukuj (Widok A4)
 				</a>
-				
+
 				<a href="{{ route('brewing.excise-email', $recipe) }}"
 				   class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 shadow-md transition">
 					Generuj e-mail akcyzowy
 				</a>
-				
+
 				<a href="{{ route('brewing.index') }}"
 				   class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition">
 					Powrót
@@ -136,35 +136,34 @@
 			</div>
 		</div>
 	</x-slot>
-	
+
 	@php
-		// Obliczenia na serwerze dla widoku podglądu
 		$totalKg = $recipe->malts->sum('kg');
         $w1TotalKg = $recipe->malts->where('batch_number', 1)->sum('kg');
         $w2TotalKg = $recipe->malts->where('batch_number', 2)->sum('kg');
 
 		$blg = $recipe->blg;
-  
+
 		$brix = $blg * 1.04 - 0.04;
 
         $formatDuration = function($start, $end = null) {
             if (!$start) return null;
             $end = $end ?: now();
             $diff = $start->diff($end);
-            
+
             $parts = [];
             if ($diff->days > 0) $parts[] = $diff->days . 'd';
             if ($diff->h > 0) $parts[] = $diff->h . 'h';
             if ($diff->i > 0 || empty($parts)) $parts[] = $diff->i . 'm';
-            
+
             return implode(' ', $parts);
         };
 	@endphp
-	
+
 	<div class="py-12">
 		<div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
-			
-			<!-- HARMONOGRAM I STATUS Warki -->
+
+
 			<div class="bg-white overflow-hidden shadow-md sm:rounded-xl border border-gray-100 mb-8 no-print">
 				<div class="bg-gray-800 px-6 py-3 flex justify-between items-center text-white">
 					<h3 class="text-sm font-bold uppercase tracking-widest flex items-center">
@@ -177,7 +176,7 @@
 				</div>
 				<div class="p-6">
 					<div class="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6 text-center">
-						
+
 						<div class="p-4 border rounded-xl {{ $recipe->mashed_at ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-dashed' }}">
 								<p class="text-[12px] font-bold text-gray-400 uppercase mb-2">Zasyp</p>
 								@if($recipe->mashed_at)
@@ -205,7 +204,7 @@
 								</form>
 							@endif
 						</div>
-						
+
 						<div class="p-4 border rounded-xl {{ $recipe->primary_fermentation_start ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-dashed' }}">
 							<p class="text-[12px] font-bold text-gray-400 uppercase mb-2">Fermentacja burzliwa</p>
 							@if($recipe->primary_fermentation_start)
@@ -225,7 +224,7 @@
 								</form>
 							@endif
 						</div>
-						
+
 						<div class="p-4 border rounded-xl {{ $recipe->secondary_fermentation_start ? 'bg-purple-50 border-purple-200' : 'bg-gray-50 border-dashed' }}">
 							<p class="text-[12px] font-bold text-gray-400 uppercase mb-2">Fermentacja cicha</p>
 							@if($recipe->secondary_fermentation_start)
@@ -250,7 +249,7 @@
 								</form>
 							@endif
 						</div>
-						
+
 						<div class="p-4 border rounded-xl {{ $recipe->finished_at ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-dashed' }}">
 							<p class="text-[12px] font-bold text-gray-400 uppercase mb-2">Koniec</p>
 							@if($recipe->finished_at)
@@ -267,7 +266,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<!-- KLUCZOWE PARAMETRY -->
 			<div class="bg-white overflow-hidden shadow-md sm:rounded-xl border border-gray-100">
 				<div class="bg-gray-50/50 border-b border-gray-100 px-6 py-4">
@@ -280,11 +279,10 @@
 						Kluczowe parametry warki - {{ $recipe->name }} - Numer tanka: {{ $recipe->tank_number }}
 					</h3>
 				</div>
-				
+
 				<div class="p-4 md:p-6 no-print">
 					<div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6">
-						
-						<!-- Objętość -->
+
 						<div class="relative group p-3 md:p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-100 rounded-xl md:rounded-2xl transition-all shadow-sm">
 							<p class="text-[12px] md:text-xs font-black text-blue-600 uppercase tracking-tighter md:tracking-wider mb-1">
 								Objętość
@@ -296,8 +294,7 @@
 								<span class="ml-1 text-sm md:text-xl font-bold text-gray-500">L</span>
 							</div>
 						</div>
-						
-						<!-- Wydajność -->
+
 						<div class="relative group p-3 md:p-5 bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 rounded-xl md:rounded-2xl transition-all shadow-sm">
 							<p class="text-[12px] md:text-xs font-black text-emerald-600 uppercase tracking-tighter md:tracking-wider mb-1">
 								Wydajność
@@ -309,8 +306,7 @@
 								<span class="ml-1 text-sm md:text-xl font-bold text-gray-500">%</span>
 							</div>
 						</div>
-						
-						<!-- Gęstość -->
+
 						<div class="relative group p-3 md:p-5 bg-gradient-to-br from-amber-50 to-white border border-amber-100 rounded-xl md:rounded-2xl transition-all shadow-sm">
 							<p class="text-[12px] md:text-xs font-black text-amber-600 uppercase tracking-tighter md:tracking-wider mb-1">
 								Gęstość
@@ -325,24 +321,23 @@
                     </span>
 							</div>
 						</div>
-						
-						<!-- Temperatura zadania drożdży -->
+
 						<div class="relative group p-3 md:p-5 bg-purple-100 border border-purple-300 rounded-xl md:rounded-2xl transition-all shadow-sm">
 							<p class="text-[12px] md:text-xs font-black text-purple-700 uppercase tracking-tighter md:tracking-wider mb-1">
 								Temp. zadania drożdży
 							</p>
-							
+
 							<div class="flex items-baseline">
         <span class="text-xl md:text-3xl font-black text-purple-950">
             {{ round($recipe->yeast_pitch_temperature, 2) ?? '—' }}
         </span>
-								
+
 								<span class="ml-1 text-sm md:text-xl font-bold text-purple-600">
             °C
         </span>
 							</div>
 						</div>
-						
+
 						<div class="relative group p-3 md:p-5 bg-cyan-100 border border-cyan-300 rounded-xl md:rounded-2xl transition-all shadow-sm">
 							<p class="text-[12px] md:text-xs font-black text-cyan-800 uppercase tracking-tighter md:tracking-wider mb-1"> Temp. fermentacji </p>
 							<div class="flex items-baseline">
@@ -350,12 +345,11 @@
 								<span class="ml-1 text-sm md:text-xl font-bold text-cyan-700"> °C </span>
 							</div>
 						</div>
-					
+
 					</div>
 				</div>
 			</div>
-			
-			<!-- ZASYP SŁODÓW - WARKA 1 -->
+
 			<div class="bg-white shadow-md sm:rounded-xl overflow-hidden border border-gray-100">
 				<div class="bg-blue-50 border-b border-blue-100 px-6 py-4">
 					<h3 class="font-bold text-blue-800 uppercase tracking-widest text-sm">Zasyp Warka 1 (500L)</h3>
@@ -396,8 +390,7 @@
 					</table>
 				</div>
 			</div>
-			
-			<!-- ZASYP SŁODÓW - WARKA 2 -->
+
 			@if($recipe->batch_count == 2)
 			<div class="bg-white shadow-md sm:rounded-xl overflow-hidden border border-gray-100">
 				<div class="bg-blue-50 border-b border-blue-100 px-6 py-4">
@@ -440,7 +433,7 @@
 				</div>
 			</div>
 			@endif
-			<!-- SEKCJA: CHMIELENIE (PODZIAŁ NA WARKI) -->
+
 			@foreach($recipe->hops->groupBy('batch_number')->filter(fn($hops, $batch) => $batch <= ($recipe->batch_count ?: 1)) as $batch => $hops)
 				<div class="bg-white shadow-md sm:rounded-xl overflow-hidden border border-gray-100 mb-6">
 					<div class="bg-amber-600 border-b border-amber-700 px-6 py-3 flex justify-between items-center text-white">
@@ -473,7 +466,7 @@
 					</div>
 				</div>
 			@endforeach
-			
+
 			<!-- MONITORING ODFERMENTOWANIA -->
 			<div class="bg-white shadow-md sm:rounded-xl overflow-hidden border border-gray-100 mb-8 no-print">
 				<div class="bg-blue-900 px-6 py-4 flex items-center justify-between">
@@ -484,7 +477,7 @@
 					@php
 						$latestReading = $recipe->gravityReadings->first();
 						$attenuation = ($blg > 0 && $latestReading) ? (($blg - $latestReading->value) / $blg) * 100 : 0;
-                        
+
                         $og = $blg;
 						$fg = $latestReading ? $latestReading->value : $og;
 
@@ -493,7 +486,7 @@
 					<span class="text-white text-xs uppercase tracking-widest font-bold">Poziom odfermentowania - {{ number_format($attenuation, 1) }}%</span>
 					<span class="text-white text-xs uppercase tracking-widest font-bold">Alkohol -  {{ number_format($abv, 2) }}%</span>
 				</div>
-				
+
 				<div class="p-6">
 					<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
 						<!-- Formularz dodawania pomiaru -->
@@ -512,8 +505,7 @@
 								<p class="text-[10px] text-gray-400 mt-2 italic">Zapisz aktualną gęstość brzeczki w tanku.</p>
 							</form>
 						</div>
-						
-						<!-- Lista pomiarów -->
+
 						<div class="md:col-span-3">
 							<div class="flex flex-wrap gap-4">
 								@forelse($recipe->gravityReadings as $reading)
@@ -537,14 +529,14 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<!-- DZIENNIK WARZENIA -->
 			<div class="bg-white shadow-md sm:rounded-xl overflow-hidden border border-gray-100 no-print">
 				<div class="bg-gray-800 px-6 py-4 flex items-center justify-between">
 					<h3 class="text-white font-bold flex items-center uppercase tracking-widest text-xs">Dziennik warzenia & Notatki</h3>
 					<span class="text-gray-400 text-[10px] font-bold">{{ $recipe->comments->count() }} WPISÓW</span>
 				</div>
-				
+
 				<div class="p-6">
 					<form action="{{ route('comments.store', $recipe) }}" method="POST" class="mb-8 no-print">
 						@csrf
@@ -553,7 +545,7 @@
 							<button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold text-xs hover:bg-blue-700 transition shadow-lg">DODAJ WPIS</button>
 						</div>
 					</form>
-					
+
 					<div class="space-y-6">
 						@forelse($recipe->comments as $comment)
 							<div class="flex items-start space-x-4">
@@ -565,7 +557,7 @@
 											$hours = (int) $comment->created_at->diffInHours(now());
 											$days  = (int) $comment->created_at->diffInDays(now());
 										@endphp
-										
+
 										<time class="text-[10px] font-bold text-gray-400">
 											{{ $comment->created_at->format('d.m.Y H:i') }}
 											(

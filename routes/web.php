@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\BeerReportController;
 use App\Http\Controllers\BeerwallController;
-use App\Http\Controllers\BrewingController;
+use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\GoPosController;
 use App\Http\Controllers\KegStockController;
 use App\Http\Controllers\MaltStockController;
@@ -31,19 +31,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/raport-piwa', [BeerReportController::class, 'index'])->name('beer.report.index');
     Route::post('/raport-piwa', [BeerReportController::class, 'upload'])->name('beer.report.upload');
 
-    Route::get('/brewing', [BrewingController::class, 'index'])->name('brewing.index');
-    Route::get('/brewing/create', [BrewingController::class, 'create'])->name('brewing.create');
-    Route::get('/brewing/{recipe}', [BrewingController::class, 'show'])->name('brewing.show');
-    Route::post('/brewing/{recipe}/comments', [BrewingController::class, 'storeComment'])->name('comments.store');
-    Route::delete('/brewing/{recipe}', [BrewingController::class, 'destroy'])->name('brewing.destroy');
-    Route::post('/brewing/{recipe}/status', [BrewingController::class, 'updateStatus'])->name('brewing.status');
-    Route::post('/brewing/{recipe}/archive', [BrewingController::class, 'toggleArchive'])->name('brewing.archive');
-    Route::post('/brewing/{recipe}/gravity', [BrewingController::class, 'storeGravity'])->name('gravity.store');
-    Route::get('/brewing/{recipe}/edit', [BrewingController::class, 'edit'])->name('brewing.edit');
-    Route::get('/brewing/{recipe}/clone', [BrewingController::class, 'clone'])->name('brewing.clone');
-    Route::patch('/brewing/{recipe}', [BrewingController::class, 'update'])->name('brewing.update');
-    Route::get('/brewing/{recipe}/print', [BrewingController::class, 'print'])->name('brewing.print');
-    Route::get('/brewing/{recipe}/excise-email', [BrewingController::class, 'generateEmailContentExciseForRecipe'])->name('brewing.excise-email');
+    Route::get('/brewing', [RecipeController::class, 'index'])->name('brewing.index');
+    Route::get('/brewing/create', [RecipeController::class, 'create'])->name('brewing.create');
+    Route::get('/brewing/{recipe}', [RecipeController::class, 'show'])->name('brewing.show');
+    Route::post('/brewing/{recipe}/comments', [RecipeController::class, 'storeComment'])->name('comments.store');
+    Route::delete('/brewing/{recipe}', [RecipeController::class, 'destroy'])->name('brewing.destroy');
+    Route::post('/brewing/{recipe}/status', [RecipeController::class, 'updateStatus'])->name('brewing.status');
+    Route::post('/brewing/{recipe}/archive', [RecipeController::class, 'toggleArchive'])->name('brewing.archive');
+    Route::post('/brewing/{recipe}/gravity', [RecipeController::class, 'storeGravity'])->name('gravity.store');
+    Route::get('/brewing/{recipe}/edit', [RecipeController::class, 'edit'])->name('brewing.edit');
+    Route::get('/brewing/{recipe}/clone', [RecipeController::class, 'clone'])->name('brewing.clone');
+    Route::patch('/brewing/{recipe}', [RecipeController::class, 'update'])->name('brewing.update');
+    Route::get('/brewing/{recipe}/print', [RecipeController::class, 'print'])->name('brewing.print');
+    Route::get('/brewing/{recipe}/excise-email', [RecipeController::class, 'generateEmailContentExciseForRecipe'])->name('brewing.excise-email');
 
     Route::prefix('admin/beerwall')->group(function () {
         Route::get('/', [BeerwallController::class, 'index'])->name('beerwall.admin.index');

@@ -67,7 +67,7 @@
 				</div>
 
 
-				{{-- Puste --}}
+
 				<div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
 					<div class="text-sm font-medium text-gray-500 uppercase">
 						Puste kegi
@@ -115,7 +115,7 @@
 									</p>
 								</div>
 
-								{{-- Dodaj keg do puli (modal) --}}
+
 								<div x-data="{ open: false, qty: 1 }" class="inline-block">
 									<button
 											type="button"
@@ -195,7 +195,6 @@
 
 							@php
 								$connectedTaps = $stocksMovements->keyBy('tap_number');
-								// Piwo już podłączone do jakiegoś kranu nie może być wydane na kolejny kran.
 								$connectedRecipeIds = $stocksMovements->pluck('recipe_id');
 								$issuable = $stocks
 									->where('is_archived', 0)
@@ -258,7 +257,6 @@
 											@php
 												$connectedFullKegs = $connected->stock?->full_kegs ?? 0;
 												$connectedLiters = $connectedFullKegs * \App\Services\KegStockService::KEG_CAPACITY_LITERS;
-												// 0 L → czerwony, poniżej 200 L → pomarańczowy, reszta → niebieski
 												$litersTone = match (true) {
 													$connectedLiters <= 0 => 'bg-red-600',
 													$connectedLiters < 200 => 'bg-orange-500',
@@ -286,7 +284,6 @@
 											@php
 												$tapLabel = $tap + 1;
 												$connectedEmpty = $connected && ($connected->stock?->full_kegs ?? 0) <= 0;
-												// Wolny kran albo piwo z kranu skończyło się w chłodni: można wybrać inne piwo.
 												$canSelect = ! $connected || $connectedEmpty;
 												$confirmMsg = match (true) {
 													$connectedEmpty => "To ostatnia sztuka kega. Odłączyć ją z kranu {$tapLabel} i podłączyć wybrane piwo?",
@@ -348,7 +345,7 @@
 
 				</div>
 
-				{{-- Stan w chłodni (zawsze widoczny) --}}
+
 				<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100 mb-6">
 					<div class="p-6 text-gray-900">
 						<div class="flex justify-between items-center mb-6">
@@ -472,7 +469,7 @@
 											@endif
 						</td>
 
-						{{-- Piwo --}}
+
 										<td class="px-4 py-3">
 											<div class="font-semibold text-gray-800">
 												<a href="{{ route('brewing.show', $movement->recipe) }}" class="hover:text-blue-600">
@@ -481,7 +478,7 @@
 											</div>
 										</td>
 
-										{{-- Pojemność (Progress Bar) --}}
+
 										<td class="px-4 py-3">
 											<div class="w-full">
 												<div class="flex justify-between items-center mb-1 text-xs">

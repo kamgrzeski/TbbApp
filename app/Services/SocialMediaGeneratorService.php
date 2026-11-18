@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Queries\SocialPostQueries;
 use App\Models\Recipe;
 use App\Models\SocialPost;
 use Carbon\CarbonInterface;
@@ -15,16 +16,9 @@ class SocialMediaGeneratorService
 {
     private const ENDPOINT = '/v1/messages';
 
-    /** Zużycie tokenów zbierane przez wszystkie wywołania API w jednym generowaniu. */
     private int $inputTokens = 0;
     private int $outputTokens = 0;
 
-    /**
-     * Generuje treść posta. Jeśli wynik zawiera zakazane sformułowania, prosi model o jedną poprawkę.
-     * Gdy zakaz nadal występuje, zwraca listę ostrzeżeń, żeby użytkownik mógł to poprawić ręcznie.
-     *
-     * @return array{content: string, prompt: string, warnings: array<int, string>}
-     */
     public function generate(
         string $topicType,
         ?Recipe $recipe = null,
@@ -56,7 +50,6 @@ class SocialMediaGeneratorService
         $violations = $this->violations($text);
 
         if ($violations !== []) {
-            // Osobna, samodzielna rozmowa: źródło, tekst i prośba o usunięcie zakazanych sformułowań.
             $repairMessages = [
                 ['role' => 'user', 'content' => $user],
                 ['role' => 'assistant', 'content' => $text],
@@ -97,11 +90,6 @@ class SocialMediaGeneratorService
         ];
     }
 
-    /**
-     * Zwraca etykiety zakazanych sformułowań znalezionych w tekście.
-     *
-     * @return array<int, string>
-     */
     public function violations(string $text): array
     {
         $found = [];
@@ -124,11 +112,6 @@ class SocialMediaGeneratorService
         }
     }
 
-    /**
-     * Trzeci przebieg w jednym wywołaniu: ocena marketingowa i redakcja językowa razem.
-     * Dostaje dane źródłowe i listę zakazanych sformułowań, więc nie dopisuje faktów ani zakazanych zwrotów.
-     * Gdy ten krok się nie uda, zwracany jest oryginalny tekst.
-     */
     private function reviewAndProofread(string $text, string $sourceData): string
     {
         $system = 'Jesteś starszym specjalistą marketingu i redaktorem języka polskiego w biurze social media browaru rzemieślniczego. '
@@ -238,7 +221,6 @@ class SocialMediaGeneratorService
             ->pluck('text')
             ->implode('');
 
-        // Usage zliczamy także przy pustej odpowiedzi – tokeny i tak zostały zużyte.
         $this->inputTokens += (int) $response->json('usage.input_tokens', 0);
         $this->outputTokens += (int) $response->json('usage.output_tokens', 0);
 
@@ -383,9 +365,6 @@ Nie używaj markdownu (żadnych **gwiazdek**, nagłówków #, list z myślnikami
 PROMPT;
     }
 
-    /**
-     * Przykłady opublikowanych postów z aplikacji, żeby model uczył się naszego stylu (rytm, długość, hook, stopka).
-     */
     private function stylePrompt(): string
     {
         $count = (int) config('brewery.style_examples_count', 5);
@@ -394,13 +373,7 @@ PROMPT;
             return '';
         }
 
-        $posts = SocialPost::query()
-            ->where('status', SocialPost::STATUS_PUBLISHED)
-            ->whereNotNull('generated_content')
-            ->latest('id')
-            ->limit($count * 4)
-            ->pluck('generated_content')
-            // Posty z zakazanymi sformułowaniami nie mogą uczyć modelu złych nawyków.
+        $posts = SocialPostQueries::publishedContentSamples($count * 4)
             ->reject(fn ($text) => $this->violations((string) $text) !== [])
             ->take($count);
 
@@ -418,9 +391,6 @@ PROMPT;
         return implode("\n", $lines);
     }
 
-    /**
-     * Bank słownictwa browarniczego z config/brewing_vocabulary.php, zamieniony na sekcję promptu.
-     */
     private function vocabularyPrompt(): string
     {
         $vocab = config('brewing_vocabulary', []);
@@ -550,9 +520,6 @@ PROMPT;
         return implode("\n", $lines);
     }
 
-    /**
-     * Profil stylu z banku (dopasowanie bez względu na wielkość liter), albo null, gdy stylu nie ma w banku.
-     */
     private function styleProfile(?string $style): ?string
     {
         if (blank($style)) {

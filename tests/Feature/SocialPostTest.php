@@ -39,7 +39,6 @@ class SocialPostTest extends TestCase
 
     private function makeUser(): User
     {
-        // Brak fakera w projekcie – tworzymy użytkownika bez factory
         return User::forceCreate([
             'name' => 'Tester',
             'email' => uniqid('tester', true) . '@example.com',
@@ -130,7 +129,6 @@ class SocialPostTest extends TestCase
         $this->assertSame(SocialPost::STATUS_DRAFT, $post->status);
         $this->assertSame(SocialPost::PLATFORM_IG, $post->platform);
 
-        // Prompt do historii zawiera dane receptury i wytyczne
         $this->assertStringContainsString('Hefeweizen', $post->prompt_used);
         $this->assertStringContainsString('Mosaic', $post->prompt_used);
         $this->assertStringContainsString('podkreśl mega aromat mango', $post->prompt_used);
@@ -279,11 +277,9 @@ class SocialPostTest extends TestCase
 
         $this->assertNotEmpty($generator->violations('Zapraszamy serdecznie na piwo.'));
         $this->assertNotEmpty($generator->violations('Przekonaj się, jak smakuje.'));
-        // Tanki i pasteryzacja to niepotwierdzone fakty o browarze – nie wolno ich pisać.
         $this->assertNotEmpty($generator->violations('Piwo leżakuje w tankach, a w sobotę trafia do kufli.'));
         $this->assertNotEmpty($generator->violations('Piwo niepasteryzowane, prosto z tanku.'));
         $this->assertSame([], $generator->violations('Piwo leżakuje, a w sobotę trafia do kufli.'));
-        // Stopka z godziną jest dozwolona.
         $this->assertSame([], $generator->violations("📍 ul. Staszica 3A\n🕓 Zapraszamy od 16:00"));
     }
 
@@ -324,7 +320,6 @@ class SocialPostTest extends TestCase
                 ->push(['content' => [['type' => 'text', 'text' => 'Pierwsza wersja posta.']]], 200)
                 // 2. Ocena i redakcja – wprowadza zakazany zwrot.
                 ->push(['content' => [['type' => 'text', 'text' => 'Przekonaj się, jak smakuje.']]], 200)
-                // 3. Poprawka końcowa – czysty tekst.
                 ->push(['content' => [['type' => 'text', 'text' => 'Wersja końcowa czysta.']]], 200),
         ]);
 

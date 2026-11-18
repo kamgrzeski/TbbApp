@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Queries\RecipeQueries;
+use App\Queries\KegStockQueries;
+use App\Queries\KegMovementQueries;
 use App\Models\KegMovement;
-use App\Models\KegStock;
-use App\Models\Recipe;
 use App\Services\KegStockService;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use App\Http\Requests\IssueKegRequest;
+use App\Http\Requests\PoolKegRequest;
+use App\Http\Requests\RemoveKegRequest;
+use App\Http\Requests\UpdateKegMovementRequest;
 use Throwable;
 
 class KegStockController extends Controller
@@ -18,47 +21,28 @@ class KegStockController extends Controller
 
     public function index()
     {
-        $stocks = KegStock::query()
-            ->with(['recipe', 'movements'])
-            ->orderBy('full_kegs', 'desc')
-            ->take(10)->get();
+        $stocks = KegStockQueries::topByFullKegs(10);
 
         $summary = $this->kegStockService->summary();
 
-        $recipes = Recipe::query()
-            ->notArchived()
-            ->whereNotNull('finished_at')
-            ->orderByDesc('finished_at')
-            ->get();
+        $recipes = RecipeQueries::brewedAndActive();
 
         return view('kegs.admin.index', [
             'stocks' => $stocks,
             'recipes' => $recipes,
             'summary' => $summary,
             'stocksMovements' => $this->kegStockService->stocksMovements(),
-            'coolerStocks' => KegStock::query()
-                ->with('recipe')
-                ->where('is_archived', 0)
-                ->orderByDesc('full_kegs')
-                ->get(),
+            'coolerStocks' => KegStockQueries::coolerStocks(),
             'recentConnections' => $this->kegStockService->currentTapConnections(),
         ]);
     }
 
-    public function issue(Request $request)
+    public function issue(IssueKegRequest $request)
     {
-        $data = $request->validate([
-            'recipe_id' => [
-                'required',
-                Rule::exists('recipes', 'id'),
-            ],
-            'quantity' => ['required', 'integer', 'min:1', 'max:20'],
-            'tap_number' => ['required', 'integer', 'between:1,' . KegStockService::TAPS_COUNT],
-            'note' => ['nullable', 'string', 'max:1000'],
-        ]);
+        $data = $request->validated();
 
         try {
-            $recipe = Recipe::findOrFail($data['recipe_id']);
+            $recipe = RecipeQueries::findOrFail($data['recipe_id']);
 
             $this->kegStockService->issue(
                 $recipe,
@@ -81,31 +65,19 @@ class KegStockController extends Controller
 
     public function movements()
     {
-        $movements = KegMovement::query()
-            ->with('recipe')
-            ->latest()
-            ->paginate(30);
+        $movements = KegMovementQueries::paginatedWithRecipe(30);
 
         return view('kegs.admin.movements', [
             'movements' => $movements,
         ]);
     }
 
-    public function pool(Request $request)
+    public function pool(PoolKegRequest $request)
     {
-        $data = $request->validate([
-            'recipe_id' => [
-                'required',
-                Rule::exists('recipes', 'id')
-                    ->whereNotNull('finished_at')
-                    ->where('is_archived', false),
-            ],
-            'quantity' => ['required', 'integer', 'min:1', 'max:20'],
-            'note' => ['nullable', 'string', 'max:1000'],
-        ]);
+        $data = $request->validated();
 
         try {
-            $recipe = Recipe::findOrFail($data['recipe_id']);
+            $recipe = RecipeQueries::findOrFail($data['recipe_id']);
 
             $this->kegStockService->pool(
                 $recipe,
@@ -125,16 +97,12 @@ class KegStockController extends Controller
         }
     }
 
-    public function remove(Request $request)
+    public function remove(RemoveKegRequest $request)
     {
-        $data = $request->validate([
-            'recipe_id' => ['required', 'exists:recipes,id'],
-            'quantity' => ['required', 'integer', 'min:1', 'max:20'],
-            'note' => ['nullable', 'string', 'max:1000'],
-        ]);
+        $data = $request->validated();
 
         try {
-            $recipe = Recipe::findOrFail($data['recipe_id']);
+            $recipe = RecipeQueries::findOrFail($data['recipe_id']);
 
             $this->kegStockService->remove(
                 $recipe,
@@ -154,11 +122,9 @@ class KegStockController extends Controller
         }
     }
 
-    public function updateMovement(Request $request, KegMovement $movement)
+    public function updateMovement(UpdateKegMovementRequest $request, KegMovement $movement)
     {
-        $data = $request->validate([
-            'capacity' => ['required', 'integer', 'min:0'],
-        ]);
+        $data = $request->validated();
 
         try {
             $movement->update([

@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Numer warki jest unikalny w skali całej bazy – baza sama odrzuci duplikat.
-     */
     public function up(): void
     {
         Schema::table('recipe_batches', function (Blueprint $table) {

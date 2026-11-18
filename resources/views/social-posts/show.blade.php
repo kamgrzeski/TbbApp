@@ -38,7 +38,6 @@
                      }
                  }">
 
-                {{-- Podgląd w stylu posta FB/IG --}}
                 <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div class="flex items-center gap-3 p-4 border-b border-gray-100 dark:border-gray-700">
                         <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold">

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\BeerReportUploadRequest;
 
 class BeerReportController extends Controller
 {
@@ -10,16 +10,12 @@ class BeerReportController extends Controller
     {
         return view('beer-report', ['report' => null]);
     }
-    public function upload(Request $request)
+    public function upload(BeerReportUploadRequest $request)
     {
-        $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt|max:5120',
-        ]);
-
         $file = $request->file('csv_file');
         $handle = fopen($file->getRealPath(), 'r');
 
-        fgetcsv($handle, 1000, ","); // Pomijamy nagłówek
+        fgetcsv($handle, 1000, ",");
 
         $originalName = $file->getClientOriginalName();
         $period = $this->extractPeriodFromFilename($originalName);
@@ -56,7 +52,6 @@ class BeerReportController extends Controller
                 $discountPerProduct[$productName] = ($discountPerProduct[$productName] ?? 0) + $discount;
             }
 
-            // 1. DYNAMICZNA WERYFIKACJA CZY TO PIWO CZY INNY ASORTYMENT
             if ($this->isBeer($productName)) {
                 $cleanedName = preg_replace('/^(Kopia\s+|Copy\s+)/ui', '', $productName);
                 $volume = $this->extractVolume($cleanedName);
@@ -96,7 +91,6 @@ class BeerReportController extends Controller
                 $totalLiters += $liters;
                 $totalBeerUnits += $qty;
 
-                // Statystyki formatów
                 if (!isset($formatTotals[$formatName])) {
                     $formatTotals[$formatName] = ['liters' => 0, 'revenue' => 0, 'units' => 0];
                 }
@@ -129,7 +123,6 @@ class BeerReportController extends Controller
 
         fclose($handle);
 
-        // Sortowanie piw wg przychodu malejąco
         uasort($beers, fn($a, $b) => $b['revenue'] <=> $a['revenue']);
         $beerTotalRevenue = array_sum(array_column($beers, 'revenue'));
 
@@ -208,12 +201,10 @@ class BeerReportController extends Controller
         return str_replace([' ', ','], ['', '.'], $val);
     }
 
-    // UNIWERSALNE WYKRYWANIE PIWA (DZIAŁA DLA KAŻDEGO STYLU ŚWIATA)
     private function isBeer(string $name): bool
     {
         $nameLower = mb_strtolower($name);
 
-        // Wykluczenia (np. gadżety ze słowem kufel, szklanka)
         if (str_contains($nameLower, 'kufel') || str_contains($nameLower, 'szklank') || str_contains($nameLower, 'koszulk')) {
             return false;
         }
@@ -231,7 +222,6 @@ class BeerReportController extends Controller
         return false;
     }
 
-    // UNIWERSALNE WYKRYWANIE PRZEKĄSEK
     private function isSnack(string $name): bool
     {
         $nameLower = mb_strtolower($name);
@@ -247,7 +237,6 @@ class BeerReportController extends Controller
         return false;
     }
 
-    // AUTOMATYCZNE WYCIĄGANIE POJEMNOŚCI W LITRACH
     private function extractVolume(string $name): float
     {
         $nameLower = mb_strtolower($name);
@@ -257,25 +246,20 @@ class BeerReportController extends Controller
         if (str_contains($nameLower, '500 ml') || str_contains($nameLower, '500ml')) return 0.5;
         if (str_contains($nameLower, '250 ml') || str_contains($nameLower, '250ml')) return 0.25;
 
-        return 0.5; // Domyślnie duży kufel
+        return 0.5;
     }
 
-    // ODCINANIE POJEMNOŚCI Z NAZWY PIWA (POZOSTAWIA CZYSTY STYL PIWA)
     private function extractBaseBeerName(string $name): string
     {
-        // 1. Usuń prefiksy Kopia / Copy
         $clean = preg_replace('/^(Kopia\s+|Copy\s+)/ui', '', trim($name));
 
-        // 2. Odetnij format z końca (np. 500 ml, 250ml, 1L PET, 1000ml)
         $clean = preg_replace('/\s*(1\s*L\s*PET|1000\s*ml|500\s*ml|250\s*ml)$/ui', '', $clean);
         $clean = trim($clean);
 
-        // 3. NAPRAWA BŁĘDU: Zamień "Piwo Stout #6" na "Piwo #6 Stout"
         if (preg_match('/^Piwo\s+([a-zA-Z]+)\s*#(\d+)$/ui', $clean, $matches)) {
             $clean = "Piwo #{$matches[2]} " . trim($matches[1]);
         }
 
-        // 4. Zamień wielokrotne spacje na pojedynczą
         $clean = preg_replace('/\s+/', ' ', $clean);
 
         return trim($clean);
@@ -294,7 +278,6 @@ class BeerReportController extends Controller
         return 'Standard';
     }
 
-    // AUTOMATYCZNE WYCIĄGANIE MIESIĄCA I ROKU Z NAZWY PLIKU
     private function extractPeriodFromFilename(string $filename): array
     {
         $months = [
@@ -321,7 +304,6 @@ class BeerReportController extends Controller
             }
         }
 
-        // Wartość awaryjna jeśli nazwa pliku nie zawiera daty
         return [
             'date' => date('d.m.Y'),
             'month' => 'Bieżący okres',

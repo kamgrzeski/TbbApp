@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Queries\KegMovementQueries;
+use App\Queries\GoPosItemsQueries;
 use App\Models\GoPosItems;
 use App\Models\KegMovement;
 use App\Models\WebhookHistory;
@@ -15,7 +17,7 @@ class GoPosController extends Controller
 
     public function index()
     {
-        $items = GoPosItems::query()->get();
+        $items = GoPosItemsQueries::all();
 
         return view('gopos.index', [
             'items' => $items
@@ -102,7 +104,6 @@ class GoPosController extends Controller
                         : $value;
                 }
 
-                // Nie ma pojemności w nazwie produktu
                 if ($deductionMl <= 0) {
 
                     $skippedItems++;
@@ -116,7 +117,7 @@ class GoPosController extends Controller
                     continue;
                 }
 
-                $kegMovement = KegMovement::where('is_current', 1)
+                $kegMovement = KegMovementQueries::isCurrent()
                     ->whereHas('recipe', function ($query) use ($item) {
                         $query->whereJsonContains(
                             'gopos_item_ids',

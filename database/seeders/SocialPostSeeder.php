@@ -5,13 +5,7 @@ namespace Database\Seeders;
 use App\Models\SocialPost;
 use Illuminate\Database\Seeder;
 
-/**
- * Wgrywa ręcznie napisane posty browaru jako OPUBLIKOWANE przykłady stylu dla generatora.
- * Uruchomienie: php artisan db:seed --class=SocialPostSeeder
- * Idempotentne: ponowne uruchomienie nie duplikuje postów (dopasowanie po treści).
- *
- * Zasada: w przykładach są wyłącznie treści, które browar potwierdził. Nie dodawaj postów z niepotwierdzonymi faktami.
- */
+
 class SocialPostSeeder extends Seeder
 {
     public function run(): void

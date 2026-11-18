@@ -1,41 +1,24 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Bank słownictwa browarniczego dla generatora postów
-|--------------------------------------------------------------------------
-| Model dostaje te listy jako materiał pomocniczy. Nie należy wstawiać wszystkich
-| haseł do jednego posta, tylko wybrać kilka pasujących do konkretnego piwa.
-|
-| Uwaga: generator czyta tylko klucze: aroma, taste, look, process, community,
-| hops, malts, styles, collocations, terminology, common_errors, usage_rules.
-| Nowa kategoria wymaga dopisania do $labels w SocialMediaGeneratorService.
-*/
+
 
 return [
 
-    /*
-    | Zapach (aromat) – to, co czuć przed łykiem.
-    */
+
     'aroma' => [
-        // słód i pieczywo
         'chlebowa skórka', 'biszkopt', 'herbatniki', 'tost', 'ciasto drożdżowe', 'karmel',
         'toffi', 'miód', 'miód lipowy', 'orzechy', 'migdały', 'czekolada', 'wanilia',
-        // owoce
         'suszone owoce', 'śliwka', 'figa', 'banan', 'jabłko', 'gruszka', 'brzoskwinia',
         'morela', 'malina', 'porzeczka', 'agrest', 'skórka cytrusowa', 'cytrusy', 'cytryna',
         'limonka', 'pomarańcza', 'grejpfrut', 'ananas', 'mango', 'marakuja', 'liczi',
         'owoce tropikalne',
-        // przyprawy, zioła, żywica
         'goździk', 'przyprawy', 'pieprz', 'kolendra', 'mięta', 'zioła', 'trawa',
         'żywica', 'sosna', 'eukaliptus', 'lukrecja',
         // kwiaty, palone, ziemiste
         'kwiaty', 'jaśmin', 'kawa', 'kakao', 'palona nuta', 'dym', 'ziemia',
     ],
 
-    /*
-    | Smak i odczucia w ustach (mouthfeel).
-    */
+
     'taste' => [
         'słodowy trzon', 'lekka słodycz', 'słodkawe', 'wytrawne wykończenie', 'suche wykończenie',
         'długie wykończenie', 'przyjemna goryczka', 'wyraźna goryczka', 'delikatna goryczka',
@@ -46,9 +29,7 @@ return [
         'orzeźwiające', 'pijalne', 'gaz w sam raz', 'lekko gazowane',
     ],
 
-    /*
-    | Wygląd, piana i kolor.
-    */
+
     'look' => [
         'złociste', 'słomkowe', 'jasne', 'kolor miodu', 'bursztynowe', 'miedziane',
         'pomarańczowe', 'rubinowe', 'ciemnobrązowe', 'ciemne jak kawa', 'czarne',
@@ -57,9 +38,7 @@ return [
         'piana, która długo trzyma', 'piana szybko opada',
     ],
 
-    /*
-    | Proces warzenia – do kulis i edukacji. Używaj tylko, gdy temat tego wymaga.
-    */
+
     'process' => [
         'słodowanie', 'zacieranie', 'filtracja brzeczki', 'gotowanie brzeczki', 'brzeczka',
         'chmielenie na gorąco', 'chmielenie na zimno', 'dry hopping',
@@ -71,9 +50,7 @@ return [
         'butelkowanie', 'drożdże', 'warka', 'słód', 'chmiel',
     ],
 
-    /*
-    | Chmiel – odmiany i ich charakter. Używaj tylko odmian, które faktycznie są w DANYCH PIWA.
-    */
+
     'hops' => [
         'Cascade – cytrusy i grejpfrut', 'Citra – limonka, mango, liczi', 'Mosaic – owoce tropikalne i jagody',
         'Saaz – delikatne, ziołowe, korzenne', 'Hallertau – kwiatowe, ziołowe, lekkie',
@@ -81,9 +58,7 @@ return [
         'Amarillo – pomarańcza i kwiaty', 'Motueka – cytrusy i zioła', 'Galaxy – marakuja i brzoskwinia',
     ],
 
-    /*
-    | Słody – rodzaje i ich charakter. Używaj tylko słodów z DANYCH PIWA.
-    */
+
     'malts' => [
         'pilzneński – czysty, chlebowy', 'monachijski – pieczywo, orzechy, bursztyn',
         'pszeniczny – lekki, kremowa piana', 'karmelowy – karmel, toffi, bursztyn',
@@ -91,11 +66,7 @@ return [
         'monachijski jasny – chlebowy, lekko słodki', 'owsiany – kremowość, gładkość',
     ],
 
-    /*
-    | Profile popularnych stylów: fermentacja, kolor, goryczka, ciało i typowe składniki.
-    | To ogólna wiedza o stylu (nie o konkretnym piwie). Klucz to nazwa stylu w kanonicznej formie.
-    | Gdy styl z DANYCH PIWA jest w tym banku, model dostaje jego profil i ma się go trzymać.
-    */
+
     'styles' => [
         'Hefeweizen' => 'pszeniczne, górna fermentacja (drożdże dają banan i goździk), mętne, bardzo lekka goryczka, wysoka gazowana, obfita pianka',
         'Witbier' => 'belgijskie pszeniczne, mętne, z dodatkiem kolendry i skórki pomarańczy, lekka goryczka, lekkie i orzeźwiające',
@@ -121,9 +92,7 @@ return [
         'Pumpkin Ale' => 'ale z dodatkiem dyni i przypraw (cynamon, gałka muszkatołowa), karmel, pieczywo, jesienne piwo',
     ],
 
-    /*
-    | Słowa o ludziach i miejscu. Nie są faktami – to język relacji, a nie informacje o lokalu.
-    */
+
     'community' => [
         'goście', 'stolik', 'kufel', 'szklanka', 'po pracy', 'wieczór', 'długi weekend',
         'na jedno', 'ze znajomymi', 'w parze', 'przy stole', 'na rozmowę', 'domowa atmosfera',
@@ -133,9 +102,7 @@ return [
         'ciepły wieczór', 'słoneczne popołudnie',
     ],
 
-    /*
-    | Poprawne związki wyrazowe (kolokacje). Gdy piszesz o tej czynności, używaj tych form.
-    */
+
     'collocations' => [
         'po pracy', 'po robocie', 'na piwo', 'napić się piwa', 'napić się czegoś nowego',
         'zamówić kufel', 'zamówić piwo', 'spróbować piwa', 'spróbować nowości',
@@ -147,9 +114,7 @@ return [
         'w czwartek', 'w piątek', 'w środę', 'w sobotę', 'w niedzielę', 'w weekend',
     ],
 
-    /*
-    | Nazewnictwo: które słowo dla czego. Używaj konsekwentnie w całym poście.
-    */
+
     'terminology' => [
         'piwo' => 'ogólne określenie napoju; w tekście używaj go konsekwentnie',
         'nazwa piwa' => 'zapisuj wielkimi literami tylko w hooku, dalej normalnym zapisem (np. Pumpkin Ale)',
@@ -164,9 +129,7 @@ return [
         'goryczka' => 'wrażenie wytrawności i gorzkości od chmielu; nie nazywaj jej „goryczką” w każdym zdaniu',
     ],
 
-    /*
-    | Typowe błędy generatora. Każdy wpis: błędna forma → poprawna lub co zrobić zamiast tego.
-    */
+
     'common_errors' => [
         'już w kuflach' => 'już dostępne / już w sprzedaży',
         'trafiło do kufli (jako ogłoszenie dostępności)' => 'już dostępne do zamówienia',

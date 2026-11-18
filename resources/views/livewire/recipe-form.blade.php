@@ -1,8 +1,8 @@
 <div>
     <style>
-        /* Bootstrap (ładowany na tym widoku) podkreśla wszystkie linki – nawigacja ma zostać bez podkreśleń */
+
         nav a { text-decoration: none; }
-        /* Bootstrap dodaje h2 margines dolny – nagłówek strony ma wyglądać jak w pozostałych widokach */
+
         header h2 { margin: 0; }
 
         @media (max-width: 767.98px) {
@@ -37,7 +37,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <!-- Bootstrap CSS dla tabel i siatki -->
+
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
                 @if($locked)
@@ -136,10 +136,8 @@
                                         </thead>
                                         <tbody>
                                         @php
-                                            // Aktywne enzymatycznie na górze; nieaktywne na dole, posortowane po wadze malejąco
                                             $batchMalts = collect($malts)->filter(fn($m) => $m['batch_number'] == $batchIdx);
                                             $isActiveEnz = fn($m) => !empty($m['malt_stock_id']) && !empty($m['is_active']);
-                                            // union() zachowuje oryginalne klucze (używane w wire:model i removeMalt)
                                             $rows = $batchMalts->filter($isActiveEnz)
                                                 ->union($batchMalts->reject($isActiveEnz)->sortByDesc(fn($m) => (float)$m['kg']));
                                         @endphp
@@ -250,7 +248,7 @@
                         @endif
                     @endforeach
 
-                    <!-- PODSUMOWANIE (Przyklejone na dole lub w ramce) -->
+
                     <div class="p-4 rounded bg-dark text-white shadow mb-4">
                         <div class="row align-items-center">
                             <div class="col-md-4 border-end border-secondary">

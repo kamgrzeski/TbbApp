@@ -2,19 +2,18 @@
 
 namespace App\Livewire;
 
-use App\Models\RecipeBatches;
+use App\Queries\RecipeQueries;
+use App\Queries\MaltStockQueries;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\Attributes\Computed;
 use App\Models\Recipe;
-use App\Models\MaltStock;
 
 class RecipeForm extends Component
 {
     public $recipeId = null;
     public $isClone = false;
-    // Receptura z wykonanym zasypem nie może być edytowana
     public bool $locked = false;
 
     // Pola modelu
@@ -26,7 +25,6 @@ class RecipeForm extends Component
 
     public $yeast_pitch_temperature = 0;
     public $fermentation_temperature = 0;
-    // Składniki
     public $malts = [];
     public $hops = [];
     public float $akcpa_blg = 0.0;
@@ -35,8 +33,7 @@ class RecipeForm extends Component
     #[Computed]
     public function availableMalts()
     {
-        return MaltStock::orderBy('name')
-            ->get(['id', 'name', 'extract', 'kg', 'is_enzymatic_active']);
+        return MaltStockQueries::orderedByName(['id', 'name', 'extract', 'kg', 'is_enzymatic_active']);
     }
 
     public function mount($recipe = null, $isClone = false)
@@ -61,7 +58,6 @@ class RecipeForm extends Component
                 $this->gopos_item_ids = (string) $recipe->gopos_item_ids;
             }
 
-            // Mapowanie słodów z bazy
             $this->malts = $recipe->malts->map(fn($m) => [
                 'batch_number' => $m->batch_number,
                 'malt_stock_id' => $m->malt_stock_id,
@@ -70,7 +66,6 @@ class RecipeForm extends Component
                 'is_active' => $m->maltStock ? (bool)$m->maltStock->is_enzymatic_active : false,
             ])->toArray();
 
-            // Mapowanie chmieli z bazy
             $this->hops = $recipe->hops->map(fn($h) => [
                 'batch_number' => $h->batch_number,
                 'name' => $h->name,
@@ -80,8 +75,6 @@ class RecipeForm extends Component
                 'is_active' => (bool)$h->is_active,
             ])->toArray();
         } else {
-            // Zamiast domyślnego 'Słód Pilzneński', dodajemy puste wiersze 
-            // aby użytkownik musiał wybrać słód z listy.
             $this->addMalt(1);
             $this->addMalt(2);
             $this->addHop(1);
@@ -103,7 +96,7 @@ class RecipeForm extends Component
 
     public function updateMaltExtract($index, $maltId)
     {
-        $malt = MaltStock::find($maltId);
+        $malt = MaltStockQueries::find($maltId);
         if ($malt) {
             $this->malts[$index]['malt_stock_id'] = $maltId;
             $this->malts[$index]['name'] = $malt->name;
@@ -136,7 +129,6 @@ class RecipeForm extends Component
         $this->hops = array_values($this->hops);
     }
 
-    // Obliczenia w locie (Reaktywne podsumowanie)
     #[Computed]
     public function stats()
     {
@@ -155,15 +147,13 @@ class RecipeForm extends Component
             $kg = (float)$m['kg'];
             $data[$b]['kg'] += $kg;
 
-            // Słody nieaktywne enzymatycznie (is_active = 0) nie dokładają się do ekstrakcie
             if (isset($m['is_active']) && (bool)$m['is_active'] === false) {
                 continue;
             }
 
-            // Pobieramy ekstrakt z magazynu, jeśli słód jest przypisany
-            $extract = 80; // domyślna wartość
+            $extract = 80;
             if (!empty($m['malt_stock_id'])) {
-                $stockMalt = MaltStock::find($m['malt_stock_id']);
+                $stockMalt = MaltStockQueries::find($m['malt_stock_id']);
                 $extract = $stockMalt ? (float)$stockMalt->extract : 80;
             } elseif (isset($m['extract'])) {
                 $extract = (float)$m['extract'];
@@ -190,8 +180,6 @@ class RecipeForm extends Component
         ];
     }
 
-    // Udział procentowy słodów aktywnych enzymatycznie (malt_stocks.is_enzymatic_active = 1)
-    // w kg aktywnych słodów tej samej warki. Zwraca [indeks wiersza => procent].
     #[Computed]
     public function enzymaticShares()
     {
@@ -221,14 +209,11 @@ class RecipeForm extends Component
         return $shares;
     }
 
-    /**
-     * Sprawdza, czy suma kg każdego słodu z magazynu we wszystkich wierszach
-     * nie przekracza dostępnego stanu. Błędy dodaje do pól kg konkretnych wierszy.
-     */
+
     private function maltStockIsEnough(): bool
     {
         $ids = collect($this->malts)->pluck('malt_stock_id')->filter()->unique()->values();
-        $stockKg = MaltStock::whereIn('id', $ids)->pluck('kg', 'id');
+        $stockKg = MaltStockQueries::kgByIds($ids);
 
         $requested = [];
         foreach ($this->malts as $m) {
@@ -258,15 +243,13 @@ class RecipeForm extends Component
 
     public function save()
     {
-        // Blokada edycji po zasypie – sprawdzane też w bazie, nie tylko na podstawie stanu komponentu
         if ($this->recipeId && !$this->isClone
-            && Recipe::whereKey($this->recipeId)->whereNotNull('mashed_at')->exists()) {
+            && RecipeQueries::isMashed($this->recipeId)) {
             $this->locked = true;
             session()->flash('error', 'Receptura ma wykonany zasyp – nie można jej edytować.');
             return;
         }
 
-        // 1. Walidacja danych
         $this->validate([
             'recipe_name' => 'required|string|max:255',
             'style' => 'nullable|string|max:100',
@@ -276,10 +259,8 @@ class RecipeForm extends Component
             'gopos_item_ids' => 'nullable|string'
         ]);
 
-        // Ilość słodu nie może przekraczać stanu magazynowego (dla receptur bez zadanych drożdży –
-        // po zadaniu drożdży stan jest już pomniejszony o zużycie)
         $yeastPitched = $this->recipeId && !$this->isClone
-            && Recipe::whereKey($this->recipeId)->whereNotNull('yeast_pitched_at')->exists();
+            && RecipeQueries::isYeastPitched($this->recipeId);
 
         if (!$yeastPitched && !$this->maltStockIsEnough()) {
             return;
@@ -291,12 +272,11 @@ class RecipeForm extends Component
         ));
 
         DB::transaction(function () use ($goposArray) {
-            // 2. Przygotowanie danych receptury
             $recipeData = [
                 'tank_number' => $this->tank_number,
                 'name'        => $this->recipe_name,
                 'style'       => trim((string) $this->style) ?: null,
-                'volume'      => $this->batch_count * 500, // lub $this->stats['volume']
+                'volume'      => $this->batch_count * 500,
                 'efficiency'  => $this->efficiency,
                 'blg'         => round($this->stats['total_blg'], 1),
                 'batch_count' => $this->batch_count,
@@ -309,43 +289,35 @@ class RecipeForm extends Component
 
             if ($this->recipeId && !$this->isClone) {
                 // ==========================================
-                // AKTUALIZACJA ISTNIEJĄCEJ RECEPTURY
                 // ==========================================
 
-                $recipe = Recipe::findOrFail($this->recipeId);
+                $recipe = RecipeQueries::findOrFail($this->recipeId);
 
                 $recipe->update($recipeData);
 
-                // Usuwamy stare składniki
                 $recipe->malts()->delete();
                 $recipe->hops()->delete();
 
             } else {
                 // ==========================================
-                // NOWA RECEPTURA LUB KLON
                 // ==========================================
 
                 $recipeData['user_id'] = Auth::id();
 
-                // Numer receptury nadawany dopiero przy wykonaniu zasypu (wersja robocza nie ma numeru)
 
                 $recipe = Recipe::create($recipeData);
 
                 // ==========================================
-                // TWORZENIE WAREK
                 // ==========================================
 
-                // Numery warek (globalne) nadawane są dopiero przy wykonaniu zasypu
-                // (BrewingController::updateStatus), a nie przy zapisie receptury.
             }
 
-            // 3. Zapis Słodów
             foreach ($this->malts as $maltData) {
                 if (empty($maltData['name']) && empty($maltData['kg'])) continue;
 
                 $stockMalt = null;
                 if (!empty($maltData['malt_stock_id'])) {
-                    $stockMalt = MaltStock::find($maltData['malt_stock_id']);
+                    $stockMalt = MaltStockQueries::find($maltData['malt_stock_id']);
                 }
 
                 $recipe->malts()->create([
@@ -356,10 +328,8 @@ class RecipeForm extends Component
                 ]);
             }
 
-            // 4. Zapis Chmieli
             foreach ($this->hops as $hopData) {
                 if (empty($hopData['name']) && empty($hopData['amount'])) continue;
-                // Chmiele z warki spoza zakresu batch_count (np. warka 2 przy jednej warce) nie są zapisywane
                 if ((int)$hopData['batch_number'] > max(1, (int)$this->batch_count)) continue;
 
                 $recipe->hops()->create([

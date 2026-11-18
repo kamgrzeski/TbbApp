@@ -1,77 +1,58 @@
 <x-app-layout>
-	
+
 	{{-- ================================================================
 		 HEADER
 	================================================================= --}}
-	
+
 	<x-slot name="header">
-		
+
 		<div class="flex justify-between items-center">
-			
+
 			<div>
-				
+
 				<h2 class="font-bold text-2xl text-gray-800 leading-tight">
 					E-maile akcyzowe
 				</h2>
-				
+
 				<p class="text-sm text-gray-500 mt-1">
 					{{ $recipe->name }}
 					— {{ $recipe->volume }} litrów
 					— zbiornik nr {{ $recipe->tank_number }}
 				</p>
-			
+
 			</div>
-			
+
 			<a
 					href="{{ route('brewing.show', $recipe) }}"
 					class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 transition"
 			>
 				Powrót
 			</a>
-		
+
 		</div>
-	
+
 	</x-slot>
-	
-	
+
 	{{-- ================================================================
 		 CONTENT
 	================================================================= --}}
-	
+
 	<div class="py-12">
 		<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-			
+
 			@foreach($recipe->batches->sortBy('batch_number') as $index => $batch)
-				
+
 				@php
-					
-					/*
-					|--------------------------------------------------------------------------
-					| NUMER WARKI
-					|--------------------------------------------------------------------------
-					*/
+
+
 
 					$batchNumber = $batch->batch_number;
 
 
-					/*
-					|--------------------------------------------------------------------------
-					| NUMER WARKI W RECEPTURZE
-					|--------------------------------------------------------------------------
-					|
-					| 1 = pierwszy zestaw słodów/chmieli
-					| 2 = drugi zestaw słodów/chmieli
-					|
-					*/
 
 					$recipeBatchNumber = $index + 1;
 
 
-					/*
-					|--------------------------------------------------------------------------
-					| SŁODY
-					|--------------------------------------------------------------------------
-					*/
 
 					$batchMalts = $recipe->malts
 						->where('batch_number', $recipeBatchNumber);
@@ -87,11 +68,6 @@
 						->where('batch_number', $recipeBatchNumber);
 
 
-					/*
-					|--------------------------------------------------------------------------
-					| ŁĄCZNA ILOŚĆ SŁODÓW
-					|--------------------------------------------------------------------------
-					*/
 
 					$totalMalt = $batchMalts->sum('kg');
 					$totalHops = $batchHops->sum('amount') / 1000;
@@ -175,11 +151,6 @@
 					';
 
 
-					/*
-					|--------------------------------------------------------------------------
-					| SŁODY
-					|--------------------------------------------------------------------------
-					*/
 
 					$emailHtml .= '
 						<p style="margin: 0 0 6px 0;">
@@ -241,11 +212,6 @@
 					$emailHtml .= '</ul>';
 
 
-					/*
-					|--------------------------------------------------------------------------
-					| ŁĄCZNA ILOŚĆ SŁODÓW
-					|--------------------------------------------------------------------------
-					*/
 
 					$emailHtml .= '
 						<p style="margin: 0 0 14px 0;">
@@ -291,83 +257,74 @@
 
 
 					$emailHtml .= '</div>';
-				
+
 				@endphp
-				
-				
+
 				{{-- ========================================================
 					 KARTA EMAILA
 				========================================================= --}}
-				
+
 				<div class="bg-white shadow-sm rounded-xl p-6 mb-6">
-					
-					
-					{{-- ====================================================
-						 NAGŁÓWEK
-					===================================================== --}}
-					
+
+
 					<div class="flex justify-between items-start mb-6">
-						
+
 						<div>
-							
+
 							<h3 class="font-bold text-xl text-gray-800">
 								Warka nr {{ $batchNumber }}
 							</h3>
-							
+
 							<p class="text-sm text-gray-500 mt-1">
 								{{ $recipe->name }}
 								— 500 litrów
 								— zbiornik nr {{ $recipe->tank_number }}
 							</p>
-						
+
 						</div>
-						
-						
+
 						<div>
 
                             <span class="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-semibold">
                                 Warka {{ $recipeBatchNumber }}
                             </span>
-						
+
 						</div>
-					
+
 					</div>
-					
-					
+
 					{{-- ====================================================
 						 INFORMACJA
 					===================================================== --}}
-					
+
 					<div class="mb-6 p-4 rounded-lg bg-purple-50 border border-purple-200">
-						
+
 						<h4 class="font-semibold text-purple-900">
 							E-mail akcyzowy — Warka nr {{ $batchNumber }}
 						</h4>
-						
+
 						<p class="text-sm text-purple-700 mt-1">
 							Wiadomość została wygenerowana dla
 							<strong>warki nr {{ $batchNumber }}</strong>.
 						</p>
-					
+
 					</div>
-					
-					
+
 					{{-- ====================================================
 						 TEMAT
 					===================================================== --}}
-					
+
 					<div class="mb-6">
-						
+
 						<label
 								for="{{ $subjectId }}"
 								class="block text-sm font-semibold text-gray-700 mb-2"
 						>
 							Temat wiadomości
 						</label>
-						
-						
+
 						<div class="flex gap-2">
-							
+
 							<input
 									id="{{ $subjectId }}"
 									type="text"
@@ -375,8 +332,7 @@
 									value="{{ $subject }}"
 									class="flex-1 rounded-lg border-gray-300 bg-gray-50 shadow-sm text-sm"
 							/>
-							
-							
+
 							<button
 									type="button"
 									onclick="copySubject('{{ $subjectId }}', this)"
@@ -384,31 +340,26 @@
 							>
 								Kopiuj temat
 							</button>
-						
+
 						</div>
-					
+
 					</div>
-					
-					
-					{{-- ====================================================
-						 TREŚĆ
-					===================================================== --}}
-					
+
+
 					<div class="flex justify-between items-end mb-3">
-						
+
 						<div>
-							
+
 							<label class="block text-sm font-semibold text-gray-700">
 								Treść wiadomości
 							</label>
-							
+
 							<p class="text-xs text-gray-500 mt-1">
 								Możesz poprawić treść przed skopiowaniem.
 							</p>
-						
+
 						</div>
-						
-						
+
 						<button
 								type="button"
 								onclick="copyEmailContent('{{ $editorId }}', '{{ $messageId }}', this)"
@@ -417,54 +368,46 @@
 						>
 							Kopiuj treść
 						</button>
-					
+
 					</div>
-					
-					
+
 					{{-- ====================================================
 						 EDYTOR
 					===================================================== --}}
-					
+
 					<div
 							id="{{ $editorId }}"
 							contenteditable="true"
 							class="border border-gray-300 rounded-lg p-6 bg-white min-h-[400px] focus:outline-none focus:ring-2 focus:ring-purple-500"
 							style="white-space: normal;"
 					>{!! $emailHtml !!}</div>
-					
-					
+
 					{{-- ====================================================
 						 KOMUNIKAT
 					===================================================== --}}
-					
+
 					<div
 							id="{{ $messageId }}"
 							class="hidden mt-4 px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm font-medium"
 					>
 						✓ Treść została skopiowana. Możesz teraz wkleić ją bezpośrednio do Gmaila lub Outlooka.
 					</div>
-				
+
 				</div>
-			
+
 			@endforeach
-		
-		
+
 		</div>
-	
+
 	</div>
-	
-	
+
 	{{-- ================================================================
 		 JAVASCRIPT
 	================================================================= --}}
-	
+
 	<script>
 
-        /*
-        |--------------------------------------------------------------------------
-        | KOPIOWANIE TEMATU
-        |--------------------------------------------------------------------------
-        */
+
 
         async function copySubject(inputId, button) {
 
@@ -508,11 +451,6 @@
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | KOPIOWANIE TREŚCI EMAILA
-        |--------------------------------------------------------------------------
-        */
 
         async function copyEmailContent(
             editorId,
@@ -527,21 +465,11 @@
                 document.getElementById(messageId);
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | KOPIA ZAWARTOŚCI
-            |--------------------------------------------------------------------------
-            */
 
             const clone =
                 content.cloneNode(true);
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | USUWAMY PUSTE TEKSTOWE WĘZŁY
-            |--------------------------------------------------------------------------
-            */
 
             while (
                 clone.firstChild &&
@@ -556,11 +484,7 @@
             }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | USUWAMY WHITESPACE PRZED PIERWSZYM ELEMENTEM
-            |--------------------------------------------------------------------------
-            */
+
 
             const firstElement =
                 clone.firstElementChild;
@@ -613,11 +537,7 @@
 
             try {
 
-                /*
-                |--------------------------------------------------------------------------
-                | NOWOCZESNE KOPIOWANIE HTML + TEXT
-                |--------------------------------------------------------------------------
-                */
+
 
                 if (
                     navigator.clipboard &&
@@ -732,7 +652,7 @@
             }
 
         }
-	
+
 	</script>
 
 </x-app-layout>

@@ -23,9 +23,9 @@
 		</div>
 	</header>
 
-	<!-- Kontener na piwa -->
+
 	<section class="list" id="list">
-		<!-- Dane zostaną wczytane przez JavaScript -->
+
 	</section>
 
 	<section class="snacks-section">

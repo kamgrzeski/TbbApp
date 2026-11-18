@@ -21,7 +21,6 @@
 
 <div class="max-w-7xl mx-auto space-y-8">
 	
-	<!-- NAGŁÓWEK & UPLOAD -->
 	<header class="glass-card rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 border-l-4 border-amber-500">
 		<div>
 			<div class="flex items-center gap-2 text-amber-500 font-semibold tracking-wider text-xs uppercase mb-1">
@@ -49,7 +48,6 @@
 			$otherRevenue = $report['totalRevenue'] - $report['beerRevenue'];
 		@endphp
 				
-				<!-- KPI GŁÓWNE -->
 		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 			<div class="glass-card rounded-2xl p-6 border-t-2 border-emerald-500">
 				<div class="text-gray-400 text-xs uppercase font-bold tracking-wider">Całkowity Przychód POS</div>
@@ -82,9 +80,8 @@
 			</div>
 		</div>
 		
-		<!-- MODUŁ WSKAŹNIKÓW BIZNESOWYCH (UNIT ECONOMICS & CROSS-SELLING) -->
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-			<!-- 1. Attach Rate Przekąsek -->
+			
 			<div class="glass-card rounded-2xl p-6 border-l-4 border-yellow-500">
 				<div class="flex justify-between items-start mb-2">
 					<span class="text-xs uppercase font-bold text-gray-400">Dosprzedaż Przekąsek (Attach Rate)</span>
@@ -100,7 +97,6 @@
 				<div class="text-[11px] text-gray-500 mt-2">Potencjał wzrostu przy 15%: <strong class="text-emerald-400">+1 200 zł zysku</strong></div>
 			</div>
 			
-			<!-- 2. Kanały Sprzedaży (Na miejscu vs Wynos) -->
 			<div class="glass-card rounded-2xl p-6 border-l-4 border-cyan-500">
 				<span class="text-xs uppercase font-bold text-gray-400">Struktura Kanałów Sprzedaży</span>
 				<div class="flex justify-between items-baseline mt-2">
@@ -117,7 +113,6 @@
 				</div>
 			</div>
 			
-			<!-- 3. Rentowność Formatów (PLN / Litr) -->
 			<div class="glass-card rounded-2xl p-6 border-l-4 border-emerald-500">
 				<span class="text-xs uppercase font-bold text-gray-400">Rentowność Formatu (PLN / 1 Litr)</span>
 				<div class="mt-3 space-y-1.5 text-xs">
@@ -154,7 +149,6 @@
 			</div>
 		</div>
 		
-		<!-- KAFLE PIW Z ANALIZĄ ABC I CENĄ ZA LITR -->
 		<div class="flex justify-between items-end pt-2">
 			<div>
 				<h2 class="text-xl font-bold text-white flex items-center gap-2">

@@ -17,8 +17,8 @@ return new class extends Migration
             $table->integer('number');
             $table->integer('tank_number');
             $table->string('name');
-            $table->float('volume'); // objętość
-            $table->float('efficiency'); // wydajność
+            $table->float('volume');
+            $table->float('efficiency');
             $table->timestamp('yeast_pitched_at')->nullable();
             $table->timestamp('primary_fermentation_start')->nullable();
             $table->timestamp('secondary_fermentation_start')->nullable();

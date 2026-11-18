@@ -1,5 +1,5 @@
-{{-- Menu akcji (trzy kropki) dla warki na liście --}}
-{{-- Parametry: $recipe, $locked (bool) – zrealizowana warka z przeszłości nie może być usunięta --}}
+
+
 <div x-data="{ open: false, top: 0, left: 0 }"
      @click.outside="open = false"
      @scroll.window="open = false"

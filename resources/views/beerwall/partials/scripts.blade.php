@@ -19,7 +19,6 @@
     const db = getDatabase(app);
     const beerRef = ref(db, 'beers');
 
-    // Godziny zamknięcia z Firebase - aktualizacja na żywo
     let closingSettings = null;
 
     const applyClosing = () => {
@@ -40,17 +39,14 @@
         applyClosing();
     });
 
-    // Sam upływ czasu nie zmienia bazy, więc sprawdzamy też co 30 s
     setInterval(applyClosing, 30000);
 
-    // Funkcja renderująca piwa na żywo
     onValue(beerRef, (snapshot) => {
         const data = snapshot.val();
         const listContainer = document.getElementById('list');
-        listContainer.innerHTML = ''; // Wyczyść listę przed renderowaniem
+        listContainer.innerHTML = '';
 
         if (data) {
-            // Zamień obiekt na tablicę i przejdź przez każde piwo
             const beersArray = Array.isArray(data) ? data : Object.values(data);
 
             beersArray.forEach((beer, index) => {

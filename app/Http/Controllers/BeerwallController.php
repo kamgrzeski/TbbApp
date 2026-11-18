@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Queries\BeerwallQueries;
+use App\Http\Requests\BeerwallSettingsRequest;
+use App\Http\Requests\StoreBeerwallBeerRequest;
+use App\Http\Requests\UpdateBeerwallBeerRequest;
 use App\Models\Beerwall;
 use App\Services\FirebaseService;
 use Illuminate\Http\Request;
@@ -11,25 +15,25 @@ class BeerwallController extends Controller
     public function indexFront()
     {
         return view('beerwall.index')->with([
-            'beerwall' => Beerwall::orderBy('position')->get(),
+            'beerwall' => BeerwallQueries::ordered(),
         ]);
     }
     public function indexHalloween()
     {
         return view('beerwall.index_halloween')->with([
-            'beerwall' => Beerwall::orderBy('position')->get(),
+            'beerwall' => BeerwallQueries::ordered(),
         ]);
     }
     public function indexChristmas()
     {
         return view('beerwall.index_christmas')->with([
-            'beerwall' => Beerwall::orderBy('position')->get(),
+            'beerwall' => BeerwallQueries::ordered(),
         ]);
     }
     public function index()
     {
-        $beers = Beerwall::orderBy('position', 'asc')->get();
-        $drafts = Beerwall::where('is_draft', true)->orderBy('created_at', 'desc')->get();
+        $beers = BeerwallQueries::ordered();
+        $drafts = BeerwallQueries::drafts();
         return view('beerwall.admin.index', compact('beers', 'drafts'));
     }
 
@@ -39,17 +43,9 @@ class BeerwallController extends Controller
         return view('beerwall.admin.settings', compact('settings'));
     }
 
-    public function updateSettings(Request $request, FirebaseService $firebase)
+    public function updateSettings(BeerwallSettingsRequest $request, FirebaseService $firebase)
     {
-        $data = $request->validate([
-            'monday_close_time' => 'nullable|date_format:H:i',
-            'tuesday_close_time' => 'nullable|date_format:H:i',
-            'wednesday_close_time' => 'nullable|date_format:H:i',
-            'thursday_close_time' => 'nullable|date_format:H:i',
-            'friday_close_time' => 'nullable|date_format:H:i',
-            'saturday_close_time' => 'nullable|date_format:H:i',
-            'sunday_close_time' => 'nullable|date_format:H:i',
-        ]);
+        $data = $request->validated();
 
         if (! $firebase->setSettings($data)) {
             return redirect()->route('beerwall.admin.settings.edit')
@@ -64,19 +60,9 @@ class BeerwallController extends Controller
         return view('beerwall.admin.create');
     }
 
-
-    public function store(Request $request)
+    public function store(StoreBeerwallBeerRequest $request)
     {
-        $data = $request->validate([
-            'beer_name' => 'required|string|max:255',
-            'beer_style' => 'nullable|string|max:255',
-            'beer_description' => 'nullable|string',
-            'beer_blg' => 'nullable|string',
-            'beer_alc' => 'nullable|string',
-            'beer_price_small' => 'required|numeric',
-            'beer_price_medium' => 'required|numeric',
-            'beer_price_large' => 'required|numeric',
-        ]);
+        $data = $request->validated();
 
         $data['is_ended'] = $request->beer_status === 'ended';
         $data['is_coming_soon'] = $request->beer_status === 'coming_soon';
@@ -95,19 +81,9 @@ class BeerwallController extends Controller
         return view('beerwall.admin.create', compact('beerwall'));
     }
 
-    public function update(Request $request, Beerwall $beerwall)
+    public function update(UpdateBeerwallBeerRequest $request, Beerwall $beerwall)
     {
-        $data = $request->validate([
-            'beer_name' => 'required|string|max:255',
-            'beer_style' => 'nullable|string|max:255',
-            'beer_description' => 'nullable|string',
-            'beer_blg' => 'nullable|string',
-            'beer_alc' => 'nullable|string',
-            'beer_price_small' => 'required|numeric',
-            'beer_price_medium' => 'required|numeric',
-            'beer_price_large' => 'required|numeric',
-            'position' => 'required|numeric'
-        ]);
+        $data = $request->validated();
 
         $data['is_ended'] = $request->beer_status === 'ended';
         $data['is_coming_soon'] = $request->beer_status === 'coming_soon';
@@ -146,13 +122,12 @@ class BeerwallController extends Controller
     {
         $beer = $beerwall->replicate();
         $beer->beer_name = $beerwall->beer_name . ' (kopia)';
-        
-        // Ustawiamy statusy na podstawie oryginału
+
         $beer->is_ended = $beerwall->is_ended;
         $beer->is_coming_soon = $beerwall->is_coming_soon;
         $beer->is_premiere = $beerwall->is_premiere;
         $beer->is_draft = $beerwall->is_draft;
-        
+
         $beer->save();
 
         return redirect()->route('beerwall.admin.edit', $beer)->with('success', 'Piwo zostało skopiowane. Możesz teraz edytować jego dane!');

@@ -20,7 +20,6 @@ class BeerWallObserver
         $this->firebaseService->syncBeers();
     }
 
-    // Wykona się po usunięciu
     public function deleted(Beerwall $beer)
     {
         $this->firebaseService->syncBeers();

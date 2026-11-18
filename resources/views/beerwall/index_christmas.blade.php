@@ -22,12 +22,12 @@
 			<div class="date" id="date">—</div>
 		</div>
 	</header>
-	
-	<!-- Kontener na piwa -->
+
+
 	<section class="list" id="list">
-		<!-- Dane zostaną wczytane przez JavaScript -->
+
 	</section>
-	
+
 	<section class="snacks-section">
 		<div class="snacks-grid" id="snacks-list">
 			<div class="snack-card">
