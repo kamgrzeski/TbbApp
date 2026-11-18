@@ -1,25 +1,25 @@
 <x-app-layout>
-	
+
 	<x-slot name="header">
 		<div class="flex justify-between items-center">
 			<div>
 				<h2 class="font-semibold text-xl text-gray-800 leading-tight">
 					{{ __('Zarządzanie kegami w chłodni') }}
 				</h2>
-				
+
 				<p class="text-sm text-gray-500 mt-1">
 					Stan wszystkich kegów w chłodni
 				</p>
 			</div>
-			
+
 		</div>
 	</x-slot>
-	
-	
+
+
 	<div class="py-12">
-		
+
 		<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-			
+
 			@if($errors->any())
 				<div style="margin-bottom: 16px; padding: 12px 16px; border-left: 4px solid #dc2626; border-radius: 6px; background: #fef2f2; color: #991b1b; font-size: 0.875rem; font-weight: 600;">
 					@foreach($errors->all() as $error)
@@ -33,76 +33,76 @@
 					{{ session('success') }}
 				</div>
 			@endif
-			
-			
+
+
 			<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-				
+
 				<div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
 					<div class="text-sm font-medium text-gray-500 uppercase">
 						Wszystkie kegi
 					</div>
-					
+
 					<div class="mt-2 text-3xl font-bold text-gray-800">
 						{{ $summary['total'] }}
 					</div>
-					
+
 					<div class="text-xs text-gray-400 mt-1">
 						fizycznie w obiegu
 					</div>
 				</div>
-				
-				
+
+
 				<div class="bg-white rounded-lg shadow-sm border border-green-100 p-6">
 					<div class="text-sm font-medium text-gray-500 uppercase">
 						Pełnych kegów w chłodni
 					</div>
-					
+
 					<div class="mt-2 text-3xl font-bold text-green-600">
 						{{ $summary['full'] }}
 					</div>
-					
+
 					<div class="text-xs text-gray-400 mt-1">
 						{{ $summary['full_liters'] }} L piwa
 					</div>
 				</div>
-				
-				
+
+
 				{{-- Puste --}}
 				<div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
 					<div class="text-sm font-medium text-gray-500 uppercase">
 						Puste kegi
 					</div>
-					
+
 					<div class="mt-2 text-3xl font-bold text-gray-600">
 						{{ $summary['available_empty'] }}
 					</div>
-					
+
 					<div class="text-xs text-gray-400 mt-1">
 						dostępne do napełnienia
 					</div>
 				</div>
-				
-				
+
+
 				<div class="bg-white rounded-lg shadow-sm border border-blue-100 p-6">
 					<div class="text-sm font-medium text-gray-500 uppercase">
 					     Dostępne krany
 					</div>
-					
+
 					<div class="mt-2 text-3xl font-bold text-blue-600">
 						4
 					</div>
-					
+
 					<div class="text-xs text-gray-400 mt-1">
 						Dostępne krany do podczepienia kegów
 					</div>
 				</div>
-			
+
 			</div>
-				
+
 				<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100  mb-6">
-					
+
 					<div class="p-6 text-gray-900">
-						
+
 							<div class="flex flex-wrap justify-between items-start gap-4 mb-6">
 
 								<div>
@@ -145,41 +145,6 @@
 												<div style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #f9fafb; border: 1px solid #e5e7eb; font-size: 0.875rem; line-height: 1.6; color: #374151;">
 													<div><span style="color: #6b7280;">Dostępne do napełnienia (bez 4 kranów):</span> <strong>{{ $summary['available_empty'] }}</strong></div>
 												</div>
-													<div style="margin-bottom: 16px;">
-														<div style="font-size: 0.75rem; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;">
-															Stan w chłodni &middot; pełne: {{ $summary['full'] }} &middot; puste: {{ $summary['empty'] }}
-														</div>
-														<div style="max-height: 240px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px;">
-															<table style="width: 100%; border-collapse: collapse; font-size: 0.875rem; color: #1f2937;">
-																<thead style="position: sticky; top: 0; background: #f9fafb;">
-																	<tr style="color: #6b7280; text-align: left;">
-																		<th style="padding: 8px 10px; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Receptura</th>
-																		<th style="padding: 8px 10px; font-weight: 600; text-align: right; border-bottom: 1px solid #e5e7eb;">Pełne</th>
-																		<th style="padding: 8px 10px; font-weight: 600; text-align: right; border-bottom: 1px solid #e5e7eb;">Litry</th>
-																		<th style="padding: 8px 10px; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Kran</th>
-																	</tr>
-																</thead>
-																<tbody>
-																	@forelse($coolerStocks as $coolerStock)
-																		@php
-																			$coolerTaps = $stocksMovements->where('recipe_id', $coolerStock->recipe_id)->pluck('tap_number')->sort()->implode(', ');
-																			$coolerEmpty = $coolerStock->full_kegs <= 0;
-																		@endphp
-																		<tr style="border-bottom: 1px solid #f3f4f6;">
-																			<td style="padding: 8px 10px;">{{ $coolerStock->recipe->name }} #{{ $coolerStock->recipe->number }}</td>
-																			<td style="padding: 8px 10px; text-align: right; font-weight: 700; color: {{ $coolerEmpty ? '#dc2626' : '#111827' }};">{{ $coolerStock->full_kegs }}</td>
-																			<td style="padding: 8px 10px; text-align: right; color: #374151;">{{ number_format($coolerStock->full_kegs * \App\Services\KegStockService::KEG_CAPACITY_LITERS, 0, ',', ' ') }} L</td>
-																			<td style="padding: 8px 10px; color: #374151;">{{ $coolerTaps !== '' ? $coolerTaps : '—' }}</td>
-																		</tr>
-																	@empty
-																		<tr>
-																			<td colspan="4" style="padding: 12px 10px; text-align: center; color: #6b7280;">Brak kegów w chłodni.</td>
-																		</tr>
-																	@endforelse
-																</tbody>
-															</table>
-														</div>
-													</div>
 
 												<form method="POST" action="{{ route('kegs.admin.pool.store') }}">
 													@csrf
@@ -378,12 +343,83 @@
 									</div>
 								@endfor
 							</div>
-					
+
 					</div>
-				
+
 				</div>
-				
+
+				{{-- Stan w chłodni (zawsze widoczny) --}}
 				<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100 mb-6">
+					<div class="p-6 text-gray-900">
+						<div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">
+                                    Stan w chłodni
+                                </h3>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    Stan pełnych i pustych kegów w chłodni według warek, wraz z litrażem i udziałem w puli.
+                                </p>
+                            </div>
+							@php
+								$totalKegs = $summary['full'] + $summary['empty'];
+								$fullPct = $totalKegs > 0 ? round($summary['full'] / $totalKegs * 100) : 0;
+							@endphp
+							<div class="flex flex-col items-end gap-2">
+								<div class="flex flex-wrap items-center gap-2">
+									<span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-semibold whitespace-nowrap">
+										<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+										Pełne <strong class="font-bold">{{ $summary['full'] }}</strong>
+									</span>
+									<span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200 text-sm font-semibold whitespace-nowrap">
+										<span class="w-2 h-2 rounded-full bg-gray-400"></span>
+										Puste <strong class="font-bold">{{ $summary['empty'] }}</strong>
+									</span>
+								</div>
+								<div class="w-48 h-1.5 rounded-full bg-gray-200 overflow-hidden" title="{{ $fullPct }}% kegów pełnych">
+									<div class="h-full bg-emerald-500 rounded-full" style="width: {{ $fullPct }}%;"></div>
+								</div>
+							</div>
+						</div>
+
+						<div class="overflow-x-auto">
+							<table class="min-w-full divide-y divide-gray-200 text-sm">
+								<thead class="bg-gray-50 text-gray-500 uppercase text-[11px]">
+									<tr>
+										<th class="px-4 py-2.5 text-left font-bold tracking-wider">Warka</th>
+										<th class="px-4 py-2.5 text-right font-bold tracking-wider">Pełne</th>
+										<th class="px-4 py-2.5 text-right font-bold tracking-wider">Litry</th>
+									</tr>
+								</thead>
+								<tbody class="bg-white divide-y divide-gray-100">
+									@forelse($coolerStocks as $coolerStock)
+										@php
+											$coolerEmpty = $coolerStock->full_kegs <= 0;
+										@endphp
+										<tr class="hover:bg-blue-50/50 transition-colors duration-100">
+											<td class="px-4 py-3">
+												<div class="font-semibold text-gray-800">
+													{{ $coolerStock->recipe->name }} #{{ $coolerStock->recipe->number }}
+												</div>
+											</td>
+											<td class="px-4 py-3 text-right font-bold {{ $coolerEmpty ? 'text-red-600' : 'text-gray-900' }}">
+												{{ $coolerStock->full_kegs }}
+											</td>
+											<td class="px-4 py-3 text-right text-gray-700">
+												{{ number_format($coolerStock->full_kegs * \App\Services\KegStockService::KEG_CAPACITY_LITERS, 0, ',', ' ') }} L
+											</td>
+										</tr>
+									@empty
+										<tr>
+											<td colspan="3" class="px-4 py-8 text-center text-sm text-gray-400">Brak kegów w chłodni.</td>
+										</tr>
+									@endforelse
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+					<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100 mb-6">
 					<div class="p-6 text-gray-900">
 						<div class="flex justify-between items-center mb-6">
 							<div>
@@ -395,7 +431,7 @@
 								</p>
 							</div>
 						</div>
-						
+
 						<div class="overflow-x-auto">
 							<table class="min-w-full divide-y divide-gray-200 text-sm">
 								<thead class="bg-gray-50 text-gray-500 uppercase text-[11px]">
@@ -417,7 +453,7 @@
 									</th>
 								</tr>
 								</thead>
-								
+
 								<tbody class="bg-white divide-y divide-gray-100">
 								@forelse($recentConnections as $movement)
 									@php
@@ -425,7 +461,7 @@
 										// Obliczanie procentu z zabezpieczeniem od 0% do 100%
 										$percentage = min(100, max(0, round(($movement->capacity / $maxCapacity) * 100)));
 									@endphp
-									
+
 									<tr class="hover:bg-blue-50/50 transition-colors duration-100">
 										{{-- Kran --}}
 										<td class="px-4 py-3 whitespace-nowrap">
@@ -444,7 +480,7 @@
 												</a>
 											</div>
 										</td>
-										
+
 										{{-- Pojemność (Progress Bar) --}}
 										<td class="px-4 py-3">
 											<div class="w-full">
@@ -464,7 +500,7 @@
 												</div>
 											</div>
 										</td>
-										
+
 										{{-- Data --}}
 										<td class="px-4 py-3 text-right whitespace-nowrap">
 											<div class="text-sm text-gray-600">
@@ -575,9 +611,9 @@
 						</div>
 					</div>
 				</div>
-			
+
 		</div>
-	
+
 	</div>
 
 </x-app-layout>
