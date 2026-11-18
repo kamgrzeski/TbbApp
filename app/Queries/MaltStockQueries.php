@@ -4,7 +4,7 @@ namespace App\Queries;
 
 use App\Models\MaltStock;
 use App\Queries\Contracts\MaltStockQueriesInterface;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 
 class MaltStockQueries implements MaltStockQueriesInterface
 {

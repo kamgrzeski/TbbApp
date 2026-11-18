@@ -4,7 +4,7 @@ namespace App\Queries;
 
 use App\Models\GoPosItems;
 use App\Queries\Contracts\GoPosItemsQueriesInterface;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 
 class GoPosItemsQueries implements GoPosItemsQueriesInterface
 {

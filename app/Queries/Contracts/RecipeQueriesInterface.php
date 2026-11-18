@@ -3,7 +3,7 @@
 namespace App\Queries\Contracts;
 
 use App\Models\Recipe;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 
 interface RecipeQueriesInterface
 {

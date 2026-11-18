@@ -4,7 +4,7 @@ namespace App\Queries;
 
 use App\Models\Recipe;
 use App\Queries\Contracts\RecipeQueriesInterface;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 
 class RecipeQueries implements RecipeQueriesInterface
 {

@@ -222,7 +222,7 @@ class RecipeForm extends Component
     private function maltStockIsEnough(): bool
     {
         $ids = collect($this->malts)->pluck('malt_stock_id')->filter()->unique()->values();
-        $stockKg = $this->maltStockQueries->pluckKgById($ids);
+        $stockKg = $this->maltStockQueries->pluckKgById($ids->all());
 
         $requested = [];
         foreach ($this->malts as $m) {
@@ -355,6 +355,76 @@ class RecipeForm extends Component
         // 5. Powiadomienie i przekierowanie
         session()->flash('success', 'Receptura zapisana pomyślnie!');
         return redirect()->route('recipe.index');
+    }
+
+    public function visibleBatches(): array
+    {
+        return array_values(array_filter([1, 2], fn ($batch) => $this->batch_count >= $batch));
+    }
+
+    public function isBatchCountLocked(): bool
+    {
+        return (bool) $this->recipeId && !$this->isClone;
+    }
+
+    public function submitLabel(): string
+    {
+        return $this->isClone ? 'Utwórz kopię' : ($this->recipeId ? 'Zaktualizuj' : 'Zapisz');
+    }
+
+    public function batchStats(int $batch): array
+    {
+        return $this->stats['w' . $batch];
+    }
+
+    public function batchBags(int $batch): float
+    {
+        return ceil((float) ($this->batchStats($batch)['kg'] ?? 0) / 25);
+    }
+
+    public function batchHopsAmount(int $batch)
+    {
+        return collect($this->hops)->where('batch_number', $batch)->sum('amount');
+    }
+
+    public function batchHops(int $batch)
+    {
+        return collect($this->hops)->filter(fn ($hop) => $hop['batch_number'] == $batch);
+    }
+
+    public function batchMaltRows(int $batch)
+    {
+        $batchMalts = collect($this->malts)->filter(fn ($m) => $m['batch_number'] == $batch);
+        $isActiveEnz = fn ($m) => !empty($m['malt_stock_id']) && !empty($m['is_active']);
+
+        return $batchMalts->filter($isActiveEnz)
+            ->union($batchMalts->reject($isActiveEnz)->sortByDesc(fn ($m) => (float) $m['kg']));
+    }
+
+    public function isInactiveEnzymatic(array $malt): bool
+    {
+        return !empty($malt['malt_stock_id']) && empty($malt['is_active']);
+    }
+
+    public function selectedMalt($maltStockId)
+    {
+        return $this->availableMalts->firstWhere('id', $maltStockId);
+    }
+
+    public function maltSharePercent(int $batch, array $malt): float|int
+    {
+        $batchKg = (float) ($this->batchStats($batch)['kg'] ?? 0);
+
+        if ($batchKg <= 0) {
+            return 0;
+        }
+
+        return round(((float) ($malt['kg'] ?? 0) / $batchKg) * 100, 1);
+    }
+
+    public function hasEnzymaticShare(int $idx): bool
+    {
+        return array_key_exists($idx, $this->enzymaticShares);
     }
 
     public function render()

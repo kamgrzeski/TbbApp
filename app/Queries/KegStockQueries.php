@@ -5,7 +5,7 @@ namespace App\Queries;
 use App\Models\KegStock;
 use App\Queries\Contracts\KegStockQueriesInterface;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 
 class KegStockQueries implements KegStockQueriesInterface
 {

@@ -4,7 +4,7 @@ namespace App\Queries;
 
 use App\Models\Beerwall;
 use App\Queries\Contracts\BeerwallQueriesInterface;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 
 class BeerwallQueries implements BeerwallQueriesInterface
 {

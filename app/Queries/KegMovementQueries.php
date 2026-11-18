@@ -5,7 +5,7 @@ namespace App\Queries;
 use App\Models\KegMovement;
 use App\Queries\Contracts\KegMovementQueriesInterface;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class KegMovementQueries implements KegMovementQueriesInterface

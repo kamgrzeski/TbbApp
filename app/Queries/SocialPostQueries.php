@@ -4,7 +4,7 @@ namespace App\Queries;
 
 use App\Models\SocialPost;
 use App\Queries\Contracts\SocialPostQueriesInterface;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class SocialPostQueries implements SocialPostQueriesInterface
