@@ -5,14 +5,14 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('brewing.index') }}">
+                    <a href="{{ route('recipe.index') }}">
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('brewing.index')" :active="request()->routeIs('brewing.index')">
+                    <x-nav-link :href="route('recipe.index')" :active="request()->routeIs('recipe.index')">
                         {{ __('Warki') }}
                     </x-nav-link>
                     <x-nav-link :href="route('beerwall.admin.index')" :active="request()->routeIs('beerwall.admin.index')">
@@ -105,7 +105,7 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             
-            <x-responsive-nav-link :href="route('brewing.index')" :active="request()->routeIs('brewing.index')">
+            <x-responsive-nav-link :href="route('recipe.index')" :active="request()->routeIs('recipe.index')">
                 {{ __('Warki') }}
             </x-responsive-nav-link>
             

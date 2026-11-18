@@ -12,7 +12,7 @@
 			</div>
 
 			<div class="flex gap-2">
-				<a href="{{ route('brewing.create') }}"
+				<a href="{{ route('recipe.create') }}"
 				   class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150"
 				>
 					+ Dodaj
@@ -33,7 +33,7 @@
 			@if($recipes->isEmpty())
 				<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100 p-12 text-center">
 					<p class="text-gray-500 text-lg">Nie masz jeszcze żadnych zapisanych receptur.</p>
-					<a href="{{ route('brewing.create') }}" class="text-blue-600 hover:underline mt-2 inline-block">Stwórz swoją pierwszą recepturę teraz!</a>
+					<a href="{{ route('recipe.create') }}" class="text-blue-600 hover:underline mt-2 inline-block">Stwórz swoją pierwszą recepturę teraz!</a>
 				</div>
 			@else
 				@php
@@ -83,7 +83,7 @@
 								<div class="md:hidden divide-y divide-amber-100 bg-white">
 									@foreach($draftRecipes as $recipe)
 										<div
-												onclick="window.location='{{ route('brewing.show', $recipe) }}'"
+												onclick="window.location='{{ route('recipe.show', $recipe) }}'"
 												class="p-4 cursor-pointer active:bg-amber-50/60"
 										>
 											<div class="flex justify-between items-start gap-3">
@@ -104,7 +104,7 @@
 												<div class="shrink-0 flex items-center gap-2"><span class="shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
 													Szkic
 												</span>
-               @include('brewing.partials.recipe-actions', ['recipe' => $recipe, 'locked' => false])</div>
+               @include('recipe.partials.recipe-actions', ['recipe' => $recipe, 'locked' => false])</div>
 											</div>
 
 											<div class="mt-3 flex flex-wrap items-center gap-2">
@@ -159,7 +159,7 @@
 									<tbody class="divide-y divide-gray-100 bg-white">
 									@foreach($draftRecipes as $recipe)
 										<tr
-												onclick="window.location='{{ route('brewing.show', $recipe) }}'"
+												onclick="window.location='{{ route('recipe.show', $recipe) }}'"
 												class="group cursor-pointer transition-colors duration-150 hover:bg-amber-50/50 {{ $loop->even ? 'bg-gray-50' : 'bg-white' }}"
 										>
 
@@ -233,7 +233,7 @@
 
 											{{-- Akcje --}}
 											<td class="px-6 py-4 whitespace-nowrap text-right">
-                                                    @include('brewing.partials.recipe-actions', ['recipe' => $recipe, 'locked' => false])
+                                                    @include('recipe.partials.recipe-actions', ['recipe' => $recipe, 'locked' => false])
 											</td>
 										</tr>
 									@endforeach
@@ -272,7 +272,7 @@
 								<div class="md:hidden divide-y divide-gray-100 bg-white">
 									@forelse($monthRecipes as $recipe)
 										<div
-												onclick="window.location='{{ route('brewing.show', $recipe) }}'"
+												onclick="window.location='{{ route('recipe.show', $recipe) }}'"
 												class="p-4 cursor-pointer active:bg-blue-50/60"
 										>
 											<div class="flex justify-between items-start gap-3">
@@ -293,7 +293,7 @@
 												<div class="shrink-0 flex items-center gap-2"><div class="text-sm font-medium text-gray-700">
 													{{ ($recipe->mashed_at ?? $recipe->yeast_pitched_at)->format('d.m.Y') }}
 												</div>
-               @include('brewing.partials.recipe-actions', ['recipe' => $recipe, 'locked' => $recipe->planned_at->isPast()])</div>
+               @include('recipe.partials.recipe-actions', ['recipe' => $recipe, 'locked' => $recipe->planned_at->isPast()])</div>
 											</div>
 
 											<div class="mt-3 flex flex-wrap items-center gap-2">
@@ -348,7 +348,7 @@
 									<tbody class="divide-y divide-gray-100 bg-white">
 									@forelse($monthRecipes as $recipe)
 										<tr
-												onclick="window.location='{{ route('brewing.show', $recipe) }}'"
+												onclick="window.location='{{ route('recipe.show', $recipe) }}'"
 												class="group cursor-pointer transition-colors duration-150 hover:bg-blue-50/60 {{ $loop->even ? 'bg-gray-50' : 'bg-white' }}"
 										>
 
@@ -410,7 +410,7 @@
 
 											{{-- Akcje --}}
 											<td class="px-6 py-4 whitespace-nowrap text-right">
-                                                    @include('brewing.partials.recipe-actions', ['recipe' => $recipe, 'locked' => $recipe->planned_at->isPast()])
+                                                    @include('recipe.partials.recipe-actions', ['recipe' => $recipe, 'locked' => $recipe->planned_at->isPast()])
 											</td>
 										</tr>
 									@empty

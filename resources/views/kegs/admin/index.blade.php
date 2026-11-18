@@ -472,7 +472,7 @@
 
 										<td class="px-4 py-3">
 											<div class="font-semibold text-gray-800">
-												<a href="{{ route('brewing.show', $movement->recipe) }}" class="hover:text-blue-600">
+												<a href="{{ route('recipe.show', $movement->recipe) }}" class="hover:text-blue-600">
 													{{ $movement->recipe->name }} #{{ $movement->recipe->number }}
 												</a>
 											</div>

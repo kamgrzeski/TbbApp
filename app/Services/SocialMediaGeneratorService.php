@@ -397,7 +397,7 @@ PROMPT;
 
     private function vocabularyPrompt(): string
     {
-        $vocab = config('brewing_vocabulary', []);
+        $vocab = config('recipe_vocabulary', []);
 
         $lines = ['BANK SŁOWNICTWA BROWARNICZEGO (materiał pomocniczy, nie lista do przepisania)'];
 
@@ -532,7 +532,7 @@ PROMPT;
 
         $needle = mb_strtolower(trim($style));
 
-        foreach (config('brewing_vocabulary.styles', []) as $name => $profile) {
+        foreach (config('recipe_vocabulary.styles', []) as $name => $profile) {
             if (mb_strtolower($name) === $needle) {
                 return $profile;
             }

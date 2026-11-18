@@ -20,7 +20,7 @@
                 Zablokowana
             </span>
         @else
-            <form action="{{ route('brewing.destroy', $recipe) }}" method="POST"
+            <form action="{{ route('recipe.destroy', $recipe) }}" method="POST"
                   onsubmit="return confirm('Czy na pewno chcesz usunąć recepturę: {{ $recipe->name }}?');">
                 @csrf
                 @method('DELETE')

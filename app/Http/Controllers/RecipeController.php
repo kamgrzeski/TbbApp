@@ -22,18 +22,18 @@ class RecipeController extends Controller
     {
         $recipes = $this->recipeQueries->findAllWithBatchesNewestFirst();
 
-        return view('brewing.index', compact('recipes'));
+        return view('recipe.index', compact('recipes'));
     }
 
     public function create()
     {
-        return view('brewing.create');
+        return view('recipe.create');
     }
 
     public function show(Recipe $recipe)
     {
         $recipe->load(['malts', 'comments.user']);
-        return view('brewing.show', compact('recipe'));
+        return view('recipe.show', compact('recipe'));
     }
 
     public function storeComment(StoreRecipeCommentRequest $request, Recipe $recipe) {
@@ -58,7 +58,7 @@ class RecipeController extends Controller
 
         $recipe->delete();
 
-        return redirect()->route('brewing.index')->with('success', 'Receptura została usunięta.');
+        return redirect()->route('recipe.index')->with('success', 'Receptura została usunięta.');
     }
 
     public function updateStatus(Request $request, Recipe $recipe)
@@ -164,7 +164,7 @@ class RecipeController extends Controller
             }
         }
 
-        return redirect()->route('brewing.show', $recipe)->with('success', 'Receptura została zaktualizowana!');
+        return redirect()->route('recipe.show', $recipe)->with('success', 'Receptura została zaktualizowana!');
     }
 
     public function cloneRecipe(Recipe $recipe)
@@ -208,14 +208,14 @@ class RecipeController extends Controller
         }
 
         return redirect()
-            ->route('brewing.edit', $newRecipe)
+            ->route('recipe.edit', $newRecipe)
             ->with('success', 'Receptura została sklonowana.');
     }
 
     public function edit(Recipe $recipe)
     {
         $recipe->load(['malts', 'hops', 'comments.user']);
-        return view('brewing.create', [
+        return view('recipe.create', [
             'recipe' => $recipe,
             'comments' => $recipe->comments,
         ]);
@@ -223,7 +223,7 @@ class RecipeController extends Controller
     public function clone(Recipe $recipe)
     {
         $recipe->load(['malts', 'hops', 'comments.user']);
-        return view('brewing.create', [
+        return view('recipe.create', [
             'recipe' => $recipe,
             'isClone' => true,
             'comments' => $recipe->comments,
@@ -232,7 +232,7 @@ class RecipeController extends Controller
 
     public function print(Recipe $recipe)
     {
-        return view('brewing.print', compact('recipe'));
+        return view('recipe.print', compact('recipe'));
     }
 
     public function generateEmailContentExciseForRecipe(Recipe $recipe)
@@ -241,7 +241,7 @@ class RecipeController extends Controller
 
         $totalMalt = $recipe->malts->sum('kg');
 
-        return view('brewing.excise-email', compact(
+        return view('recipe.excise-email', compact(
             'recipe',
             'totalMalt'
         ));

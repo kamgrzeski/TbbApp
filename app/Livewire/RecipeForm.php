@@ -354,7 +354,7 @@ class RecipeForm extends Component
 
         // 5. Powiadomienie i przekierowanie
         session()->flash('success', 'Receptura zapisana pomyślnie!');
-        return redirect()->route('brewing.index');
+        return redirect()->route('recipe.index');
     }
 
     public function render()

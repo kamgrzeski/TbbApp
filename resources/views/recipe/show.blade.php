@@ -44,7 +44,7 @@
 		<div class="flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-center no-print">
 			<div>
 				<nav class="text-sm font-medium text-gray-500 mb-1 no-print">
-					<a href="{{ route('brewing.index') }}" class="hover:text-blue-600 transition">Receptury</a> / Detale
+					<a href="{{ route('recipe.index') }}" class="hover:text-blue-600 transition">Receptury</a> / Detale
 				</nav>
 				<h2 class="font-bold text-2xl text-gray-800 leading-tight">
 					{{ $recipe->name }}
@@ -61,7 +61,7 @@
 
 					<div x-show="open" x-transition @click.outside="open = false"
 					     class="mt-2 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden divide-y divide-gray-100">
-						<form action="{{ route('brewing.archive', $recipe) }}" method="POST">
+						<form action="{{ route('recipe.archive', $recipe) }}" method="POST">
 							@csrf
 							<button type="submit"
 							        class="w-full text-left px-4 py-3 text-sm font-medium hover:bg-gray-50 {{ $recipe->is_archived ? 'text-amber-600' : 'text-gray-600' }}">
@@ -69,29 +69,29 @@
 							</button>
 						</form>
 
-						<a href="{{ route('brewing.clone', $recipe) }}"
+						<a href="{{ route('recipe.clone', $recipe) }}"
 						   class="block px-4 py-3 text-sm font-medium text-emerald-700 hover:bg-gray-50">
 							Klonuj recepturę
 						</a>
 
 @unless($recipe->mashed_at)
-						<a href="{{ route('brewing.edit', $recipe) }}"
+						<a href="{{ route('recipe.edit', $recipe) }}"
 						   class="block px-4 py-3 text-sm font-medium text-blue-700 hover:bg-gray-50">
 							Edytuj recepturę
 						</a>
 @endunless
 
-						<a href="{{ route('brewing.print', $recipe) }}" target="_blank"
+						<a href="{{ route('recipe.print', $recipe) }}" target="_blank"
 						   class="block px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50">
 							Drukuj (widok A4)
 						</a>
 
-						<a href="{{ route('brewing.excise-email', $recipe) }}"
+						<a href="{{ route('recipe.excise-email', $recipe) }}"
 						   class="block px-4 py-3 text-sm font-medium text-purple-700 hover:bg-gray-50">
 							Generuj e-mail akcyzowy
 						</a>
 
-						<a href="{{ route('brewing.index') }}"
+						<a href="{{ route('recipe.index') }}"
 						   class="block px-4 py-3 text-sm font-medium text-gray-500 hover:bg-gray-50">
 							Powrót
 						</a>
@@ -99,7 +99,7 @@
 				</div>
 
 				<div class="hidden lg:flex lg:space-x-3 no-print">
-				<form action="{{ route('brewing.archive', $recipe) }}" method="POST" class="flex">
+				<form action="{{ route('recipe.archive', $recipe) }}" method="POST" class="flex">
 					@csrf
 					<button type="submit"
 					        class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg font-semibold text-xs whitespace-nowrap uppercase tracking-widest shadow-md transition {{ $recipe->is_archived ? 'bg-amber-500 text-white hover:bg-amber-600' : 'bg-gray-500 text-white hover:bg-gray-600' }}">
@@ -107,29 +107,29 @@
 					</button>
 				</form>
 
-				<a href="{{ route('brewing.clone', $recipe) }}"
+				<a href="{{ route('recipe.clone', $recipe) }}"
 				   class="inline-flex items-center px-4 py-2 bg-emerald-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-emerald-700 shadow-md transition">
 					Klonuj Recepturę
 				</a>
 
 @unless($recipe->mashed_at)
-				<a href="{{ route('brewing.edit', $recipe) }}"
+				<a href="{{ route('recipe.edit', $recipe) }}"
 				   class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 shadow-md transition">
 					Edytuj Recepturę
 				</a>
 @endunless
 
-				<a href="{{ route('brewing.print', $recipe) }}" target="_blank"
+				<a href="{{ route('recipe.print', $recipe) }}" target="_blank"
 				   class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 shadow-md transition">
 					Drukuj (Widok A4)
 				</a>
 
-				<a href="{{ route('brewing.excise-email', $recipe) }}"
+				<a href="{{ route('recipe.excise-email', $recipe) }}"
 				   class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 shadow-md transition">
 					Generuj e-mail akcyzowy
 				</a>
 
-				<a href="{{ route('brewing.index') }}"
+				<a href="{{ route('recipe.index') }}"
 				   class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition">
 					Powrót
 				</a>
@@ -184,7 +184,7 @@
 								@elseif($recipe->yeast_pitched_at)
 									<p class="text-gray-400 text-[12px] font-bold uppercase">Brak daty zasypu</p>
 								@else
-									<form action="{{ route('brewing.status', $recipe) }}" method="POST">
+									<form action="{{ route('recipe.status', $recipe) }}" method="POST">
 										@csrf
 										<input type="hidden" name="type" value="mash">
 										<button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white text-[12px] font-bold py-2 px-3 rounded-lg transition uppercase">Wykonano zasyp</button>
@@ -197,7 +197,7 @@
 							@if($recipe->yeast_pitched_at)
 								<p class="text-amber-700 font-black text-lg leading-none">{{ $recipe->yeast_pitched_at->format('d.m.Y H:i') }}</p>
 							@else
-								<form action="{{ route('brewing.status', $recipe) }}" method="POST">
+								<form action="{{ route('recipe.status', $recipe) }}" method="POST">
 									@csrf
 									<input type="hidden" name="type" value="yeast">
 									<button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white text-[12px] font-bold py-2 px-3 rounded-lg transition uppercase {{ !$recipe->mashed_at ? 'opacity-40' : '' }}" {{ !$recipe->mashed_at ? 'disabled' : '' }}>Zadaj drożdże</button>
@@ -217,7 +217,7 @@
 									@endif
 								</div>
 							@else
-								<form action="{{ route('brewing.status', $recipe) }}" method="POST">
+								<form action="{{ route('recipe.status', $recipe) }}" method="POST">
 									@csrf
 									<input type="hidden" name="type" value="primary">
 									<button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-bold py-2 px-3 rounded-lg transition {{ !$recipe->yeast_pitched_at ? 'opacity-40' : '' }}" {{ !$recipe->yeast_pitched_at ? 'disabled' : '' }}>START BURZLIWA</button>
@@ -242,7 +242,7 @@
 									@endif
 								</div>
 							@else
-								<form action="{{ route('brewing.status', $recipe) }}" method="POST">
+								<form action="{{ route('recipe.status', $recipe) }}" method="POST">
 									@csrf
 									<input type="hidden" name="type" value="secondary">
 									<button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white text-[12px] font-bold py-2 px-3 rounded-lg transition {{ !$recipe->primary_fermentation_start ? 'opacity-40' : '' }}" {{ !$recipe->primary_fermentation_start ? 'disabled' : '' }}>START CICHA</button>
@@ -256,7 +256,7 @@
 								<p class="text-green-700 font-black text-lg leading-none">{{ $recipe->finished_at->format('d.m.Y H:i') }}</p>
 								<p class="text-green-600 text-[12px] font-bold mt-1 uppercase italic">Piwo trafiło do chłodni</p>
 							@else
-								<form action="{{ route('brewing.status', $recipe) }}" method="POST">
+								<form action="{{ route('recipe.status', $recipe) }}" method="POST">
 									@csrf
 									<input type="hidden" name="type" value="finish">
 									<button type="submit" class="bg-green-600 hover:bg-green-700 text-white text-[12px] font-bold py-2 px-3 rounded-lg transition {{ !$recipe->secondary_fermentation_start ? 'opacity-40' : '' }}" {{ !$recipe->secondary_fermentation_start ? 'disabled' : '' }}>ZAKOŃCZ</button>
