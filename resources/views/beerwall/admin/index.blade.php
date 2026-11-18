@@ -43,7 +43,6 @@
 				</a>
 			</div>
 
-			{{-- TABELA 1: KARTA PIW (AKTYWNE) --}}
 			<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200">
 				<div class="p-6 text-gray-900">
 					<div class="flex items-center justify-between mb-6">
@@ -77,7 +76,6 @@
 								<tbody class="bg-white divide-y divide-gray-200">
 								@foreach($beers->where('is_draft', false) as $beer)
 									<tr class="hover:bg-slate-50/80 transition duration-150 {{ $beer->is_ended ? 'opacity-60 bg-gray-50/50' : '' }}">
-										{{-- Kolumna 1: Nazwa i parametry --}}
 										<td class="px-6 py-4">
 											<div class="flex flex-col gap-1.5">
 												<div class="text-base font-bold text-gray-900 leading-tight">
@@ -102,7 +100,6 @@
 											</div>
 										</td>
 
-										{{-- Kolumna 2: Ceny --}}
 										<td class="px-6 py-4 whitespace-nowrap text-center">
 											<div class="flex items-center justify-center gap-2">
 												<div class="flex flex-col items-center min-w-[54px] px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
@@ -120,7 +117,6 @@
 											</div>
 										</td>
 
-										{{-- Kolumna 3: Status / Pozycja --}}
 										<td class="px-6 py-4 whitespace-nowrap text-center">
 											<div class="flex flex-col items-center gap-1.5">
 												@if($beer->is_premiere)
@@ -147,9 +143,7 @@
 											</div>
 										</td>
 
-										{{-- Kolumna 4: Akcje --}}
 									<td class="px-6 py-4 whitespace-nowrap text-right">
-										{{-- Menu akcji --}}
 										<div x-data="{ open: false, top: 0, left: 0 }" @click.outside="open = false" @scroll.window="open = false" class="inline-flex justify-end">
 											<button type="button" aria-label="Akcje"
 											        @click="const r = $el.getBoundingClientRect(); top = r.bottom + 6; left = r.right - 192; open = !open"
@@ -223,7 +217,6 @@
 								<tbody class="bg-white divide-y divide-gray-200">
 								@foreach($beers->where('is_draft', true) as $beer)
 									<tr class="hover:bg-slate-50/80 transition duration-150">
-										{{-- Kolumna 1: Nazwa i parametry --}}
 										<td class="px-6 py-4">
 											<div class="flex flex-col gap-1.5">
 												<div class="text-base font-bold text-gray-900 leading-tight">
@@ -248,7 +241,6 @@
 											</div>
 										</td>
 
-										{{-- Kolumna 2: Ceny --}}
 										<td class="px-6 py-4 whitespace-nowrap text-center">
 											<div class="flex items-center justify-center gap-2">
 												<div class="flex flex-col items-center min-w-[54px] px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
@@ -266,7 +258,6 @@
 											</div>
 										</td>
 
-										{{-- Kolumna 3: Status / Pozycja --}}
 										<td class="px-6 py-4 whitespace-nowrap text-center">
 											<div class="flex flex-col items-center gap-1.5">
 												<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-300">
@@ -278,9 +269,7 @@
 											</div>
 										</td>
 
-										{{-- Kolumna 4: Akcje --}}
 									<td class="px-6 py-4 whitespace-nowrap text-right">
-										{{-- Menu akcji --}}
 										<div x-data="{ open: false, top: 0, left: 0 }" @click.outside="open = false" @scroll.window="open = false" class="inline-flex justify-end">
 											<button type="button" aria-label="Akcje"
 											        @click="const r = $el.getBoundingClientRect(); top = r.bottom + 6; left = r.right - 192; open = !open"

@@ -65,21 +65,18 @@
 
 		<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-			{{-- SUCCESS --}}
 			@if(session('success'))
 				<div class="mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded shadow-sm">
 					{{ session('success') }}
 				</div>
 			@endif
 
-			{{-- ERROR --}}
 			@if(session('error'))
 				<div class="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded shadow-sm">
 					{{ session('error') }}
 				</div>
 			@endif
 
-			{{-- PODSUMOWANIE --}}
 			<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
 
 
@@ -99,7 +96,6 @@
 
 				</div>
 
-				{{-- Aktywne --}}
 				<div class="bg-white rounded-lg shadow-sm border border-green-100 p-6">
 
 					<div class="text-sm font-medium text-gray-500 uppercase">
@@ -116,7 +112,6 @@
 
 				</div>
 
-				{{-- Nieaktywne --}}
 				<div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
 
 					<div class="text-sm font-medium text-gray-500 uppercase">
@@ -233,7 +228,6 @@
 
 									<tr class="group transition-colors duration-150 hover:bg-blue-50">
 
-										{{-- ID --}}
 										<td class="px-6 py-4 whitespace-nowrap">
 
                                             <span class="inline-flex items-center px-2.5 py-1
@@ -247,7 +241,6 @@
 
 										</td>
 
-										{{-- NAZWA --}}
 										<td class="px-6 py-4">
 
 											<div class="font-bold text-gray-900 text-base">
@@ -256,7 +249,6 @@
 
 										</td>
 
-										{{-- KATEGORIA --}}
 										<td class="px-6 py-4 text-center whitespace-nowrap">
 
 											@if($item->gopos_catgory_id == 2)
@@ -287,7 +279,6 @@
 
 										</td>
 
-										{{-- CENA --}}
 										<td class="px-6 py-4 text-center whitespace-nowrap">
 
                                             <span class="inline-flex items-center px-3 py-1.5
@@ -302,7 +293,6 @@
 
 										</td>
 
-										{{-- STATUS --}}
 										<td class="px-6 py-4 text-center whitespace-nowrap">
 
 											@if($item->gopos_status === 'ENABLED')
@@ -341,7 +331,6 @@
 
 										</td>
 
-										{{-- AKTUALIZACJA --}}
 										<td class="px-6 py-4 text-right whitespace-nowrap">
 
 											<div class="text-sm text-gray-600">
