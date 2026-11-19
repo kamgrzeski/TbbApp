@@ -11,7 +11,7 @@
 
     .page {
         position: relative;
-        z-index: 1;
+        z-index: 100; /* ponad nakładką hw-overlay-box (z-index 95), żeby krew nie zasłaniała napisu, logo i czasu */
     }
 
 

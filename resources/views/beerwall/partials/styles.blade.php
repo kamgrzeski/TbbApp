@@ -29,7 +29,7 @@
 
         .page {
             position: relative;
-            padding: 0vh 1vw 1vh; 
+            padding: 0vh 0.3vw 1vh;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -62,15 +62,17 @@
             justify-content: center;
             gap: 1.5vh;
             margin: 2vh 0;
+            width: 100%;
         }
 
         .row {
             position: relative;
+            width: 100%;
             display: grid;
             grid-template-columns: 6vh 2fr 12vw auto; 
             align-items: center;
             gap: 2vw;
-            padding: 1.5vh 0.5vw 1.5vh 2vw; 
+            padding: 1.5vh 0.5vw 1.5vh 1vw;
             background: rgba(255,255,255,0.04);
             border: 1px solid var(--border);
             border-radius: var(--radius);
@@ -174,7 +176,7 @@
             font-family: sans-serif;
         }
         .closed-overlay h1 {
-            font-size: 7vh;
+            font-size: 11vh;
             font-weight: 900;
             color: var(--gold);
             text-transform: uppercase;
@@ -187,7 +189,7 @@
             display: inline-block;                  
         }
         .closed-overlay p {
-            font-size: 3.5vh;
+            font-size: 5.5vh;
             color: var(--text-muted);
         }
 

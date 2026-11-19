@@ -32,7 +32,23 @@
 			@endif
 
 
-			<div class="flex justify-end">
+			<div class="flex justify-between items-center flex-wrap gap-2">
+				<div class="flex flex-wrap items-center gap-2 text-sm">
+					<span class="text-gray-500 font-medium">Strony publiczne:</span>
+					<a href="{{ route('beerwall.index-front') }}" target="_blank" rel="noopener"
+					   class="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-md text-blue-700 font-semibold hover:bg-blue-100 transition">
+						/bw
+					</a>
+					<a href="{{ route('beerwall.index-hallowen') }}" target="_blank" rel="noopener"
+					   class="px-3 py-1.5 bg-orange-50 border border-orange-200 rounded-md text-orange-700 font-semibold hover:bg-orange-100 transition">
+						/bw-halloween
+					</a>
+					<a href="{{ route('beerwall.index-christmas') }}" target="_blank" rel="noopener"
+					   class="px-3 py-1.5 bg-green-50 border border-green-200 rounded-md text-green-700 font-semibold hover:bg-green-100 transition">
+						/bw-christmas
+					</a>
+				</div>
+
 				<a href="{{ route('beerwall.admin.settings.edit') }}"
 				   class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50 active:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition ease-in-out duration-150">
 					<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
