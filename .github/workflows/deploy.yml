@@ -12,6 +12,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 1. Instalacja PHP 8.3 i Composera po stronie GitHub Actions
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+      # 2. Budowanie frontendu po stronie GitHub Actions
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -21,19 +32,9 @@ jobs:
         run: |
           npm ci
           npm run build
-          tar -czf build.tar.gz public/build
 
-      - name: Upload built assets
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          source: "build.tar.gz"
-          target: "/home/twinbrot/core-app"
-
-      - name: Deploy on DirectAdmin server
+      # 3. Włączenie trybu maintenance na serwerze przed wysłaniem plików
+      - name: Maintenance mode ON
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -43,11 +44,50 @@ jobs:
           script: |
             cd /home/twinbrot/core-app
             /opt/alt/php83/usr/bin/php artisan down || true
-            git pull origin main
-            rm -rf public/build
-            tar -xzf build.tar.gz && rm -f build.tar.gz
-            /opt/alt/php83/usr/bin/php /home/twinbrot/composer.phar install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+      # 4. Wysłanie gotowej aplikacji (kod + vendor + public/build) przez rsync
+      - name: Sync files to DirectAdmin server
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          rsync -az --delete \
+            --exclude='.git*' \
+            --exclude='.github/' \
+            --exclude='.env' \
+            --exclude='node_modules/' \
+            --exclude='tests/' \
+            --exclude='storage/' \
+            --exclude='public/storage' \
+            --exclude='bootstrap/cache/*.php' \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/twinbrot/core-app/
+
+      # 5. Migracje i odświeżenie cache na serwerze
+      - name: Run Artisan commands on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script_stop: true
+          script: |
+            cd /home/twinbrot/core-app
             /opt/alt/php83/usr/bin/php artisan migrate --force
             /opt/alt/php83/usr/bin/php artisan optimize:clear
             /opt/alt/php83/usr/bin/php artisan optimize
-            /opt/alt/php83/usr/bin/php artisan up
+
+      # 6. Wyłączenie trybu maintenance (wykona się zawsze, nawet przy błędzie wyżej)
+      - name: Maintenance mode OFF
+        if: always()
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /home/twinbrot/core-app
+            /opt/alt/php83/usr/bin/php artisan up || true
