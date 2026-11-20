@@ -89,6 +89,15 @@
     }
 
 
+    .hw-overlay-top {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 101;          /* ponad .page (z-index 100) — duch i pajak na wierzchu treści */
+        overflow: hidden;
+    }
+
+
     .hw-drips {
         position: absolute;
         top: 0;
@@ -234,6 +243,10 @@
 		<path d="M25,0 Q22,22 0,25 M50,0 Q45,45 0,50 M75,0 Q68,68 0,75" fill="none" stroke="#fff" stroke-width="1"/>
 	</svg>
 
+</div>
+
+<!-- Duch i pajak nad treścią strony (poza hw-overlay-box, bo ten ma z-index 95 pod .page) -->
+<div class="hw-overlay-top">
 	<div class="hw-spider-wrap">
 		<div class="hw-spider-thread"></div>
 		<svg class="hw-spider-body" viewBox="0 0 100 100">
