@@ -12,8 +12,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Budowanie assetów (Vite / Tailwind / JS) po stronie GitHuba
-      # Jeśli nie używasz npm/Vite w projekcie, usuń te 3 kroki (Setup Node, Build, Upload build)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
