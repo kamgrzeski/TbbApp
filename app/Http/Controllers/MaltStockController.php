@@ -68,8 +68,25 @@ class MaltStockController extends Controller
         return redirect()->route('malts.admin.index')->with('success', 'Słód został usunięty z magazynu.');
     }
 
-    public function subtractBag(MaltStock $maltStock): RedirectResponse
+    public function subtract(Request $request, MaltStock $maltStock): RedirectResponse
     {
-        return redirect()->route('malts.admin.index')->with('error', 'Ta funkcja została wyłączona.');
+        $validated = $request->validate([
+            'amount' => ['required', 'numeric', 'in:0.1,1'],
+        ]);
+
+        $amount = (float) $validated['amount'];
+
+        // Atomic: odejmuje tylko gdy na stanie jest wystarczająca ilość.
+        $updated = MaltStock::whereKey($maltStock->id)
+            ->where('kg', '>=', $amount)
+            ->decrement('kg', $amount);
+
+        if ($updated === 0) {
+            return redirect()->route('malts.admin.index')->with('error', 'Za mało słodu na stanie: ' . $maltStock->name);
+        }
+
+        $label = $amount < 1 ? number_format($amount * 1000, 0) . ' g' : number_format($amount, 0) . ' kg';
+
+        return redirect()->route('malts.admin.index')->with('success', 'Odjęto ' . $label . ' słodu: ' . $maltStock->name);
     }
 }

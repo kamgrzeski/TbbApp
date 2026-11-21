@@ -83,7 +83,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/', [MaltStockController::class, 'store'])->name('malts.admin.store');
             Route::get('/{maltStock}/edit', [MaltStockController::class, 'edit'])->name('malts.admin.edit');
             Route::put('/{maltStock}', [MaltStockController::class, 'update'])->name('malts.admin.update');
-            Route::post('/{maltStock}/subtract-bag', [MaltStockController::class, 'subtractBag'])->name('malts.admin.subtract-bag');
+            Route::post('/{maltStock}/subtract', [MaltStockController::class, 'subtract'])->name('malts.admin.subtract');
             Route::delete('/{maltStock}', [MaltStockController::class, 'destroy'])->name('malts.admin.destroy');
         });
 

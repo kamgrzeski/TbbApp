@@ -17,6 +17,16 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            @if(session('success'))
+                <div class="mb-4 mx-4 sm:mx-0 rounded-lg bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 p-4 text-sm text-green-800 dark:text-green-200">{{ session('success') }}</div>
+            @endif
+            @if(session('error'))
+                <div class="mb-4 mx-4 sm:mx-0 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-4 text-sm text-red-800 dark:text-red-200">{{ session('error') }}</div>
+            @endif
+            @if($errors->has('amount'))
+                <div class="mb-4 mx-4 sm:mx-0 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-4 text-sm text-red-800 dark:text-red-200">{{ $errors->first('amount') }}</div>
+            @endif
+
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                     <div class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Wszystkie słody</div>
@@ -41,29 +51,29 @@
             </div>
 
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700">
-                <div class="p-0 text-gray-900 dark:text-gray-100">
+                <div class="p-0 text-gray-900 dark:text-gray-100 overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nazwa słodu</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ilość KG</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Faktura</th>
-                                <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Zarządzanie</th>
+                                <th class="px-3 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nazwa słodu</th>
+                                <th class="px-3 sm:px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ilość KG</th>
+                                <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Faktura</th>
+                                <th class="px-3 sm:px-6 py-3 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Zarządzanie</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             @foreach($malts as $maltStock)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap font-medium">{{ $maltStock->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-3 sm:px-6 py-4 whitespace-normal sm:whitespace-nowrap font-medium min-w-[7rem]">{{ $maltStock->name }}</td>
+                                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $maltStock->kg <= 0 ? 'bg-red-600 text-white animate-pulse' : ($maltStock->kg < 50 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300') }}">
-                                            {{ $maltStock->kg <= 0 ? number_format($maltStock->kg, 2) . ' kg' : number_format($maltStock->kg, 2) . ' kg' }}
+                                            {{ number_format($maltStock->kg, 2) }} kg
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                         {{ $maltStock->invoice_number ?? '—' }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         {{-- Menu akcji --}}
                                         <div x-data="{ open: false, top: 0, left: 0 }" @click.outside="open = false" @scroll.window="open = false" class="inline-flex justify-end">
                                             <button type="button" aria-label="Akcje"
@@ -74,6 +84,18 @@
 
                                             <div x-show="open" x-transition x-cloak :style="`top: ${top}px; left: ${left}px`"
                                                  class="fixed z-50 w-48 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden divide-y divide-gray-100 dark:divide-gray-700 text-left">
+                                                @foreach(['0.1' => 'Odejmij 100 g', '1' => 'Odejmij 1 kg'] as $amount => $label)
+                                                    <form action="{{ route('malts.admin.subtract', $maltStock->id) }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="amount" value="{{ $amount }}">
+                                                        <button type="submit"
+                                                                @disabled($maltStock->kg < $amount)
+                                                                class="w-full text-left px-4 py-3 text-sm font-medium text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/30 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent">
+                                                            {{ $label }}
+                                                        </button>
+                                                    </form>
+                                                @endforeach
+
                                                 <a href="{{ route('malts.admin.edit', $maltStock->id) }}"
                                                    class="block px-4 py-3 text-sm font-medium text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
                                                     Edytuj
